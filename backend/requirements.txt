@@ -1,0 +1,36 @@
+## GCI Brain — Python Dependencies
+
+# === Core Framework ===
+fastapi>=0.115.0
+uvicorn>=0.30.0
+pydantic>=2.9.0
+pydantic-settings>=2.5.0
+
+# === LLM Providers (Fallback Chain: Ollama → Groq → Mistral) ===
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+ollama>=0.4.0
+
+# === System Monitoring (Amygdala) ===
+psutil>=6.0.0
+
+# === Async Scheduling (Dreamer + SEAL loop) ===
+apscheduler>=3.10.0
+
+# === Utilities ===
+httpx>=0.27.0
+python-dotenv>=1.0.0
+
+# === Lightweight Vector Search (replaces ChromaDB for ARM64 compat) ===
+numpy>=1.26.0
+scikit-learn>=1.5.0
+
+# === Testing ===
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+
+# === Optional (install when C++ build tools are available) ===
+# chromadb>=0.5.0
+# langchain-groq>=0.2.0
+# langchain-mistralai>=0.2.0

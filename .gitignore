@@ -1,0 +1,40 @@
+# Secrets and Environment Variables
+.env
+*.env
+!.env.example
+
+# Rust / Cargo
+target/
+**/target/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# Databases & Runtime Data
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/chromadb/
+
+# Logs
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Excluded Workspace Artifacts (not part of backend)
+/Tony/
+/grevidea/
+*.mp4
+*.mov
+*.avi

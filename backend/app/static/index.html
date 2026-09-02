@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grevidea Core Intelligence (GCI) — Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Palette: Crisp Porcelain White & Rich Roasted Espresso / Walnut */
+      --bg-base: #f7f4ee;
+      --bg-surface: #ffffff;
+      --bg-subtle: #efe9e0;
+      --bg-elevated: #faf7f2;
+      
+      --sidebar-bg: #1c130e;
+      --sidebar-surface: #291c15;
+      --sidebar-border: rgba(255, 255, 255, 0.08);
+      --sidebar-hover: rgba(255, 255, 255, 0.05);
+      --sidebar-active: #34241b;
+
+      --border-subtle: #e8dfd4;
+      --border-strong: #d5c7b7;
+      --border-focus: #c28848;
+
+      --color-espresso: #1a110b;
+      --color-mocha: #2d1e15;
+      --color-walnut: #4a3325;
+      --color-caramel: #b86a23;
+      --color-amber: #d97706;
+      --color-sand: #7e6c5f;
+      --color-stone: #9e8d80;
+
+      --text-heading: #1a110b;
+      --text-body: #3c2a1e;
+      --text-muted: #7c6b5e;
+      --text-light: #f5ece3;
+      --text-sidebar-subtle: #9c8b7e;
+
+      --accent-green: #15803d;
+      --accent-green-bg: #f0fdf4;
+      --accent-green-border: #bbf7d0;
+
+      --accent-red: #b91c1c;
+      --accent-red-bg: #fef2f2;
+      --accent-red-border: #fecaca;
+
+      --shadow-subtle: 0 1px 3px rgba(35, 20, 10, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+      --shadow-card: 0 4px 14px rgba(35, 20, 10, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+      --shadow-hover: 0 8px 24px rgba(35, 20, 10, 0.07), 0 2px 6px rgba(0, 0, 0, 0.03);
+
+      --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Space Mono', monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-body);
+      font-family: var(--font-primary);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d3c4b6; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #b09e8f; }
+
+    /* ── Left Sidebar (Architectural Minimalist) ── */
+    .sidebar {
+      width: 270px;
+      background: var(--sidebar-bg);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--sidebar-border);
+      z-index: 50;
+    }
+
+    .sidebar-header {
+      padding: 24px 22px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      background: #2b1c14;
+      border: 1px solid rgba(197, 138, 69, 0.35);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .brand-meta h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-meta p {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-sidebar-subtle);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-vitals {
+      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid var(--sidebar-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pulse-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #86efac;
+      letter-spacing: 0.4px;
+    }
+
+    .pulse-indicator.survival {
+      color: #fca5a5;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-sidebar-subtle);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 12px 10px 6px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-light);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border-left: 2px solid transparent;
+    }
+
+    .nav-link:hover {
+      background: var(--sidebar-hover);
+      color: #ffffff;
+    }
+
+    .nav-link.active {
+      background: var(--sidebar-active);
+      color: #ffffff;
+      border-left-color: var(--border-focus);
+      font-weight: 600;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-tag {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-sidebar-subtle);
+    }
+
+    .sidebar-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--sidebar-border);
+      background: rgba(0, 0, 0, 0.25);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-sidebar-subtle);
+    }
+
+    /* ── Main Canvas ── */
+    .canvas {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    /* ── Top Bar ── */
+    .top-header {
+      padding: 18px 36px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .header-text h2 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-heading);
+      letter-spacing: -0.3px;
+    }
+
+    .header-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Buttons (Tactile Neo-Minimalism) ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-primary);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-solid {
+      background: var(--color-mocha);
+      color: #ffffff;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .btn-solid:hover {
+      background: var(--color-espresso);
+      box-shadow: var(--shadow-card);
+    }
+
+    .btn-outline {
+      background: var(--bg-surface);
+      border-color: var(--border-strong);
+      color: var(--color-walnut);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-subtle);
+      border-color: var(--color-walnut);
+    }
+
+    .btn-danger {
+      background: var(--accent-red-bg);
+      border-color: var(--accent-red-border);
+      color: var(--accent-red);
+    }
+
+    .btn-danger:hover {
+      background: var(--accent-red);
+      color: #ffffff;
+    }
+
+    .btn-success {
+      background: var(--accent-green-bg);
+      border-color: var(--accent-green-border);
+      color: var(--accent-green);
+    }
+
+    .btn-success:hover {
+      background: var(--accent-green);
+      color: #ffffff;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+
+    /* ── Canvas Container ── */
+    .canvas-body {
+      padding: 28px 36px 60px;
+      max-width: 1380px;
+      width: 100%;
+    }
+
+    /* ── Survival Mode Banner ── */
+    .emergency-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: var(--accent-red-bg);
+      border: 1px solid var(--accent-red-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      color: var(--accent-red);
+      font-size: 13px;
+    }
+
+    .emergency-banner.active {
+      display: flex;
+    }
+
+    /* ── KPI Cards Strip ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    @media (max-width: 1024px) {
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-subtle);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .kpi-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-2px);
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 18px;
+      right: 18px;
+      height: 2px;
+      background: var(--border-focus);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .kpi-card:hover::after {
+      opacity: 1;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .kpi-number {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--color-espresso);
+      letter-spacing: -0.6px;
+      margin-bottom: 4px;
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ── Content Card Panes ── */
+    .card-pane {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-subtle);
+      margin-bottom: 24px;
+    }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .pane-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-espresso);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2col { grid-template-columns: 1fr; }
+    }
+
+    .view-pane {
+      display: none;
+      animation: viewSlide 0.18s ease;
+    }
+
+    .view-pane.active {
+      display: block;
+    }
+
+    @keyframes viewSlide {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Event & Activity Feed ── */
+    .activity-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+    }
+
+    .activity-item:hover {
+      background: #ffffff;
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .tag-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 3px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      background: var(--bg-subtle);
+      color: var(--color-walnut);
+      border: 1px solid var(--border-strong);
+    }
+
+    .tag-SENSE     { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .tag-EVALUATE  { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .tag-ACT       { background: #faf5ee; color: #b86a23; border-color: #e8dfd4; }
+    .tag-LEARN     { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+    .tag-ERROR     { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .tag-DREAM     { background: #fdf4ff; color: #9333ea; border-color: #f5d0fe; }
+    .tag-HEAL      { background: #f0fdf4; color: #166534; border-color: #86efac; }
+    .tag-SURVIVAL  { background: #b91c1c; color: #ffffff; }
+
+    .activity-text {
+      font-size: 13px;
+      color: var(--color-espresso);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .activity-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      gap: 12px;
+    }
+
+    /* ── SEAL 4 Stages Visualizer ── */
+    .seal-matrix {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 800px) {
+      .seal-matrix { grid-template-columns: 1fr; }
+    }
+
+    .seal-card {
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      border-top: 3px solid var(--border-strong);
+    }
+
+    .seal-card.active {
+      border-top-color: var(--color-caramel);
+      background: #ffffff;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .card-idx {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--color-caramel);
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-espresso);
+      margin-bottom: 4px;
+    }
+
+    .card-info {
+      font-size: 11px;
+      color: var(--text-body);
+      line-height: 1.35;
+    }
+
+    /* ── Chat Console ── */
+    .console-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      height: 480px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .console-history {
+      flex: 1;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--bg-elevated);
+    }
+
+    .msg-bubble {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .msg-bubble.user {
+      align-self: flex-end;
+      background: var(--color-mocha);
+      color: #ffffff;
+    }
+
+    .msg-bubble.brain {
+      align-self: flex-start;
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
+      color: var(--color-espresso);
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .console-input-row {
+      padding: 12px 16px;
+      background: #ffffff;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-field {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-primary);
+      font-size: 13px;
+      color: var(--color-espresso);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-field:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* ── Filter Chips ── */
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .filter-btn {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      color: var(--color-walnut);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--color-mocha);
+      color: #ffffff;
+      border-color: var(--color-mocha);
+    }
+
+    /* ── Code Display ── */
+    pre.code-terminal {
+      background: #18110c;
+      color: #f7f0e8;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      overflow-x: auto;
+      max-height: 280px;
+      line-height: 1.4;
+    }
+
+    /* ── Toast Tray ── */
+    .toast-deck {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .toast-card {
+      background: var(--color-espresso);
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      box-shadow: var(--shadow-hover);
+      border-left: 3px solid var(--color-caramel);
+      animation: popIn 0.15s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: translateY(6px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-mark">🌱</div>
+      <div class="brand-meta">
+        <h1>Grevidea GCI</h1>
+        <p>Core Intelligence v0.1.0</p>
+      </div>
+    </div>
+
+    <div class="sidebar-vitals">
+      <div id="sideStatusIndicator" class="pulse-indicator">
+        <span class="pulse-dot"></span>
+        <span id="sideStatusText">GCI ACTIVE</span>
+      </div>
+      <span id="sideUptimeDisplay" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-sidebar-subtle);">0s</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Core Monitoring</div>
+      
+      <a class="nav-link active" data-view="view-overview">
+        <div class="nav-left">
+          <span>🛰️</span>
+          <span>Live Telemetry</span>
+        </div>
+      </a>
+
+      <a class="nav-link" data-view="view-seal">
+        <div class="nav-left">
+          <span>🔄</span>
+          <span>SEAL Loop</span>
+        </div>
+        <span id="navSealCounter" class="nav-tag">0</span>
+      </a>
+
+      <a class="nav-link" data-view="view-events">
+        <div class="nav-left">
+          <span>📜</span>
+          <span>Mythos Audit</span>
+        </div>
+        <span id="navEventsCounter" class="nav-tag">0</span>
+      </a>
+
+      <a class="nav-link" data-view="view-memory">
+        <div class="nav-left">
+          <span>🔍</span>
+          <span>Semantic Memory</span>
+        </div>
+      </a>
+
+      <div class="nav-label">Intelligence & Tools</div>
+
+      <a class="nav-link" data-view="view-tools">
+        <div class="nav-left">
+          <span>🛠️</span>
+          <span>Tools & Sandbox</span>
+        </div>
+        <span class="nav-tag">3</span>
+      </a>
+
+      <a class="nav-link" data-view="view-dreamer">
+        <div class="nav-left">
+          <span>🌙</span>
+          <span>The Dreamer</span>
+        </div>
+      </a>
+
+      <a class="nav-link" data-view="view-chat">
+        <div class="nav-left">
+          <span>💬</span>
+          <span>Socratic Chat</span>
+        </div>
+      </a>
+
+      <a class="nav-link" data-view="view-amygdala">
+        <div class="nav-left">
+          <span>🛡️</span>
+          <span>Amygdala Protocol</span>
+        </div>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>LLM Provider: <strong id="sideLLMLabel" style="color: #d59a58;">NONE</strong></div>
+      <div style="font-size: 10px; margin-top: 2px;">Microservice Architecture</div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="canvas">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-text">
+        <h2 id="viewHeading">Live System Telemetry</h2>
+        <p id="viewSubheading">Real-time health, request volume, and autonomous loop cycles.</p>
+      </div>
+
+      <div class="header-tools">
+        <button id="btnHeaderSeal" class="btn btn-outline btn-sm">⚡ Run SEAL Cycle</button>
+        <button id="btnHeaderDream" class="btn btn-outline btn-sm">🌙 REM Sleep</button>
+        <button id="btnHeaderMock" class="btn btn-solid btn-sm">👥 Mock Traffic (+5)</button>
+        <button id="btnHeaderSurvival" class="btn btn-danger btn-sm">🚨 Survival Drill</button>
+      </div>
+    </header>
+
+    <div class="canvas-body">
+      
+      <!-- Survival Mode Emergency Alert -->
+      <div id="emergencyBanner" class="emergency-banner">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 18px;">🚨</span>
+          <div>
+            <strong>SURVIVAL MODE ACTIVE</strong> — Non-critical tools have been shed to protect core servers.
+          </div>
+        </div>
+        <button id="btnExitEmergency" class="btn btn-solid btn-sm">Exit Survival Mode</button>
+      </div>
+
+      <!-- Top 4 KPI Cards Strip -->
+      <div class="kpi-row">
+        
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span>CPU & MEMORY</span>
+            <span>💻</span>
+          </div>
+          <div class="kpi-number" id="kpiCpu">0%</div>
+          <div class="kpi-sub">
+            <span>RAM: <strong id="kpiRam">0%</strong></span>
+            <span>Disk: <strong id="kpiDisk">0%</strong></span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span>REQUEST VOLUME</span>
+            <span>📈</span>
+          </div>
+          <div class="kpi-number" id="kpiRpm">0.0 <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">RPM</span></div>
+          <div class="kpi-sub">
+            <span>Threshold: <strong>500 RPM</strong></span>
+            <span id="kpiLoadTag" style="color: var(--accent-green); font-weight: 700;">Nominal</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span>SEAL CYCLES</span>
+            <span>🔄</span>
+          </div>
+          <div class="kpi-number" id="kpiSealCycles">0</div>
+          <div class="kpi-sub">
+            <span>Interval: <strong>60s</strong></span>
+            <span>Latency: <strong id="kpiSealLatency">0ms</strong></span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span>OPEN MYTHOS</span>
+            <span>🧠</span>
+          </div>
+          <div class="kpi-number" id="kpiMemories">0</div>
+          <div class="kpi-sub">
+            <span>Events: <strong id="kpiEvents">0</strong></span>
+            <span>Errors (24h): <strong id="kpiErrors">0</strong></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- VIEW 1: Live Overview & User Activity -->
+      <div id="view-overview" class="view-pane active">
+        <div class="grid-2col">
+          
+          <div class="card-pane">
+            <div class="pane-header">
+              <div class="pane-title">
+                <span>👥</span> Live User Activity Stream
+              </div>
+              <button id="btnMock10Actions" class="btn btn-outline btn-sm">+10 Eco Actions</button>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              Live transport commute logs, AQI queries, disaster sensors, and autonomous nudges.
+            </p>
+            <div id="userActivityContainer" class="activity-feed">
+              <!-- JS Injected -->
+            </div>
+          </div>
+
+          <div class="card-pane">
+            <div class="pane-header">
+              <div class="pane-title">
+                <span>🛡️</span> Amygdala Vitals & Load Shedding
+              </div>
+            </div>
+            
+            <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 16px;">
+              <div style="font-size: 12px; font-weight: 700; color: var(--color-espresso); margin-bottom: 8px;">Survival Thresholds:</div>
+              <div style="display: flex; flex-direction: column; gap: 6px; font-family: var(--font-mono); font-size: 11px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">CPU Threshold:</span>
+                  <strong>85.0%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Memory Threshold:</span>
+                  <strong>90.0%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Request Rate:</span>
+                  <strong>500 RPM</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: var(--text-muted);">Safe Recovery:</span>
+                  <strong style="color: var(--accent-green);">300s safe metrics</strong>
+                </div>
+              </div>
+            </div>
+
+            <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 16px;">
+              <div style="font-size: 12px; font-weight: 700; color: var(--color-espresso); margin-bottom: 4px;">System Stress Drill</div>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                Simulate traffic spikes to verify autonomous tool shedding.
+              </p>
+              <div style="display: flex; gap: 8px;">
+                <button id="btnStressTrigger" class="btn btn-danger btn-sm" style="flex: 1;">Trigger Survival Mode</button>
+                <button id="btnStressReset" class="btn btn-success btn-sm" style="flex: 1;">Reset to Normal</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 2: SEAL Autonomous Loop -->
+      <div id="view-seal" class="view-pane">
+        <div class="card-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span>🔄</span> SEAL Continuous Autonomous Loop
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <button id="btnSealPause" class="btn btn-outline btn-sm">⏸️ Pause</button>
+              <button id="btnSealResume" class="btn btn-outline btn-sm" style="display: none;">▶️ Resume</button>
+              <button id="btnSealRunDirect" class="btn btn-solid btn-sm">⚡ Run Cycle</button>
+            </div>
+          </div>
+
+          <div class="seal-matrix">
+            <div class="seal-card active">
+              <div class="card-idx">Stage 1</div>
+              <div class="card-name">🛰️ SENSE</div>
+              <div class="card-info">Gathers CPU, memory, API latency, and recent errors.</div>
+            </div>
+            <div class="seal-card active">
+              <div class="card-idx">Stage 2</div>
+              <div class="card-name">⚖️ EVALUATE</div>
+              <div class="card-info">Analyzes health data to classify anomalies.</div>
+            </div>
+            <div class="seal-card active">
+              <div class="card-idx">Stage 3</div>
+              <div class="card-name">⚡ ACT</div>
+              <div class="card-info">Executes diagnostic tools or activates survival mode.</div>
+            </div>
+            <div class="seal-card active">
+              <div class="card-idx">Stage 4</div>
+              <div class="card-name">🧠 LEARN</div>
+              <div class="card-info">Saves lessons into Open Mythos so patterns persist.</div>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <div>
+              <h4 style="font-size: 12px; font-weight: 700; color: var(--color-walnut); margin-bottom: 6px;">Latest Sensed Telemetry Snapshot</h4>
+              <pre id="sealSnapshotCode" class="code-terminal">Loading snapshot...</pre>
+            </div>
+            <div>
+              <h4 style="font-size: 12px; font-weight: 700; color: var(--color-walnut); margin-bottom: 6px;">Lessons Learned & Outcomes</h4>
+              <div id="sealLessonsList" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; font-size: 12px; min-height: 180px;">
+                Loading lessons...
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 3: Mythos Audit Stream -->
+      <div id="view-events" class="view-pane">
+        <div class="card-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span>📜</span> Open Mythos Structured Event Stream
+            </div>
+            <div class="filter-bar" id="eventFiltersBar" style="margin-bottom: 0;">
+              <button class="filter-btn active" data-tag="">ALL</button>
+              <button class="filter-btn" data-tag="SENSE">SENSE</button>
+              <button class="filter-btn" data-tag="ACT">ACT</button>
+              <button class="filter-btn" data-tag="LEARN">LEARN</button>
+              <button class="filter-btn" data-tag="ERROR">ERROR</button>
+              <button class="filter-btn" data-tag="HEAL">HEAL</button>
+              <button class="filter-btn" data-tag="DREAM">DREAM</button>
+            </div>
+          </div>
+
+          <div id="auditStreamContainer" class="activity-feed">
+            <!-- JS Injected -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Semantic Memory Search -->
+      <div id="view-memory" class="view-pane">
+        <div class="card-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span>🔍</span> Semantic Vector Memory Search
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Shortcuts:</span>
+            <button class="filter-btn mem-shortcut" data-term="system health">System Health</button>
+            <button class="filter-btn mem-shortcut" data-term="SEAL cycle anomaly">SEAL Anomalies</button>
+            <button class="filter-btn mem-shortcut" data-term="survival mode emergency">Survival Emergency</button>
+            <button class="filter-btn mem-shortcut" data-term="daily digest dream">Daily Digest</button>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <input type="text" id="memorySearchField" class="input-field" placeholder="Query past experiences in natural language..." value="system health">
+            <button id="btnRecallMemory" class="btn btn-solid">Recall Memory</button>
+          </div>
+
+          <div id="memoryCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px;">
+            <!-- JS Injected -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: Tools & Sandbox -->
+      <div id="view-tools" class="view-pane">
+        <div class="grid-2col">
+          
+          <div class="card-pane">
+            <div class="pane-header">
+              <div class="pane-title">
+                <span>🛠️</span> Registered Tools Registry
+              </div>
+            </div>
+            <div id="toolsCardsStack" style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- JS Injected -->
+            </div>
+          </div>
+
+          <div class="card-pane">
+            <div class="pane-header">
+              <div class="pane-title">
+                <span>🧪</span> Shadow Sandbox (Digital Twin)
+              </div>
+              <button id="btnTestShadowSandbox" class="btn btn-solid btn-sm">Test in Sandbox</button>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+              Test self-healing fixes in an isolated environment before promoting to production.
+            </p>
+
+            <label style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">Python Fix Implementation:</label>
+            <textarea id="sandboxCodeEditor" class="input-field" style="width: 100%; height: 85px; font-family: var(--font-mono); font-size: 11px; margin-bottom: 10px;">def fix(input_data):
+    val = input_data.get("val", 0)
+    return {"val": val * 2, "status": "repaired"}</textarea>
+
+            <label style="font-size: 11px; font-family: var(--font-mono); color: var(--text-muted);">Test Cases (JSON):</label>
+            <textarea id="sandboxCasesEditor" class="input-field" style="width: 100%; height: 75px; font-family: var(--font-mono); font-size: 11px; margin-bottom: 10px;">[
+  {"input": {"val": 2}, "expected_output": {"val": 4, "status": "repaired"}},
+  {"input": {"val": 5}, "expected_output": {"val": 10, "status": "repaired"}}
+]</textarea>
+
+            <div id="sandboxResultsCard" style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 11px;">
+              Ready for simulation.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 6: The Dreamer -->
+      <div id="view-dreamer" class="view-pane">
+        <div class="card-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span>🌙</span> Nightly Consolidation & Morning Brief
+            </div>
+            <button id="btnDreamManual" class="btn btn-solid btn-sm">🌙 Run REM Sleep Cycle</button>
+          </div>
+
+          <div class="grid-2col">
+            <div style="background: #faf6f0; border: 1px solid rgba(184, 106, 35, 0.25); border-radius: var(--radius-sm); padding: 18px;">
+              <h3 style="color: var(--color-espresso); font-size: 14px; margin-bottom: 8px; font-weight: 700;">
+                ☀️ Latest Morning Brief
+              </h3>
+              <p id="dreamBriefContent" style="font-size: 13px; line-height: 1.5; color: var(--text-body); margin-bottom: 14px;">
+                No brief recorded yet.
+              </p>
+              
+              <div style="display: flex; gap: 16px; font-family: var(--font-mono); font-size: 11px;">
+                <div>Fixes: <strong id="dreamFixesTag" style="color: var(--accent-green);">0</strong></div>
+                <div>Anomalies: <strong id="dreamAnomaliesTag" style="color: var(--color-caramel);">0</strong></div>
+                <div>Flagged: <strong id="dreamFlaggedTag">None</strong></div>
+              </div>
+            </div>
+
+            <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 18px;">
+              <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Scheduled REM Consolidation</h4>
+              <p style="font-size: 12px; color: var(--text-muted); line-height: 1.45; margin-bottom: 10px;">
+                Runs every night at <strong>03:00 AM IST</strong> during lowest server traffic:
+              </p>
+              <ul style="font-size: 12px; color: var(--text-body); line-height: 1.5; padding-left: 16px;">
+                <li>Compresses 24h old semantic memory clusters</li>
+                <li>Purges transient logs older than 7 days</li>
+                <li>Flags recurring tool failure patterns</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 7: Socratic Chat -->
+      <div id="view-chat" class="view-pane">
+        <div class="card-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span>💬</span> Socratic Developer Chat Console
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Quick Prompts:</span>
+            <button class="filter-btn chat-prompt" data-query="status">status</button>
+            <button class="filter-btn chat-prompt" data-query="health">health</button>
+            <button class="filter-btn chat-prompt" data-query="tools">tools</button>
+            <button class="filter-btn chat-prompt" data-query="memories">memories</button>
+            <button class="filter-btn chat-prompt" data-query="Did we encounter any errors recently?">Did we encounter any errors recently?</button>
+          </div>
+
+          <div class="console-box">
+            <div id="chatMessagesLog" class="console-history">
+              <div class="msg-bubble brain">
+                <strong>GCI Brain:</strong> Greetings developer. You can query system vitals, request tool statuses, or discuss errors.
+              </div>
+            </div>
+
+            <div class="console-input-row">
+              <input type="text" id="chatConsoleInput" class="input-field" placeholder="Type a message ('status', 'health', 'tools')...">
+              <button id="btnChatSend" class="btn btn-solid">Send</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 8: Amygdala Protocol -->
+      <div id="view-amygdala" class="view-pane">
+        <div class="card-pane">
+          <div class="pane-header">
+            <div class="pane-title">
+              <span>🛡️</span> Amygdala Survival Protocol
+            </div>
+          </div>
+          <p style="font-size: 13px; color: var(--text-body); line-height: 1.5; margin-bottom: 16px;">
+            The Amygdala monitors hardware and network metrics. When thresholds are breached, non-critical background services are automatically shed to keep the core server uncrashable.
+          </p>
+          <div class="grid-2col">
+            <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 18px;">
+              <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Active Thresholds</h4>
+              <div style="display: flex; flex-direction: column; gap: 8px; font-family: var(--font-mono); font-size: 11px;">
+                <div>CPU Threshold: <strong>85.0%</strong></div>
+                <div>Memory Threshold: <strong>90.0%</strong></div>
+                <div>RPM Threshold: <strong>500 req/min</strong></div>
+                <div>Recovery Cooldown: <strong>300s</strong></div>
+              </div>
+            </div>
+            <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 18px;">
+              <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Emergency Testing</h4>
+              <div style="display: flex; gap: 8px;">
+                <button id="btnAmygdalaTrigger" class="btn btn-danger btn-sm" style="flex: 1;">Trigger Drill</button>
+                <button id="btnAmygdalaReset" class="btn btn-success btn-sm" style="flex: 1;">Reset Drill</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification Deck -->
+  <div id="toastDeck" class="toast-deck"></div>
+
+  <script>
+    const API_ENDPOINT = '';
+    let isEmergency = false;
+
+    // Toast Notification
+    function showNotice(msg) {
+      const deck = document.getElementById('toastDeck');
+      const card = document.createElement('div');
+      card.className = 'toast-card';
+      card.textContent = msg;
+      deck.appendChild(card);
+      setTimeout(() => card.remove(), 3200);
+    }
+
+    // Sidebar View Navigation
+    const viewHeadings = {
+      'view-overview': ['Live System Telemetry', 'Real-time health, request volume, and autonomous loop cycles.'],
+      'view-seal': ['SEAL Autonomous Loop', 'Sense → Evaluate → Act → Learn continuous execution pipeline.'],
+      'view-events': ['Open Mythos Audit Stream', 'Append-only structured event log.'],
+      'view-memory': ['Semantic Vector Memory', 'Natural language recall from Open Mythos.'],
+      'view-tools': ['Tools & Shadow Sandbox', 'Registered tools and digital twin test bench.'],
+      'view-dreamer': ['The Dreamer', 'Nightly memory consolidation and morning briefing.'],
+      'view-chat': ['Socratic Developer Chat', 'Conversational interface for developers.'],
+      'view-amygdala': ['Amygdala Survival Protocol', 'System load-shedding and survival controls.']
+    };
+
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.sidebar-nav .nav-link').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.view-pane').forEach(p => p.classList.remove('active'));
+
+        link.classList.add('active');
+        const targetView = link.getAttribute('data-view');
+        document.getElementById(targetView).classList.add('active');
+
+        if (viewHeadings[targetView]) {
+          document.getElementById('viewHeading').textContent = viewHeadings[targetView][0];
+          document.getElementById('viewSubheading').textContent = viewHeadings[targetView][1];
+        }
+
+        if (targetView === 'view-memory') executeMemSearch();
+      });
+    });
+
+    // Real-Time Polling
+    async function updateTelemetryStream() {
+      try {
+        const res = await fetch(`${API_ENDPOINT}/brain/telemetry/summary`);
+        if (!res.ok) return;
+        const payload = await res.json();
+        renderLiveDashboard(payload);
+      } catch (err) {
+        console.error('Telemetry fetch error:', err);
+      }
+    }
+
+    function renderLiveDashboard(payload) {
+      const { status, vitals, memory, tools, seal_last_cycle, recent_events, morning_brief } = payload;
+
+      // Status
+      isEmergency = status.survival_mode;
+      const statusIndicator = document.getElementById('sideStatusIndicator');
+      const statusText = document.getElementById('sideStatusText');
+      const emergencyBanner = document.getElementById('emergencyBanner');
+
+      if (isEmergency) {
+        statusIndicator.className = 'pulse-indicator survival';
+        statusText.textContent = 'SURVIVAL MODE';
+        emergencyBanner.classList.add('active');
+      } else {
+        statusIndicator.className = 'pulse-indicator';
+        statusText.textContent = 'GCI ACTIVE';
+        emergencyBanner.classList.remove('active');
+      }
+
+      document.getElementById('sideUptimeDisplay').textContent = `${Math.floor(status.uptime_seconds)}s`;
+      document.getElementById('sideLLMLabel').textContent = status.llm_provider.toUpperCase();
+
+      // Key Metrics
+      document.getElementById('kpiCpu').textContent = `${vitals.cpu_percent.toFixed(1)}%`;
+      document.getElementById('kpiRam').textContent = `${vitals.memory_percent.toFixed(1)}%`;
+      document.getElementById('kpiDisk').textContent = `${vitals.disk_percent.toFixed(1)}%`;
+
+      document.getElementById('kpiRpm').innerHTML = `${vitals.requests_per_minute.toFixed(1)} <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">RPM</span>`;
+      document.getElementById('kpiLoadTag').textContent = isEmergency ? 'Survival Active' : 'Nominal';
+      document.getElementById('kpiLoadTag').style.color = isEmergency ? 'var(--accent-red)' : 'var(--accent-green)';
+
+      document.getElementById('kpiSealCycles').textContent = status.seal_cycle_count;
+      document.getElementById('navSealCounter').textContent = status.seal_cycle_count;
+      if (seal_last_cycle) {
+        document.getElementById('kpiSealLatency').textContent = `${seal_last_cycle.duration_ms}ms`;
+      }
+
+      document.getElementById('kpiMemories').textContent = memory.total_memories;
+      document.getElementById('kpiEvents').textContent = memory.total_events;
+      document.getElementById('navEventsCounter').textContent = memory.total_events;
+      document.getElementById('kpiErrors').textContent = memory.error_count_24h;
+
+      // Activity Feeds
+      renderUserActivityFeed(recent_events);
+      renderAuditStream(recent_events);
+      renderToolsStack(tools.list);
+
+      // SEAL Data
+      if (seal_last_cycle) {
+        document.getElementById('sealSnapshotCode').textContent = JSON.stringify(seal_last_cycle.sensed_data, null, 2);
+        const lessons = seal_last_cycle.lessons_learned || [];
+        const actions = seal_last_cycle.actions_taken || [];
+        document.getElementById('sealLessonsList').innerHTML = `
+          <div style="margin-bottom: 6px;"><strong>Actions Taken:</strong> ${actions.length ? actions.join(', ') : 'None (Nominal)'}</div>
+          <div><strong>Lessons Learned:</strong><ul style="padding-left: 16px; margin-top: 3px;">${lessons.map(l => `<li>${l}</li>`).join('')}</ul></div>
+        `;
+      }
+
+      // Morning Brief
+      if (morning_brief) {
+        document.getElementById('dreamBriefContent').textContent = morning_brief.summary;
+        document.getElementById('dreamFixesTag').textContent = morning_brief.fixes_applied;
+        document.getElementById('dreamAnomaliesTag').textContent = morning_brief.anomalies_detected;
+        document.getElementById('dreamFlaggedTag').textContent = morning_brief.tools_failing.length ? morning_brief.tools_failing.join(', ') : 'None';
+      }
+    }
+
+    function renderUserActivityFeed(events) {
+      const container = document.getElementById('userActivityContainer');
+      const userEvs = (events || []).filter(e => e.source === 'user_traffic' || e.event_type === 'ACT');
+      if (!userEvs.length) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">No live user interactions yet. Click Mock Traffic to generate test events.</div>';
+        return;
+      }
+      container.innerHTML = userEvs.map(e => `
+        <div class="activity-item">
+          <span style="font-size: 15px;">🌱</span>
+          <div style="flex: 1; min-width: 0;">
+            <div class="activity-text">${sanitize(e.message)}</div>
+            <div class="activity-meta">
+              <span>Source: ${e.source}</span>
+              <span>${new Date(e.timestamp).toLocaleTimeString()}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAuditStream(events) {
+      const container = document.getElementById('auditStreamContainer');
+      if (!events || !events.length) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px;">No events recorded yet.</div>';
+        return;
+      }
+      container.innerHTML = events.map(e => `
+        <div class="activity-item">
+          <span class="tag-badge tag-${e.event_type}">${e.event_type}</span>
+          <div style="flex: 1; min-width: 0;">
+            <div class="activity-text">${sanitize(e.message)}</div>
+            <div class="activity-meta">
+              <span>Source: <strong>${e.source}</strong></span>
+              <span>Severity: ${e.severity}</span>
+              <span>${new Date(e.timestamp).toLocaleTimeString()}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderToolsStack(tools) {
+      const container = document.getElementById('toolsCardsStack');
+      if (!tools) return;
+      container.innerHTML = tools.map(t => `
+        <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; border-left: 3px solid ${t.is_critical ? 'var(--color-caramel)' : 'var(--color-walnut)'};">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+            <strong style="font-family: var(--font-mono); font-size: 12px; color: var(--color-espresso);">${t.name}</strong>
+            <span style="font-size: 10px; font-family: var(--font-mono); padding: 1px 5px; border-radius: 3px; ${t.is_active ? 'background: var(--accent-green-bg); color: var(--accent-green);' : 'background: var(--accent-red-bg); color: var(--accent-red);'}">
+              ${t.is_active ? 'ACTIVE' : 'SHED'}
+            </span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-body); margin-bottom: 5px;">${sanitize(t.description)}</div>
+          <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-muted);">${t.is_critical ? '🔒 Critical Tool' : '⚙️ Optional'}</div>
+        </div>
+      `).join('');
+    }
+
+    // Semantic Memory Search
+    async function executeMemSearch() {
+      const query = document.getElementById('memorySearchField').value.trim() || 'system health';
+      const container = document.getElementById('memoryCardsGrid');
+      container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px;">Searching Open Mythos...</div>';
+
+      try {
+        const res = await fetch(`${API_ENDPOINT}/brain/mythos/search`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, top_k: 6 })
+        });
+        const data = await res.json();
+        if (!data.results || !data.results.length) {
+          container.innerHTML = '<div style="color: var(--text-muted); font-size: 12px;">No matching memories found.</div>';
+          return;
+        }
+        container.innerHTML = data.results.map(m => `
+          <div style="background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px;">
+            <div style="display: flex; justify-content: space-between; font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); margin-bottom: 6px;">
+              <span style="background: var(--bg-subtle); color: var(--color-walnut); padding: 1px 5px; border-radius: 3px;">${m.memory_type.toUpperCase()}</span>
+              <span>${new Date(m.timestamp).toLocaleTimeString()}</span>
+            </div>
+            <div style="font-size: 12px; color: var(--color-espresso); line-height: 1.35; margin-bottom: 5px;">${sanitize(m.text)}</div>
+            <div style="font-size: 10px; font-family: var(--font-mono); color: var(--text-muted);">Source: ${m.source}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<div style="color: var(--accent-red); font-size: 12px;">Error: ${err.message}</div>`;
+      }
+    }
+
+    // Socratic Chat
+    async function handleChatSubmit() {
+      const input = document.getElementById('chatConsoleInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+
+      const log = document.getElementById('chatMessagesLog');
+      log.innerHTML += `<div class="msg-bubble user"><strong>You:</strong> ${sanitize(msg)}</div>`;
+      log.scrollTop = log.scrollHeight;
+
+      try {
+        const res = await fetch(`${API_ENDPOINT}/brain/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        log.innerHTML += `
+          <div class="msg-bubble brain">
+            <div style="font-size: 10px; font-family: var(--font-mono); color: var(--color-caramel); margin-bottom: 3px;">[${data.mode ? data.mode.toUpperCase() : 'DIRECT'} MODE]</div>
+            <div>${sanitize(data.response).replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+        log.scrollTop = log.scrollHeight;
+      } catch (err) {
+        log.innerHTML += `<div class="msg-bubble brain" style="border-color: var(--accent-red); color: var(--accent-red);">Error: ${err.message}</div>`;
+      }
+    }
+
+    // Traffic Simulator
+    async function executeMockTraffic(count = 5) {
+      try {
+        const res = await fetch(`${API_ENDPOINT}/brain/telemetry/simulate-traffic`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count })
+        });
+        const d = await res.json();
+        showNotice(`👥 ${d.status}`);
+        updateTelemetryStream();
+      } catch (err) {
+        showNotice('Failed to simulate traffic');
+      }
+    }
+
+    // Button Listeners
+    document.getElementById('btnHeaderSeal').addEventListener('click', async () => {
+      showNotice('⚡ Running SEAL Cycle...');
+      const r = await fetch(`${API_ENDPOINT}/brain/seal/run-once`, { method: 'POST' });
+      const d = await r.json();
+      showNotice(`✅ Cycle ${d.result.cycle_id} complete`);
+      updateTelemetryStream();
+    });
+
+    document.getElementById('btnSealRunDirect')?.addEventListener('click', () => document.getElementById('btnHeaderSeal').click());
+
+    document.getElementById('btnHeaderDream').addEventListener('click', async () => {
+      showNotice('🌙 Triggering REM Sleep...');
+      const r = await fetch(`${API_ENDPOINT}/brain/dream`, { method: 'POST' });
+      const d = await r.json();
+      showNotice(`☀️ Sleep complete: ${d.brief.summary}`);
+      updateTelemetryStream();
+    });
+
+    document.getElementById('btnDreamManual')?.addEventListener('click', () => document.getElementById('btnHeaderDream').click());
+
+    document.getElementById('btnHeaderMock').addEventListener('click', () => executeMockTraffic(5));
+    document.getElementById('btnMock10Actions')?.addEventListener('click', () => executeMockTraffic(10));
+
+    // Survival Mode Handlers
+    document.getElementById('btnHeaderSurvival').addEventListener('click', async () => {
+      const ep = isEmergency ? 'exit' : 'trigger';
+      await fetch(`${API_ENDPOINT}/brain/survival/${ep}`, { method: 'POST' });
+      showNotice(isEmergency ? '✅ Survival Mode Exited' : '🚨 Survival Mode Active');
+      updateTelemetryStream();
+    });
+
+    document.getElementById('btnExitEmergency')?.addEventListener('click', () => document.getElementById('btnHeaderSurvival').click());
+    document.getElementById('btnStressTrigger')?.addEventListener('click', () => document.getElementById('btnHeaderSurvival').click());
+    document.getElementById('btnStressReset')?.addEventListener('click', () => document.getElementById('btnHeaderSurvival').click());
+    document.getElementById('btnAmygdalaTrigger')?.addEventListener('click', () => document.getElementById('btnHeaderSurvival').click());
+    document.getElementById('btnAmygdalaReset')?.addEventListener('click', () => document.getElementById('btnHeaderSurvival').click());
+
+    // Sandbox Simulation
+    document.getElementById('btnTestShadowSandbox')?.addEventListener('click', async () => {
+      const code = document.getElementById('sandboxCodeEditor').value;
+      const casesRaw = document.getElementById('sandboxCasesEditor').value;
+      const card = document.getElementById('sandboxResultsCard');
+      try {
+        const testCases = JSON.parse(casesRaw);
+        card.textContent = 'Simulating fix...';
+        const res = await fetch(`${API_ENDPOINT}/brain/shadow/simulate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fix_code: code, test_cases: testCases, fix_description: 'Sandbox Test' })
+        });
+        const d = await res.json();
+        const r = d.result;
+        card.innerHTML = `
+          <div style="color: ${r.passed ? 'var(--accent-green)' : 'var(--accent-red)'}; font-weight: 700; margin-bottom: 3px;">
+            ${r.passed ? '✅ PASSED — ELIGIBLE FOR PROMOTION' : '❌ FAILED'}
+          </div>
+          <div>Tests: ${r.test_cases_passed}/${r.test_cases_run} passed | Latency: ${r.latency_ms}ms</div>
+        `;
+        showNotice(r.passed ? '✅ Simulation Passed' : '❌ Simulation Failed');
+        updateTelemetryStream();
+      } catch (err) {
+        card.textContent = `Error: ${err.message}`;
+      }
+    });
+
+    // Memory Search Trigger
+    document.getElementById('btnRecallMemory')?.addEventListener('click', executeMemSearch);
+    document.querySelectorAll('.mem-shortcut').forEach(b => {
+      b.addEventListener('click', () => {
+        document.getElementById('memorySearchField').value = b.getAttribute('data-term');
+        executeMemSearch();
+      });
+    });
+
+    // Chat Trigger
+    document.getElementById('btnChatSend')?.addEventListener('click', handleChatSubmit);
+    document.getElementById('chatConsoleInput')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleChatSubmit();
+    });
+    document.querySelectorAll('.chat-prompt').forEach(b => {
+      b.addEventListener('click', () => {
+        document.getElementById('chatConsoleInput').value = b.getAttribute('data-query');
+        handleChatSubmit();
+      });
+    });
+
+    function sanitize(text) {
+      if (!text) return '';
+      return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    updateTelemetryStream();
+    setInterval(updateTelemetryStream, 2500);
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+﻿# Force gnullvm target — uses Clang + LLVM from MSYS2, no Windows SDK required
+[build]
+target = "aarch64-pc-windows-gnullvm"
+
+[target.aarch64-pc-windows-gnullvm]
+linker = "C:\\msys64\\clangarm64\\bin\\clang.exe"
+ar = "C:\\msys64\\clangarm64\\bin\\llvm-ar.exe"
+rustflags = ["-C", "link-arg=--target=aarch64-pc-windows-gnu"]
