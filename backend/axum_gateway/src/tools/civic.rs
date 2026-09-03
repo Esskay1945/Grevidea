@@ -129,6 +129,27 @@ fn urlencoding(s: &str) -> String {
 
 // ── T31 — Pollution Reporter ──────────────────────────────────────────────────
 
+pub async fn get_pollution_reports(
+    State(state): State<AppState>,
+    auth: AuthUser,
+) -> AppResult<Json<ApiResponse<Vec<PollutionReport>>>> {
+    let user_id = Uuid::parse_str(&auth.0.sub)
+        .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
+
+    let reports = sqlx::query_as::<_, PollutionReport>(
+        r#"SELECT id, user_id, report_type, description, severity, latitude, longitude, status, photo_url, created_at
+           FROM pollution_reports
+           WHERE user_id = $1
+           ORDER BY created_at DESC"#
+    )
+    .bind(user_id)
+    .fetch_all(&state.db)
+    .await
+    .unwrap_or_default();
+
+    Ok(Json(ApiResponse::ok(reports)))
+}
+
 pub async fn submit_pollution_report(
     State(state): State<AppState>,
     auth: AuthUser,

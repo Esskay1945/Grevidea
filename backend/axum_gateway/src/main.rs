@@ -59,23 +59,33 @@ async fn main() -> anyhow::Result<()> {
     info!("🌿 Grevidea Gateway starting on port {port}");
     info!("🧠 GCI Brain endpoint: {}", config.brain_url);
 
-    // Connect to Supabase PostgreSQL (resilient lazy pool allows startup in dev/test)
+    // Connect to Supabase PostgreSQL (PgBouncer pooler compatible)
+    use sqlx::postgres::PgConnectOptions;
+    use std::str::FromStr;
+
+    let pg_options = match PgConnectOptions::from_str(&config.database_url) {
+        Ok(opts) => opts.statement_cache_capacity(0),
+        Err(e) => {
+            tracing::error!("Failed to parse database URL: {e}");
+            PgConnectOptions::default()
+        }
+    };
+
     let db = match PgPoolOptions::new()
         .max_connections(20)
-        .acquire_timeout(std::time::Duration::from_secs(3))
-        .connect(&config.database_url)
+        .acquire_timeout(std::time::Duration::from_secs(5))
+        .connect_with(pg_options.clone())
         .await
     {
         Ok(pool) => {
-            info!("✅ Database connected to PostgreSQL");
+            info!("✅ Database connected to PostgreSQL (PgBouncer mode, statement cache disabled)");
             pool
         }
         Err(e) => {
             tracing::warn!("⚠️  Database connection not immediately established: {e}. Running with lazy pool.");
             PgPoolOptions::new()
                 .max_connections(20)
-                .connect_lazy(&config.database_url)
-                .expect("Failed to initialize database pool")
+                .connect_lazy_with(pg_options)
         }
     };
 
@@ -116,7 +126,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/v1/aqi",                get(tools::civic::get_aqi))
         .route("/api/v1/aqi/route",          post(tools::civic::score_route_aqi))
         .route("/api/v1/green-zones",        get(tools::civic::find_green_zones))
-        .route("/api/v1/reports",            post(tools::civic::submit_pollution_report))
+        .route("/api/v1/reports",            get(tools::civic::get_pollution_reports).post(tools::civic::submit_pollution_report))
         .route("/api/v1/rti/draft",          post(tools::civic::draft_rti))
         .route("/api/v1/sos",                post(tools::civic::create_sos))
         .route("/api/v1/sos/nearby",         get(tools::civic::get_nearby_sos))

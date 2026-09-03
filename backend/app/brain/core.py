@@ -165,12 +165,10 @@ class GCICore:
         # Tier 2: Groq (cloud)
         if self._settings.groq_enabled and self._settings.groq_api_key:
             try:
-                from langchain_groq import ChatGroq
-                self._llm_client = ChatGroq(
+                import openai
+                self._llm_client = openai.AsyncOpenAI(
+                    base_url="https://api.groq.com/openai/v1",
                     api_key=self._settings.groq_api_key,
-                    model=self._settings.groq_model,
-                    temperature=self._settings.llm_temperature,
-                    max_tokens=self._settings.llm_max_tokens,
                 )
                 self._llm_provider = "groq"
                 logger.info(
@@ -212,6 +210,14 @@ class GCICore:
         """
         if self._llm_provider == "ollama":
             return await self._ollama_invoke(prompt)
+        elif self._llm_provider == "groq" and self._llm_client:
+            resp = await self._llm_client.chat.completions.create(
+                model=self._settings.groq_model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=self._settings.llm_temperature,
+                max_tokens=self._settings.llm_max_tokens,
+            )
+            return resp.choices[0].message.content or ""
         elif self._llm_client:
             from langchain_core.messages import HumanMessage
             response = await self._llm_client.ainvoke([HumanMessage(content=prompt)])
@@ -241,6 +247,19 @@ class GCICore:
             ])
             full_prompt = f"{system_prompt}\n\n{history_text}\nUSER: {user_message}\nASSISTANT:"
             return await self._ollama_invoke(full_prompt)
+
+        elif self._llm_provider == "groq" and self._llm_client:
+            groq_messages = [{"role": "system", "content": system_prompt}]
+            for m in messages[-6:]:
+                groq_messages.append({"role": m["role"], "content": m["content"]})
+            groq_messages.append({"role": "user", "content": user_message})
+            resp = await self._llm_client.chat.completions.create(
+                model=self._settings.groq_model,
+                messages=groq_messages,
+                temperature=self._settings.llm_temperature,
+                max_tokens=self._settings.llm_max_tokens,
+            )
+            return resp.choices[0].message.content or ""
 
         elif self._llm_client:
             from langchain_core.messages import AIMessage, HumanMessage, SystemMessage

@@ -93,28 +93,28 @@ class _GoogleLogoPainter extends CustomPainter {
 
     // Blue Arc (Top right to bottom right)
     final blueArc = Path()
-      ..moveTo(center.x, center.y)
+      ..moveTo(center.dx, center.dy)
       ..arcTo(Rect.fromCircle(center: center, radius: radius), -0.78, 1.2, false)
       ..close();
     canvas.drawPath(blueArc, bluePaint);
 
     // Green Arc (Bottom)
     final greenArc = Path()
-      ..moveTo(center.x, center.y)
+      ..moveTo(center.dx, center.dy)
       ..arcTo(Rect.fromCircle(center: center, radius: radius), 0.42, 1.6, false)
       ..close();
     canvas.drawPath(greenArc, greenPaint);
 
     // Yellow Arc (Bottom-left to Top-left)
     final yellowArc = Path()
-      ..moveTo(center.x, center.y)
+      ..moveTo(center.dx, center.dy)
       ..arcTo(Rect.fromCircle(center: center, radius: radius), 2.02, 1.6, false)
       ..close();
     canvas.drawPath(yellowArc, yellowPaint);
 
     // Red Arc (Top)
     final redArc = Path()
-      ..moveTo(center.x, center.y)
+      ..moveTo(center.dx, center.dy)
       ..arcTo(Rect.fromCircle(center: center, radius: radius), 3.62, 1.5, false)
       ..close();
     canvas.drawPath(redArc, redPaint);

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "835302893001",
+    "project_id": "grevidea-6a3e0",
+    "storage_bucket": "grevidea-6a3e0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835302893001:android:d4050afe1acb3b80b0f418",
+        "android_client_info": {
+          "package_name": "com.grevidea.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGltv1ijE30CIRf04oK6r52GdlacYE53U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

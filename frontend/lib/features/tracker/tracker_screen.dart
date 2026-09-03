@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/responsive_wrapper.dart';
-import '../../core/widgets/gold_sparkline.dart';
+import '../../core/widgets/grevidea_app_bar.dart';
+import '../../core/widgets/feature_directory_drawer.dart';
 import '../../state/app_state.dart';
+import 'log_activity_screen.dart';
 
 class TrackerScreen extends StatefulWidget {
   final AppState appState;
@@ -15,324 +16,354 @@ class TrackerScreen extends StatefulWidget {
 
 class _TrackerScreenState extends State<TrackerScreen> {
   int _selectedPeriod = 0; // 0: Day, 1: Week, 2: Month, 3: Year
+  DateTime _currentDate = DateTime(2025, 5, 28);
+
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'Transport', 'co2': '5.2 kg', 'pct': 0.42, 'pctText': '42%', 'color': AppColors.sapphire, 'icon': Icons.directions_car_rounded},
+    {'name': 'Energy', 'co2': '3.5 kg', 'pct': 0.28, 'pctText': '28%', 'color': AppColors.amber, 'icon': Icons.bolt_rounded},
+    {'name': 'Food', 'co2': '2.0 kg', 'pct': 0.16, 'pctText': '16%', 'color': AppColors.emerald, 'icon': Icons.restaurant_rounded},
+    {'name': 'Waste', 'co2': '1.0 kg', 'pct': 0.08, 'pctText': '8%', 'color': Colors.teal, 'icon': Icons.recycling_rounded},
+    {'name': 'Others', 'co2': '0.7 kg', 'pct': 0.06, 'pctText': '6%', 'color': AppColors.champagneGold, 'icon': Icons.more_horiz_rounded},
+  ];
+
+  final List<double> _trendPoints = [15.2, 14.0, 16.5, 13.8, 14.2, 13.0, 12.4];
+
+  String _formatDate(DateTime dt) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
+    final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Carbon Tracker'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined, color: AppColors.champagneGold),
-            onPressed: () {},
-          ),
-        ],
+      backgroundColor: bg,
+      drawer: FeatureDirectoryDrawer(appState: widget.appState),
+      appBar: GrevideaAppBar(
+        title: 'My Tracker',
+        subtitle: 'Automated Footprint Telemetry',
+        showBack: Navigator.of(context).canPop(),
+        appState: widget.appState,
       ),
-      body: ResponsiveWrapper(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Period Selector Tabs
-              Container(
-                height: 42,
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
-                ),
-                child: Row(
-                  children: ['Day', 'Week', 'Month', 'Year'].asMap().entries.map((entry) {
-                    final isSelected = _selectedPeriod == entry.key;
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedPeriod = entry.key),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.royalForest : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: isSelected ? Border.all(color: AppColors.champagneGold, width: 1) : null,
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.royalForest,
+        icon: const Icon(Icons.add_rounded, color: AppColors.champagneGold),
+        label: const Text('Log Activity', style: TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => LogActivityScreen(appState: widget.appState)),
+          );
+        },
+      ),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Period Segmented Tabs (Day / Week / Month / Year) (Matching Screen 02)
+            Container(
+              height: 42,
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              ),
+              child: Row(
+                children: ['Day', 'Week', 'Month', 'Year'].asMap().entries.map((entry) {
+                  final isSelected = _selectedPeriod == entry.key;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedPeriod = entry.key),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.royalForest : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                          border: isSelected ? Border.all(color: AppColors.champagneGold, width: 1) : null,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          entry.value,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? AppColors.champagneGold : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            entry.value,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Date Navigator (< May 28, 2025 >) (Matching Screen 02)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  onPressed: () => setState(() => _currentDate = _currentDate.subtract(const Duration(days: 1))),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today_rounded, size: 15, color: AppColors.champagneGold),
+                    const SizedBox(width: 8),
+                    Text(
+                      _formatDate(_currentDate),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: textColor),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  onPressed: () => setState(() => _currentDate = _currentDate.add(const Duration(days: 1))),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Total CO2 Footprint Card (Matching Screen 02 in reference mockup)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkSurface : const Color(0xFFF1F8F4),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total CO₂ Footprint',
+                        style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '12.4',
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.champagneGold : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                              fontSize: 36,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? Colors.white : AppColors.royalForest,
+                              letterSpacing: -1,
                             ),
                           ),
+                          const SizedBox(width: 6),
+                          const Text(
+                            'kg CO₂',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.emerald.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          '↓ 16% vs yesterday',
+                          style: TextStyle(color: AppColors.emerald, fontSize: 11, fontWeight: FontWeight.w700),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Total CO2 Summary Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20.0),
-                decoration: BoxDecoration(
-                  color: AppColors.royalForest,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.goldBorder, width: 1.2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                    ],
+                  ),
+                  // Windmill graphic icon
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.royalForest.withValues(alpha: 0.1),
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: const Icon(Icons.wind_power_rounded, size: 48, color: AppColors.emerald),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // By Category Section (Matching Screen 02)
+            Text(
+              'By Category',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
+            ),
+            const SizedBox(height: 12),
+
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              ),
+              child: Column(
+                children: _categories.map((c) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
                       children: [
-                        const Text(
-                          'Total CO₂ Footprint',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.champagneGold,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          children: [
+                            Icon(c['icon'] as IconData, size: 16, color: c['color'] as Color),
+                            const SizedBox(width: 8),
+                            Text(c['name'] as String, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor)),
+                            const Spacer(),
+                            Text(c['co2'] as String, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textColor)),
+                            const SizedBox(width: 10),
+                            Text(c['pctText'] as String, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: c['color'] as Color)),
+                          ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.emerald.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            '↓ 18% vs avg',
-                            style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.w700),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: c['pct'] as double,
+                            minHeight: 6,
+                            backgroundColor: (c['color'] as Color).withValues(alpha: 0.15),
+                            valueColor: AlwaysStoppedAnimation<Color>(c['color'] as Color),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    const Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '12.4',
-                          style: TextStyle(
-                            fontSize: 38,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'kg CO₂ today',
-                          style: TextStyle(fontSize: 14, color: Colors.white70),
-                        ),
-                      ],
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Footprint Trend Line Chart (Mon -> Sun) (Matching Screen 02)
+            Text(
+              'Footprint Trend',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
+            ),
+            const SizedBox(height: 12),
+
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('kg CO₂', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                      Text('This Week', style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 120,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, 120),
+                      painter: _LineTrendPainter(points: _trendPoints, color: AppColors.emerald),
                     ),
-                    const SizedBox(height: 14),
-                    const GoldSparkline(
-                      data: [18.2, 16.5, 14.8, 15.2, 13.9, 12.8, 12.4],
-                      height: 36,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('Mon', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Tue', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Wed', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Thu', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Fri', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Sat', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Sun', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                    ],
+                  ),
+                ],
               ),
-
-              const SizedBox(height: 24),
-
-              // Category Breakdown Bars
-              Text(
-                'Emissions by Category',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              _CategoryProgressRow(
-                icon: Icons.directions_car_outlined,
-                category: 'Transport & Commute',
-                kg: '5.2 kg',
-                percentage: 0.42,
-                color: AppColors.champagneGold,
-              ),
-              _CategoryProgressRow(
-                icon: Icons.bolt_outlined,
-                category: 'Household Energy',
-                kg: '3.5 kg',
-                percentage: 0.28,
-                color: AppColors.emerald,
-              ),
-              _CategoryProgressRow(
-                icon: Icons.restaurant_outlined,
-                category: 'Food & Groceries',
-                kg: '2.0 kg',
-                percentage: 0.16,
-                color: AppColors.amber,
-              ),
-              _CategoryProgressRow(
-                icon: Icons.delete_outline_rounded,
-                category: 'Waste & Packaging',
-                kg: '1.0 kg',
-                percentage: 0.08,
-                color: AppColors.coral,
-              ),
-
-              const SizedBox(height: 24),
-
-              // Green Commute Route Comparator Banner
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.alt_route_rounded, color: AppColors.champagneGold, size: 22),
-                        SizedBox(width: 8),
-                        Text(
-                          'Route Carbon Comparator',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Thane West → Bandra Kurla Complex (BKC)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                      ),
-                    ),
-                    const Divider(height: 24),
-                    const _CommuteOptionRow(mode: 'Metro Route 4+2', time: '42 min', co2: '0.4 kg', cost: '₹40', isRecommended: true),
-                    const SizedBox(height: 10),
-                    const _CommuteOptionRow(mode: 'Electric AC Bus', time: '1 hr 10m', co2: '1.1 kg', cost: '₹45', isRecommended: false),
-                    const SizedBox(height: 10),
-                    const _CommuteOptionRow(mode: 'Private Petrol Car', time: '55 min', co2: '4.8 kg', cost: '₹220', isRecommended: false),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+            const SizedBox(height: 80),
+          ],
         ),
       ),
     );
   }
 }
 
-class _CategoryProgressRow extends StatelessWidget {
-  final IconData icon;
-  final String category;
-  final String kg;
-  final double percentage;
+class _LineTrendPainter extends CustomPainter {
+  final List<double> points;
   final Color color;
 
-  const _CategoryProgressRow({
-    required this.icon,
-    required this.category,
-    required this.kg,
-    required this.percentage,
-    required this.color,
-  });
+  _LineTrendPainter({required this.points, required this.color});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 18, color: color),
-                  const SizedBox(width: 8),
-                  Text(category, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                ],
-              ),
-              Text(kg, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: percentage,
-              minHeight: 6,
-              backgroundColor: Colors.grey.withOpacity(0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
-          ),
-        ],
-      ),
-    );
+  void paint(Canvas canvas, Size size) {
+    if (points.isEmpty) return;
+
+    final minVal = points.reduce((a, b) => a < b ? a : b) - 2;
+    final maxVal = points.reduce((a, b) => a > b ? a : b) + 2;
+    final range = maxVal - minVal;
+
+    final path = Path();
+    final stepX = size.width / (points.length - 1);
+
+    for (int i = 0; i < points.length; i++) {
+      final x = i * stepX;
+      final y = size.height - ((points[i] - minVal) / range * size.height);
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    // Gradient fill under curve
+    final fillPath = Path.from(path)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color.withValues(alpha: 0.3), color.withValues(alpha: 0.0)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(fillPath, fillPaint);
+
+    final linePaint = Paint()
+      ..color = color
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke;
+    canvas.drawPath(path, linePaint);
+
+    // Draw dots
+    final dotPaint = Paint()..color = color;
+    for (int i = 0; i < points.length; i++) {
+      final x = i * stepX;
+      final y = size.height - ((points[i] - minVal) / range * size.height);
+      canvas.drawCircle(Offset(x, y), 3.5, dotPaint);
+    }
   }
-}
-
-class _CommuteOptionRow extends StatelessWidget {
-  final String mode;
-  final String time;
-  final String co2;
-  final String cost;
-  final bool isRecommended;
-
-  const _CommuteOptionRow({
-    required this.mode,
-    required this.time,
-    required this.co2,
-    required this.cost,
-    required this.isRecommended,
-  });
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isRecommended ? AppColors.royalForest.withOpacity(0.2) : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        border: isRecommended ? Border.all(color: AppColors.champagneGold, width: 1) : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(mode, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-              Text('$time • $cost', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-            ],
-          ),
-          Text(
-            co2,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: isRecommended ? AppColors.emerald : AppColors.coral,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

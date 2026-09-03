@@ -39,6 +39,11 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.lightSurface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        hintStyle: TextStyle(
+          color: AppColors.lightTextSecondary.withValues(alpha: 0.55),
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.lightCardBorder),
@@ -96,6 +101,11 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.darkSurface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        hintStyle: TextStyle(
+          color: AppColors.darkTextSecondary.withValues(alpha: 0.45),
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.darkCardBorder),

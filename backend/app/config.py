@@ -56,13 +56,23 @@ class Settings(BaseSettings):
 
     # Tier 2: Groq (online, fast cloud inference)
     groq_api_key: Optional[str] = None
-    groq_model: str = "llama-3.1-70b-versatile"
+    groq_model: str = "openai/gpt-oss-20b"
     groq_enabled: bool = True
+
+    # Tier 2.5: Google Gemini (Vision & Fast Reasoning)
+    gemini_api_key: Optional[str] = None
+    gemini_model: str = "gemini-1.5-flash"
+    gemini_enabled: bool = True
 
     # Tier 3: Mistral (final fallback)
     mistral_api_key: Optional[str] = None
     mistral_model: str = "mistral-large-latest"
     mistral_enabled: bool = True
+
+    # Scientific Fact-Checking & Academic Retrieval
+    tavily_api_key: Optional[str] = None
+    openalex_api_key: Optional[str] = None
+    database_url: Optional[str] = None
 
     # LLM parameters
     llm_temperature: float = 0.1
@@ -136,9 +146,9 @@ class Settings(BaseSettings):
     )
 
     model_config = {
-        "env_file": ".env",
+        "env_file": [".env", "../.env", "app/.env"],
         "env_file_encoding": "utf-8",
-        "env_prefix": "GCI_",
+        "extra": "ignore",
         "case_sensitive": False,
     }
 

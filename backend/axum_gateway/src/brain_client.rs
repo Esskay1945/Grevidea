@@ -19,7 +19,9 @@ pub struct BrainChatRequest {
 #[derive(Debug, Deserialize)]
 pub struct BrainChatResponse {
     pub response: String,
+    #[serde(default)]
     pub tools_used: Vec<String>,
+    #[serde(default)]
     pub memory_refs: Vec<String>,
 }
 

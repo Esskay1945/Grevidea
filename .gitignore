@@ -40,4 +40,7 @@ Thumbs.db
 /grevidea/
 *.mp4
 *.mov
-*.avi
+
+# Build Artifacts
+*.apk
+*.aab
