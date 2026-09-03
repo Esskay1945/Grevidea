@@ -2,6 +2,9 @@
 .env
 *.env
 !.env.example
+*oauth*.json
+*.keystore
+!debug.keystore.example
 
 # Rust / Cargo
 target/
