@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/login_screen.dart';
+import 'features/dashboard/dashboard_screen.dart';
 import 'state/app_state.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Immersive edge-to-edge styling for modern Android & iOS
@@ -18,6 +19,7 @@ void main() {
   );
 
   final appState = AppState();
+  await appState.initPersistence();
   runApp(GrevideaApp(appState: appState));
 }
 
@@ -37,8 +39,9 @@ class GrevideaApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: appState.themeMode,
-          // Starts from LoginScreen allowing immediate theme switching and testing of auth flows!
-          home: LoginScreen(appState: appState),
+          home: (appState.isAuthenticated && appState.hasCompletedOnboarding)
+              ? DashboardScreen(appState: appState)
+              : LoginScreen(appState: appState),
         );
       },
     );

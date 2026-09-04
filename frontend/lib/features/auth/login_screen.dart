@@ -8,6 +8,7 @@ import '../../state/app_state.dart';
 import 'forgot_password_dialog.dart';
 import 'signup_screen.dart';
 import '../onboarding/baseline_setup_screen.dart';
+import '../dashboard/dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final AppState appState;
@@ -31,12 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    if (_formKey.currentState?.validate() ?? false) {
-      widget.appState.login(
-        _emailController.text.trim(),
-        _passwordController.text,
+  void _navigateAfterAuth(BuildContext context) {
+    if (widget.appState.hasCompletedOnboarding) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => DashboardScreen(appState: widget.appState),
+        ),
       );
+    } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => BaselineSetupScreen(
@@ -48,11 +51,35 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _handleLogin() {
+    if (_formKey.currentState?.validate() ?? false) {
+      final success = widget.appState.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      if (success) {
+        _navigateAfterAuth(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: AppColors.coral,
+            content: Text('Invalid password. Please check your credentials or try again.'),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
       );
+      // Explicitly sign out previously cached session so account selection dialog opens every time
+      try {
+        await googleSignIn.signOut();
+      } catch (_) {}
+
       final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account != null) {
         final email = account.email;
@@ -65,14 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
               content: Text('✓ Signed in with Google as $name ($email)', style: const TextStyle(color: AppColors.champagneGold)),
             ),
           );
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => BaselineSetupScreen(
-                appState: widget.appState,
-                isInitialSetup: true,
-              ),
-            ),
-          );
+          _navigateAfterAuth(context);
         }
         return;
       }
@@ -154,14 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       content: Text('✓ Signed in with Google as Siddharth Kumar (esskay400d@gmail.com)', style: TextStyle(color: AppColors.champagneGold)),
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(
-                        appState: widget.appState,
-                        isInitialSetup: true,
-                      ),
-                    ),
-                  );
+                  _navigateAfterAuth(context);
                 },
               ),
               const Divider(height: 8),
@@ -184,14 +197,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       content: Text('✓ Signed in with Google as Siddharth (esskay1945@gmail.com)', style: TextStyle(color: AppColors.champagneGold)),
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(
-                        appState: widget.appState,
-                        isInitialSetup: true,
-                      ),
-                    ),
-                  );
+                  _navigateAfterAuth(context);
                 },
               ),
               const Divider(height: 8),
@@ -214,14 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       content: Text('✓ Signed in with Google as John Doe (xyz@gmail.com)', style: TextStyle(color: AppColors.champagneGold)),
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(
-                        appState: widget.appState,
-                        isInitialSetup: true,
-                      ),
-                    ),
-                  );
+                  _navigateAfterAuth(context);
                 },
               ),
               const Divider(height: 12),
@@ -261,14 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           content: Text('✓ Signed in as $displayName ($email)', style: const TextStyle(color: AppColors.champagneGold)),
                         ),
                       );
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => BaselineSetupScreen(
-                            appState: widget.appState,
-                            isInitialSetup: true,
-                          ),
-                        ),
-                      );
+                      _navigateAfterAuth(context);
                     }
                   },
                 ),

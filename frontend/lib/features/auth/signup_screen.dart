@@ -6,6 +6,7 @@ import '../../core/widgets/responsive_wrapper.dart';
 import '../../core/widgets/google_sign_in_button.dart';
 import '../../state/app_state.dart';
 import '../onboarding/baseline_setup_screen.dart';
+import '../dashboard/dashboard_screen.dart';
 import 'widgets/password_strength_bar.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -43,15 +44,14 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  void _handleSignup() {
-    if (_formKey.currentState?.validate() ?? false) {
-      widget.appState.signup(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+  void _navigateAfterAuth(BuildContext context) {
+    if (widget.appState.hasCompletedOnboarding) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => DashboardScreen(appState: widget.appState),
+        ),
       );
-
-      // Leads to the one-time 58-feature baseline onboarding form as requested!
+    } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => BaselineSetupScreen(
@@ -63,11 +63,26 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  void _handleSignup() {
+    if (_formKey.currentState?.validate() ?? false) {
+      widget.appState.signup(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      _navigateAfterAuth(context);
+    }
+  }
+
   Future<void> _handleGoogleSignUp(BuildContext context) async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
       );
+      try {
+        await googleSignIn.signOut();
+      } catch (_) {}
       final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account != null) {
         final email = account.email;
@@ -84,14 +99,7 @@ class _SignupScreenState extends State<SignupScreen> {
               content: Text('✓ Google Account Linked: $name ($email)', style: const TextStyle(color: AppColors.champagneGold)),
             ),
           );
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => BaselineSetupScreen(
-                appState: widget.appState,
-                isInitialSetup: true,
-              ),
-            ),
-          );
+          _navigateAfterAuth(context);
         }
         return;
       }
@@ -175,14 +183,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       content: Text('✓ Google Account Linked: Siddharth Kumar (esskay400d@gmail.com)', style: TextStyle(color: AppColors.champagneGold)),
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(
-                        appState: widget.appState,
-                        isInitialSetup: true,
-                      ),
-                    ),
-                  );
+                  _navigateAfterAuth(context);
                 },
               ),
               const Divider(height: 8),
@@ -207,14 +208,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       content: Text('✓ Google Account Linked: Siddharth (esskay1945@gmail.com)', style: TextStyle(color: AppColors.champagneGold)),
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(
-                        appState: widget.appState,
-                        isInitialSetup: true,
-                      ),
-                    ),
-                  );
+                  _navigateAfterAuth(context);
                 },
               ),
               const Divider(height: 8),
@@ -239,14 +233,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       content: Text('✓ Google Account Linked: John Doe (xyz@gmail.com)', style: TextStyle(color: AppColors.champagneGold)),
                     ),
                   );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(
-                        appState: widget.appState,
-                        isInitialSetup: true,
-                      ),
-                    ),
-                  );
+                  _navigateAfterAuth(context);
                 },
               ),
               const Divider(height: 12),
@@ -288,14 +275,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           content: Text('✓ Google Account Linked: $displayName ($email)', style: const TextStyle(color: AppColors.champagneGold)),
                         ),
                       );
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (_) => BaselineSetupScreen(
-                            appState: widget.appState,
-                            isInitialSetup: true,
-                          ),
-                        ),
-                      );
+                      _navigateAfterAuth(context);
                     }
                   },
                 ),

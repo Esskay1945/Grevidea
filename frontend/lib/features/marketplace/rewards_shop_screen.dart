@@ -2,29 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
+import '../../core/models/plant_record.dart';
 import '../../state/app_state.dart';
-
-class PlantGrowthRecord {
-  final int id;
-  final String species;
-  final String location;
-  final DateTime plantedDate;
-  final int currentMonth;
-  final bool isMonthVerified;
-  final int pointsEarned;
-  final bool isForfeited;
-
-  PlantGrowthRecord({
-    required this.id,
-    required this.species,
-    required this.location,
-    required this.plantedDate,
-    required this.currentMonth,
-    required this.isMonthVerified,
-    required this.pointsEarned,
-    this.isForfeited = false,
-  });
-}
 
 class RewardsShopScreen extends StatefulWidget {
   final AppState appState;
@@ -67,18 +46,8 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
     },
   ];
 
-  // Plant Growth Tracker Records
-  final List<PlantGrowthRecord> _plants = [
-    PlantGrowthRecord(
-      id: 1,
-      species: 'Neem Sapling (Balcony Pot)',
-      location: 'Majiwada, Thane West',
-      plantedDate: DateTime.now().subtract(const Duration(days: 35)),
-      currentMonth: 2,
-      isMonthVerified: false,
-      pointsEarned: 100,
-    ),
-  ];
+  // Plant Growth Tracker Records (Dynamic, user-persisted, completely empty [] for new users)
+  List<PlantGrowthRecord> get _plants => widget.appState.plants;
 
   // Carpooling Corridor State (Zero Seeded Data - Real Database Corridor Matching)
   final TextEditingController _carpoolOrigin = TextEditingController(text: 'Majiwada, Thane');
@@ -148,20 +117,16 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
             label: const Text('Capture & Verify Sapling', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             onPressed: () {
               Navigator.pop(ctx);
-              setState(() {
-                _plants.insert(
-                  0,
-                  PlantGrowthRecord(
-                    id: DateTime.now().millisecondsSinceEpoch,
-                    species: 'Ashoka Sapling',
-                    location: widget.appState.baseline.cityWard,
-                    plantedDate: DateTime.now(),
-                    currentMonth: 1,
-                    isMonthVerified: true,
-                    pointsEarned: 100,
-                  ),
-                );
-              });
+              final newPlant = PlantGrowthRecord(
+                id: DateTime.now().millisecondsSinceEpoch,
+                species: 'Ashoka Sapling',
+                location: widget.appState.baseline.cityWard,
+                plantedDate: DateTime.now(),
+                currentMonth: 1,
+                isMonthVerified: true,
+                pointsEarned: 100,
+              );
+              widget.appState.addPlant(newPlant);
               widget.appState.logActivity(
                 title: 'Planted Ashoka Sapling',
                 category: 'Waste',
@@ -222,17 +187,16 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
 
   void _verifyMonthlyCheckIn(int index) {
     final p = _plants[index];
-    setState(() {
-      _plants[index] = PlantGrowthRecord(
-        id: p.id,
-        species: p.species,
-        location: p.location,
-        plantedDate: p.plantedDate,
-        currentMonth: p.currentMonth,
-        isMonthVerified: true,
-        pointsEarned: p.pointsEarned + 50,
-      );
-    });
+    final updated = PlantGrowthRecord(
+      id: p.id,
+      species: p.species,
+      location: p.location,
+      plantedDate: p.plantedDate,
+      currentMonth: p.currentMonth,
+      isMonthVerified: true,
+      pointsEarned: p.pointsEarned + 50,
+    );
+    widget.appState.updatePlant(updated);
     widget.appState.logActivity(
       title: 'Month ${p.currentMonth} Growth Verified',
       category: 'Education',
@@ -252,18 +216,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
   void _simulateMissedCheckInDeduction(int index) {
     final p = _plants[index];
     final pointsToDeduct = p.pointsEarned;
-    setState(() {
-      _plants[index] = PlantGrowthRecord(
-        id: p.id,
-        species: p.species,
-        location: p.location,
-        plantedDate: p.plantedDate,
-        currentMonth: p.currentMonth,
-        isMonthVerified: false,
-        pointsEarned: 0,
-        isForfeited: true,
-      );
-    });
+    widget.appState.forfeitPlant(p.id);
     widget.appState.logActivity(
       title: 'Penalty: Missed Tree Check-in',
       category: 'Waste',

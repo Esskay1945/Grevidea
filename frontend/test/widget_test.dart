@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grevidea/main.dart';
 import 'package:grevidea/state/app_state.dart';
+import 'package:grevidea/core/models/plant_record.dart';
 
 void main() {
   group('1. Smoke & UI Initialization', () {
@@ -172,6 +173,66 @@ void main() {
       const currentSpeedKmh = 38.0;
       final isHighSpeedTransit = currentSpeedKmh > 25.0;
       expect(isHighSpeedTransit, isTrue);
+    });
+  });
+
+  group('7. One-Time Onboarding Gating & User Database Persistence', () {
+    test('New user starts with hasCompletedOnboarding = false and empty plant tracker', () {
+      final state = AppState();
+      state.signup(name: 'New Tester', email: 'newtester@example.com', password: 'Password123!');
+      expect(state.hasCompletedOnboarding, isFalse);
+      expect(state.plants.isEmpty, isTrue);
+      expect(state.userEmail, equals('newtester@example.com'));
+      expect(state.userPassword, equals('Password123!'));
+    });
+
+    test('Completing onboarding sets hasCompletedOnboarding = true and preserves status', () {
+      final state = AppState();
+      state.signup(name: 'Eco Warrior', email: 'warrior@example.com', password: 'Pass123!@#');
+      expect(state.hasCompletedOnboarding, isFalse);
+
+      state.completeOnboarding();
+      expect(state.hasCompletedOnboarding, isTrue);
+
+      // Logging in again as the same user must retain hasCompletedOnboarding = true (one-time form only)
+      final loginSuccess = state.login('warrior@example.com', 'Pass123!@#');
+      expect(loginSuccess, isTrue);
+      expect(state.hasCompletedOnboarding, isTrue);
+    });
+
+    test('Wrong password returns false on login', () {
+      final state = AppState();
+      state.signup(name: 'Secure User', email: 'secure@example.com', password: 'CorrectPassword123');
+      
+      final failedLogin = state.login('secure@example.com', 'WrongPassword456');
+      expect(failedLogin, isFalse);
+
+      final okLogin = state.login('secure@example.com', 'CorrectPassword123');
+      expect(okLogin, isTrue);
+    });
+  });
+
+  group('8. Plant Tracker Zero-State & Adoption Lifecycle', () {
+    test('Brand new user has 0 plants initially, adoption increments count', () {
+      final state = AppState();
+      state.signup(name: 'Gardener', email: 'gardener@example.com', password: 'PlantPassword123');
+      expect(state.plants.isEmpty, isTrue);
+
+      state.addPlant(
+        PlantGrowthRecord(
+          id: 1,
+          species: 'Neem Sapling (Azadirachta indica)',
+          location: 'Balcony Pot #1',
+          plantedDate: DateTime.now(),
+          currentMonth: 1,
+          isMonthVerified: true,
+          pointsEarned: 100,
+        ),
+      );
+
+      expect(state.plants.length, equals(1));
+      expect(state.plants.first.species, equals('Neem Sapling (Azadirachta indica)'));
+      expect(state.greenPoints, equals(100));
     });
   });
 }

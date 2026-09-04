@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart' as ll;
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -15,9 +17,18 @@ class GreenCommuteScreen extends StatefulWidget {
 class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
   late TextEditingController _originController;
   late TextEditingController _destController;
+  late final MapController _mapController;
   int _selectedModeIndex = 0;
   double _routeDistanceKm = 24.5;
   bool _isSearching = false;
+
+  final Map<String, ll.LatLng> _destinationCoords = {
+    'BKC, Mumbai': const ll.LatLng(19.0657, 72.8687),
+    'Andheri East': const ll.LatLng(19.1136, 72.8697),
+    'Thane Station': const ll.LatLng(19.1860, 72.9757),
+    'Vashi, Navi Mumbai': const ll.LatLng(19.0771, 72.9986),
+    'Powai Hiranandani': const ll.LatLng(19.1176, 72.9060),
+  };
 
   final List<String> _quickDestinations = [
     'BKC, Mumbai',
@@ -27,11 +38,27 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
     'Powai Hiranandani',
   ];
 
+  ll.LatLng get _originCoord => ll.LatLng(
+    widget.appState.locationService.currentLatitude,
+    widget.appState.locationService.currentLongitude,
+  );
+
+  ll.LatLng get _destCoord => _destinationCoords[_destController.text] ?? const ll.LatLng(19.0657, 72.8687);
+
   @override
   void initState() {
     super.initState();
-    _originController = TextEditingController(text: '${widget.appState.baseline.cityWard} (Current Location)');
+    _mapController = MapController();
+    _originController = TextEditingController(text: '${widget.appState.baseline.cityWard} (Live GPS)');
     _destController = TextEditingController(text: 'BKC, Mumbai');
+
+    _routeDistanceKm = widget.appState.locationService.distanceBetweenKm(
+      _originCoord.latitude,
+      _originCoord.longitude,
+      _destCoord.latitude,
+      _destCoord.longitude,
+    );
+    if (_routeDistanceKm < 0.5) _routeDistanceKm = 24.5;
   }
 
   @override
@@ -53,24 +80,25 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
     setState(() {
       _destController.text = dest;
       _isSearching = true;
+      final target = _destinationCoords[dest] ?? const ll.LatLng(19.0657, 72.8687);
+      _routeDistanceKm = widget.appState.locationService.distanceBetweenKm(
+        _originCoord.latitude,
+        _originCoord.longitude,
+        target.latitude,
+        target.longitude,
+      );
+      if (_routeDistanceKm < 0.5) _routeDistanceKm = 15.0;
     });
 
-    Future.delayed(const Duration(milliseconds: 400), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
-        setState(() {
-          if (dest.contains('BKC')) {
-            _routeDistanceKm = 24.5;
-          } else if (dest.contains('Andheri')) {
-            _routeDistanceKm = 21.0;
-          } else if (dest.contains('Thane Station')) {
-            _routeDistanceKm = 4.8;
-          } else if (dest.contains('Vashi')) {
-            _routeDistanceKm = 18.2;
-          } else {
-            _routeDistanceKm = 15.0;
-          }
-          _isSearching = false;
-        });
+        setState(() => _isSearching = false);
+        try {
+          final target = _destCoord;
+          final centerLat = (_originCoord.latitude + target.latitude) / 2;
+          final centerLng = (_originCoord.longitude + target.longitude) / 2;
+          _mapController.move(ll.LatLng(centerLat, centerLng), 11.5);
+        } catch (_) {}
       }
     });
   }
@@ -264,31 +292,106 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
               ),
               const SizedBox(height: 14),
 
-              // Interactive Route Map Canvas
+              // Real Interactive OpenStreetMap Corridor Map
               Container(
-                height: 170,
+                height: 220,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: isDark ? const Color(0xFF13221A) : const Color(0xFFE2EFE7),
-                  border: Border.all(color: AppColors.emerald.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: Stack(
                     children: [
-                      // Simulated Vector Grid Map
-                      CustomPaint(
-                        size: const Size(double.infinity, 170),
-                        painter: _RouteMapPainter(isDark: isDark),
+                      FlutterMap(
+                        mapController: _mapController,
+                        options: MapOptions(
+                          initialCenter: ll.LatLng(
+                            (_originCoord.latitude + _destCoord.latitude) / 2,
+                            (_originCoord.longitude + _destCoord.longitude) / 2,
+                          ),
+                          initialZoom: 11.5,
+                          interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            userAgentPackageName: 'com.grevidea.app',
+                          ),
+                          PolylineLayer(
+                            polylines: [
+                              Polyline(
+                                points: [
+                                  _originCoord,
+                                  ll.LatLng(
+                                    (_originCoord.latitude * 2 + _destCoord.latitude) / 3,
+                                    (_originCoord.longitude * 2 + _destCoord.longitude) / 3,
+                                  ),
+                                  ll.LatLng(
+                                    (_originCoord.latitude + _destCoord.latitude * 2) / 3,
+                                    (_originCoord.longitude + _destCoord.longitude * 2) / 3,
+                                  ),
+                                  _destCoord,
+                                ],
+                                strokeWidth: 4.5,
+                                color: AppColors.emerald,
+                              ),
+                            ],
+                          ),
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: _originCoord,
+                                width: 38,
+                                height: 38,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.royalForest,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.champagneGold, width: 2.5),
+                                    boxShadow: [
+                                      BoxShadow(color: AppColors.emerald.withValues(alpha: 0.5), blurRadius: 8, spreadRadius: 2),
+                                    ],
+                                  ),
+                                  child: const Icon(Icons.my_location_rounded, color: AppColors.champagneGold, size: 18),
+                                ),
+                              ),
+                              Marker(
+                                point: _destCoord,
+                                width: 38,
+                                height: 38,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.coral,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                    boxShadow: const [
+                                      BoxShadow(color: Colors.black26, blurRadius: 6),
+                                    ],
+                                  ),
+                                  child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 20),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
+                      // Corridor distance chip
                       Positioned(
                         top: 12,
                         left: 14,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.65),
+                            color: Colors.black.withValues(alpha: 0.72),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
@@ -304,6 +407,65 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                           ),
                         ),
                       ),
+                      // Map Zoom / Recenter Controls
+                      Positioned(
+                        top: 12,
+                        right: 14,
+                        child: Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                final currentZoom = _mapController.camera.zoom;
+                                _mapController.move(_mapController.camera.center, currentZoom + 1);
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                                ),
+                                child: const Icon(Icons.add, size: 18, color: Colors.black87),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              onTap: () {
+                                final currentZoom = _mapController.camera.zoom;
+                                _mapController.move(_mapController.camera.center, currentZoom - 1);
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                                ),
+                                child: const Icon(Icons.remove, size: 18, color: Colors.black87),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              onTap: () {
+                                _mapController.move(_originCoord, 13.0);
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: AppColors.royalForest,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                                ),
+                                child: const Icon(Icons.gps_fixed_rounded, size: 16, color: AppColors.champagneGold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Bottom Traffic & Geocoding Bar
                       Positioned(
                         bottom: 12,
                         left: 14,
@@ -311,22 +473,22 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.darkSurface.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.95),
+                            color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : Colors.white.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: const [
-                              Text('🟢 Flow: Normal (EE Highway)', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.emerald)),
-                              Text('Live Traffic & Geocoding', style: TextStyle(fontSize: 9.5, color: Colors.grey)),
+                              Text('🟢 OpenStreetMap Live Tiles', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.emerald)),
+                              Text('Live Transit Corridor', style: TextStyle(fontSize: 9.5, color: Colors.grey)),
                             ],
                           ),
                         ),
                       ),
                       if (_isSearching)
                         Container(
-                          color: Colors.black.withValues(alpha: 0.4),
+                          color: Colors.black.withValues(alpha: 0.35),
                           child: const Center(
                             child: CircularProgressIndicator(color: AppColors.champagneGold, strokeWidth: 2.5),
                           ),
@@ -460,57 +622,4 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
       ),
     );
   }
-}
-
-class _RouteMapPainter extends CustomPainter {
-  final bool isDark;
-  _RouteMapPainter({required this.isDark});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final roadPaint = Paint()
-      ..color = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06)
-      ..strokeWidth = 3.0
-      ..style = PaintingStyle.stroke;
-
-    // Background road network lines
-    canvas.drawLine(Offset(0, size.height * 0.4), Offset(size.width, size.height * 0.4), roadPaint);
-    canvas.drawLine(Offset(0, size.height * 0.7), Offset(size.width, size.height * 0.8), roadPaint);
-    canvas.drawLine(Offset(size.width * 0.3, 0), Offset(size.width * 0.35, size.height), roadPaint);
-    canvas.drawLine(Offset(size.width * 0.7, 0), Offset(size.width * 0.65, size.height), roadPaint);
-
-    // Active Route Polyline
-    final routePath = Path()
-      ..moveTo(size.width * 0.15, size.height * 0.75)
-      ..cubicTo(size.width * 0.35, size.height * 0.7, size.width * 0.45, size.height * 0.35, size.width * 0.85, size.height * 0.3);
-
-    final glowPaint = Paint()
-      ..color = AppColors.emerald.withValues(alpha: 0.3)
-      ..strokeWidth = 8.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final polylinePaint = Paint()
-      ..color = AppColors.emerald
-      ..strokeWidth = 4.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawPath(routePath, glowPaint);
-    canvas.drawPath(routePath, polylinePaint);
-
-    // Origin Pin
-    final originPaint = Paint()..color = AppColors.emerald;
-    canvas.drawCircle(Offset(size.width * 0.15, size.height * 0.75), 7, originPaint);
-    final innerPaint = Paint()..color = Colors.white;
-    canvas.drawCircle(Offset(size.width * 0.15, size.height * 0.75), 3, innerPaint);
-
-    // Destination Pin
-    final destPaint = Paint()..color = AppColors.coral;
-    canvas.drawCircle(Offset(size.width * 0.85, size.height * 0.3), 8, destPaint);
-    canvas.drawCircle(Offset(size.width * 0.85, size.height * 0.3), 3.5, innerPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
