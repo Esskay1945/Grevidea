@@ -38,89 +38,19 @@ fn aqi_category(aqi: i32) -> (&'static str, &'static str) {
     }
 }
 
-pub async fn get_aqi(
-    State(state): State<AppState>,
-    _auth: AuthUser,
-    Query(q): Query<AqiQuery>,
-) -> AppResult<Json<ApiResponse<AqiResponse>>> {
-    let city = q.city.clone().unwrap_or_else(|| "Delhi".to_string());
-
-    // Try DB cache first (last 30 min)
-    let cached = sqlx::query_as::<_, AqiReading>(
-        r#"SELECT id, station_id, city, aqi, pm25, pm10, no2, so2, co, o3, category, recorded_at
-           FROM aqi_readings WHERE city ILIKE $1
-           AND recorded_at > NOW() - INTERVAL '30 minutes'
-           ORDER BY recorded_at DESC LIMIT 1"#
-    )
-    .bind(&city)
-    .fetch_optional(&state.db)
-    .await?;
-
-    if let Some(r) = cached {
-        let (cat, msg) = aqi_category(r.aqi);
-        return Ok(Json(ApiResponse::ok(AqiResponse {
-            city: r.city,
-            aqi: r.aqi,
-            category: cat.to_string(),
-            pm25: r.pm25,
-            pm10: r.pm10,
-            health_message: msg.to_string(),
-            source: "cache".to_string(),
-            cached: true,
-        })));
-    }
-
-    // Fetch from OpenAQ (no key needed)
-    let url = format!(
-        "https://api.openaq.org/v2/latest?city={}&limit=1&parameter=pm25",
-        urlencoding(&city)
-    );
-
-    let resp = state.brain.http.get(&url)
-        .header("User-Agent", "Grevidea/1.0")
-        .send().await;
-
-    let (aqi, pm25, pm10) = match resp {
-        Ok(r) if r.status().is_success() => {
-            if let Ok(v) = r.json::<serde_json::Value>().await {
-                let pm25_val = v["results"][0]["measurements"]
-                    .as_array()
-                    .and_then(|m| m.iter().find(|x| x["parameter"] == "pm25"))
-                    .and_then(|x| x["value"].as_f64())
-                    .unwrap_or(35.0);
-                let pm10_val = pm25_val * 1.5;
-                let aqi_calc = (pm25_val * 4.0) as i32;
-                (aqi_calc, pm25_val, pm10_val)
-            } else { (85, 35.0, 52.0) }
-        }
-        _ => (85, 35.0, 52.0), // fallback mock
+pub async fn get_aqi(State(state): State<AppState>, auth: AuthUser, Query(q): Query<AqiQuery>) -> AppResult<Json<ApiResponse<serde_json::Value>>> {
+    let city=q.city.unwrap_or_else(|| "Thane".into());
+    let (lat,lon)=if let (Some(lat),Some(lon))=(q.lat,q.lon) {(lat,lon)} else {
+        let Json(found)=super::live::geocode(State(state.clone()),auth,Query(super::live::Search{q:city.clone()})).await?;
+        let first=found.data.as_array().and_then(|a|a.first()).ok_or_else(|| AppError::NotFound("City not found".into()))?;
+        let lat=first["lat"].as_str().and_then(|v|v.parse::<f64>().ok()).ok_or_else(||AppError::NotFound("Invalid city latitude".into()))?;
+        let lon=first["lon"].as_str().and_then(|v|v.parse::<f64>().ok()).ok_or_else(||AppError::NotFound("Invalid city longitude".into()))?;
+        (lat,lon)
     };
-
-    let (cat, msg) = aqi_category(aqi);
-
-    // Cache in DB
-    let _ = sqlx::query(
-        r#"INSERT INTO aqi_readings (station_id, city, aqi, pm25, pm10, no2, so2, co, o3, category)
-           VALUES ($1, $2, $3, $4, $5, 0, 0, 0, 0, $6)"#
-    )
-    .bind(format!("openaq_{}", city.to_lowercase()))
-    .bind(&city)
-    .bind(aqi)
-    .bind(pm25)
-    .bind(pm10)
-    .bind(cat)
-    .execute(&state.db).await;
-
-    Ok(Json(ApiResponse::ok(AqiResponse {
-        city,
-        aqi,
-        category: cat.to_string(),
-        pm25,
-        pm10,
-        health_message: msg.to_string(),
-        source: "openaq".to_string(),
-        cached: false,
-    })))
+    super::live::validate_coordinates(lat,lon)?;
+    let air=super::live::fetch(&state,"https://air-quality-api.open-meteo.com/v1/air-quality",&[("latitude",lat.to_string()),("longitude",lon.to_string()),("current","us_aqi,pm2_5,pm10".into())]).await?;
+    let aqi=air["current"]["us_aqi"].as_i64().ok_or_else(||AppError::BrainUnavailable("AQI not available".into()))?;
+    Ok(Json(ApiResponse::ok(json!({"city":city,"aqi":aqi,"category":aqi_category(aqi as i32).0,"pm25":air["current"]["pm2_5"],"pm10":air["current"]["pm10"],"timestamp":air["current"]["time"],"source":"Open-Meteo / CAMS model · US AQI","cached":false}))))
 }
 
 fn urlencoding(s: &str) -> String {
@@ -352,10 +282,14 @@ pub async fn create_sos(
     let user_id = Uuid::parse_str(&auth.0.sub)
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
+    super::live::validate_coordinates(req.latitude, req.longitude)?;
+    if req.people_count == 0 || req.battery_percent.is_some_and(|b| !(0..=100).contains(&b)) {
+        return Err(AppError::BadRequest("Invalid SOS people count or battery level".into()));
+    }
     let needs_json = serde_json::to_value(&req.needs).unwrap();
     let sos = sqlx::query_as::<_, SosRequest>(
-        r#"INSERT INTO sos_requests (user_id, disaster_type, description, needs, people_count, latitude, longitude)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
+        r#"INSERT INTO sos_requests (user_id, disaster_type, description, needs, people_count, latitude, longitude, battery_percent, street_address)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
            RETURNING id, user_id, disaster_type, description, needs, people_count, latitude, longitude, status, created_at"#
     )
     .bind(user_id)
@@ -365,6 +299,7 @@ pub async fn create_sos(
     .bind(req.people_count as i32)
     .bind(req.latitude)
     .bind(req.longitude)
+    .bind(req.battery_percent).bind(req.street_address)
     .fetch_one(&state.db)
     .await?;
 
@@ -377,7 +312,7 @@ pub async fn create_sos(
         "priority": "critical"
     })).await;
 
-    Ok(Json(ApiResponse::with_message(sos, "SOS broadcast sent. Matching helpers nearby...")))
+    Ok(Json(ApiResponse::with_message(sos, "SOS stored in Grevidea. Emergency services and contacts have not been notified.")))
 }
 
 pub async fn get_nearby_sos(
@@ -419,7 +354,7 @@ pub struct RouteScore {
 }
 
 pub async fn score_route_aqi(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
     _auth: AuthUser,
     Json(req): Json<RouteScoreRequest>,
 ) -> AppResult<Json<ApiResponse<RouteScore>>> {
@@ -427,8 +362,15 @@ pub async fn score_route_aqi(
         return Err(AppError::BadRequest("At least one waypoint required".into()));
     }
 
-    let avg_aqi = 85.0_f64;
-    let max_aqi = 110.0_f64;
+    if req.waypoints.len()>10 { return Err(AppError::BadRequest("Maximum 10 sample waypoints".into())); }
+    let mut values=Vec::new();
+    for p in &req.waypoints {
+        super::live::validate_coordinates(p[0],p[1])?;
+        let data=super::live::fetch(&state,"https://air-quality-api.open-meteo.com/v1/air-quality",&[("latitude",p[0].to_string()),("longitude",p[1].to_string()),("current","us_aqi".into())]).await?;
+        values.push(data["current"]["us_aqi"].as_f64().ok_or_else(||AppError::BrainUnavailable("AQI sample unavailable".into()))?);
+    }
+    let avg_aqi=values.iter().sum::<f64>()/values.len() as f64;
+    let max_aqi=values.iter().copied().fold(0.0,f64::max);
     let score = (100.0 - avg_aqi / 3.0) as u8;
     let (label, rec) = if score > 75 {
         ("Clean Route", "Great choice! Air quality along this route is good.")
@@ -442,8 +384,8 @@ pub async fn score_route_aqi(
         avg_aqi,
         max_aqi,
         score,
-        label: label.to_string(),
-        recommendation: rec.to_string(),
+        label: format!("{} (model estimate)", label),
+        recommendation: format!("CAMS US AQI model, not station telemetry. {}", rec),
     })))
 }
 

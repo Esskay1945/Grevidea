@@ -220,6 +220,10 @@ class OpenMythos:
 
         # Initialize vector store (semantic memory)
         self._vector_store = _SimpleVectorStore()
+        self._conn.execute("CREATE TABLE IF NOT EXISTS semantic_memories (id TEXT PRIMARY KEY, text TEXT NOT NULL, metadata TEXT NOT NULL)")
+        self._conn.commit()
+        for row in self._conn.execute("SELECT id, text, metadata FROM semantic_memories"):
+            self._vector_store.add(row["id"], row["text"], json.loads(row["metadata"]))
 
         logger.info(
             f"Open Mythos initialized. SQLite: {self._db_path}, "
@@ -422,6 +426,8 @@ class OpenMythos:
             **(metadata or {}),
         }
 
+        self._conn.execute("INSERT INTO semantic_memories VALUES (?, ?, ?)", (memory_id, text, json.dumps(meta)))
+        self._conn.commit()
         self._vector_store.add(memory_id, text, meta)
         logger.debug(f"Remembered [{memory_type}] from {source}: {text[:80]}...")
         return memory_id
@@ -463,6 +469,8 @@ class OpenMythos:
         old_entries = self._vector_store.get_all(where={"timestamp": {"$lt": cutoff}})
         if old_entries:
             ids = [entry_id for entry_id, _ in old_entries]
+            self._conn.executemany("DELETE FROM semantic_memories WHERE id = ?", [(i,) for i in ids])
+            self._conn.commit()
             deleted = self._vector_store.delete(ids)
             if deleted > 0:
                 logger.info(f"Deleted {deleted} memories older than {cutoff}")

@@ -96,14 +96,14 @@ class _ForestBackdropState extends State<ForestBackdrop>
                           end: Alignment.bottomCenter,
                           colors: dark
                               ? const [
-                                  Color(0x99031118),
-                                  Color(0x55031118),
-                                  Color(0xAA031118),
+                                  Color(0xE6031118),
+                                  Color(0xB8031118),
+                                  Color(0xE6031118),
                                 ]
                               : const [
-                                  Color(0xB3072117),
-                                  Color(0x55072117),
-                                  Color(0xAA072117),
+                                  Color(0xD9072117),
+                                  Color(0xA6072117),
+                                  Color(0xD9072117),
                                 ],
                           stops: const [0, 0.42, 1],
                         ),
@@ -150,8 +150,7 @@ class _ForestAtmosphere extends CustomPainter {
       // Cluster at the perimeter, away from the main reading area.
       final side = i.isEven ? 0.055 : 0.94;
       final x = size.width * (side + math.sin(phase + i * 1.7) * 0.035);
-      final y =
-          size.height *
+      final y = size.height *
           (((i * 0.137) % 0.9) + 0.05 + math.cos(phase + i * 0.9) * 0.014);
       final center = Offset(x, y);
       final pulse = still ? 0.65 : 0.45 + 0.25 * math.sin(phase * 2 + i);

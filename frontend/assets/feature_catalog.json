@@ -1,0 +1,1180 @@
+[
+  {
+    "id": 1,
+    "tool": "climate_gpt",
+    "title": "Ask Climate Assistant",
+    "group": "gci_proxy",
+    "fields": [
+      {
+        "name": "message",
+        "label": "Message",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "mode",
+        "label": "Mode",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 2,
+    "tool": "misinformation_detector",
+    "title": "Misinformation Detector",
+    "group": "gci_proxy",
+    "fields": [
+      {
+        "name": "claim",
+        "label": "Claim",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 3,
+    "tool": "jitai_nudge_engine",
+    "title": "Personal Green Reminders",
+    "group": "gci_proxy",
+    "fields": [
+      {
+        "name": "context",
+        "label": "Context",
+        "type": "object",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 4,
+    "tool": "spillover_analyzer",
+    "title": "Habit Spillover Insights",
+    "group": "gci_proxy",
+    "fields": [
+      {
+        "name": "days",
+        "label": "Days",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 5,
+    "tool": "disaster_risk_predictor",
+    "title": "Climate Risk Outlook",
+    "group": "gci_proxy",
+    "fields": [
+      {
+        "name": "city",
+        "label": "City",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "lat",
+        "label": "Lat",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "lon",
+        "label": "Lon",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 6,
+    "tool": "eco_persona_generator",
+    "title": "My Green Personality",
+    "group": "gci_proxy",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 7,
+    "tool": "morning_brief_composer",
+    "title": "Morning Climate Brief",
+    "group": "gci_proxy",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 8,
+    "tool": "climate_anxiety_companion",
+    "title": "Climate Wellbeing Companion",
+    "group": "gci_proxy",
+    "fields": [
+      {
+        "name": "feeling",
+        "label": "Feeling",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "intensity",
+        "label": "Intensity",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 9,
+    "tool": "carbon_calculator",
+    "title": "Carbon Calculator",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "mode",
+        "label": "Mode",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "distance_km",
+        "label": "Distance km",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "passengers",
+        "label": "Passengers",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 10,
+    "tool": "transport_mode_detector",
+    "title": "Transport Mode Detector",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "speed_kmh",
+        "label": "Speed kmh",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "cadence_spm",
+        "label": "Cadence spm",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "altitude_change_m",
+        "label": "Altitude change m",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 11,
+    "tool": "carbon_history",
+    "title": "Carbon History",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "days",
+        "label": "Days",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 12,
+    "tool": "carbon_budget",
+    "title": "Carbon Budget",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "monthly_cap_kg",
+        "label": "Monthly cap kg",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 13,
+    "tool": "food_carbon",
+    "title": "Food Carbon",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "food_name",
+        "label": "Food name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "quantity_grams",
+        "label": "Quantity grams",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "origin",
+        "label": "Origin",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 14,
+    "tool": "supply_chain_tracer",
+    "title": "Supply Chain Tracer",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "product_name",
+        "label": "Product name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "barcode",
+        "label": "Barcode",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "origin_country",
+        "label": "Origin country",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "user_lat",
+        "label": "User lat",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "user_lon",
+        "label": "User lon",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 15,
+    "tool": "lifestyle_auto_inferrer",
+    "title": "Activity-Based Travel Estimate",
+    "group": "footprint",
+    "fields": [
+      {
+        "name": "step_count",
+        "label": "Step count",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "active_minutes",
+        "label": "Active minutes",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "cycling_minutes",
+        "label": "Cycling minutes",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "source",
+        "label": "Source",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 16,
+    "tool": "health_planet_correlator",
+    "title": "Health and Environment Patterns",
+    "group": "footprint",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 17,
+    "tool": "weekly_carbon_report",
+    "title": "Weekly Carbon Report",
+    "group": "footprint",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 18,
+    "tool": "carbon_comparison",
+    "title": "Carbon Comparison",
+    "group": "footprint",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 19,
+    "tool": "carbon_cap_market",
+    "title": "Carbon Credit Marketplace",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "page",
+        "label": "Page",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "label": "Limit",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 20,
+    "tool": "ecolens_scanner",
+    "title": "Scan a Product",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "barcode",
+        "label": "Barcode",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "product_name",
+        "label": "Product name",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 21,
+    "tool": "resource_pool_manager",
+    "title": "Borrow Community Resources",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "message",
+        "label": "Message",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "listing_id",
+        "label": "Listing id",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 22,
+    "tool": "green_gig_marketplace",
+    "title": "Green Jobs",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "page",
+        "label": "Page",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "label": "Limit",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 23,
+    "tool": "carpool_matcher",
+    "title": "Carpool Matcher",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "page",
+        "label": "Page",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "label": "Limit",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 24,
+    "tool": "offset_suggester",
+    "title": "Offset Suggester",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "target_co2_kg",
+        "label": "Target co2 kg",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 25,
+    "tool": "green_product_recommender",
+    "title": "Green Product Recommender",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "original_score",
+        "label": "Original score",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 26,
+    "tool": "marketplace_impact_calc",
+    "title": "Marketplace Impact Calc",
+    "group": "marketplace",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 27,
+    "tool": "verified_seller_auditor",
+    "title": "Seller Certificates",
+    "group": "marketplace",
+    "fields": [
+      {
+        "name": "cert_type",
+        "label": "Cert type",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "cert_number",
+        "label": "Cert number",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "issuer",
+        "label": "Issuer",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "expiry_date",
+        "label": "Expiry date",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "document_hash",
+        "label": "Document hash",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 28,
+    "tool": "circular_economy_tracker",
+    "title": "Circular Economy Tracker",
+    "group": "marketplace",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 29,
+    "tool": "aqi_fetcher",
+    "title": "Aqi Fetcher",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "city",
+        "label": "City",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "lat",
+        "label": "Lat",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "lon",
+        "label": "Lon",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 30,
+    "tool": "aqi_heatmap_generator",
+    "title": "Aqi Heatmap Generator",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "city",
+        "label": "City",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "bbox",
+        "label": "Bbox",
+        "type": "object",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 31,
+    "tool": "pollution_reporter",
+    "title": "Pollution Reporter",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "latitude",
+        "label": "Latitude",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "longitude",
+        "label": "Longitude",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "report_type",
+        "label": "Report type",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "severity",
+        "label": "Severity",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "photo_url",
+        "label": "Photo url",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 32,
+    "tool": "pollution_source_mapper",
+    "title": "Pollution Source Mapper",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "city",
+        "label": "City",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 33,
+    "tool": "green_zone_finder",
+    "title": "Green Zone Finder",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "lat",
+        "label": "Lat",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "lon",
+        "label": "Lon",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "radius_km",
+        "label": "Radius km",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 34,
+    "tool": "rti_drafter",
+    "title": "Draft a Municipal Complaint",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "violation_type",
+        "label": "Violation type",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "authority",
+        "label": "Authority",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "location",
+        "label": "Location",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 35,
+    "tool": "municipal_budget_voter",
+    "title": "Municipal Budget Voter",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "project_id",
+        "label": "Project id",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 36,
+    "tool": "disaster_sos",
+    "title": "Disaster Sos",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "battery_percent",
+        "label": "Battery percent",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "street_address",
+        "label": "Street address",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "latitude",
+        "label": "Latitude",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "longitude",
+        "label": "Longitude",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "disaster_type",
+        "label": "Disaster type",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "needs",
+        "label": "Needs",
+        "type": "list",
+        "required": true
+      },
+      {
+        "name": "people_count",
+        "label": "People count",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 37,
+    "tool": "route_aqi_scorer",
+    "title": "Route Aqi Scorer",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "waypoints",
+        "label": "Waypoints",
+        "type": "object",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 38,
+    "tool": "health_impact_explainer",
+    "title": "Health Impact Explainer",
+    "group": "civic",
+    "fields": [
+      {
+        "name": "aqi",
+        "label": "Aqi",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "user_age",
+        "label": "User age",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "has_asthma",
+        "label": "Has asthma",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "has_heart_condition",
+        "label": "Has heart condition",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "is_pregnant",
+        "label": "Is pregnant",
+        "type": "boolean",
+        "required": false
+      },
+      {
+        "name": "exposure_hours",
+        "label": "Exposure hours",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 39,
+    "tool": "green_points",
+    "title": "Green Points",
+    "group": "gamification",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 40,
+    "tool": "points_ledger",
+    "title": "Points History",
+    "group": "gamification",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 41,
+    "tool": "achievement_engine",
+    "title": "Achievement Engine",
+    "group": "gamification",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 42,
+    "tool": "leaderboard",
+    "title": "Leaderboard",
+    "group": "gamification",
+    "fields": [
+      {
+        "name": "page",
+        "label": "Page",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "label": "Limit",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 43,
+    "tool": "streak_tracker",
+    "title": "Streak Tracker",
+    "group": "gamification",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 44,
+    "tool": "eco_squad_manager",
+    "title": "Eco Squad Manager",
+    "group": "gamification",
+    "fields": [
+      {
+        "name": "name",
+        "label": "Name",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 45,
+    "tool": "challenge_generator",
+    "title": "Challenge Generator",
+    "group": "gamification",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 46,
+    "tool": "impact_translator",
+    "title": "Impact Translator",
+    "group": "gamification",
+    "fields": [
+      {
+        "name": "co2_saved_kg",
+        "label": "Co2 saved kg",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 47,
+    "tool": "green_social_feed",
+    "title": "Green Social Feed",
+    "group": "gamification",
+    "fields": [
+      {
+        "name": "page",
+        "label": "Page",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "limit",
+        "label": "Limit",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 48,
+    "tool": "crowdfunding_manager",
+    "title": "Crowdfunding Manager",
+    "group": "gamification",
+    "fields": [
+      {
+        "name": "title",
+        "label": "Title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "goal_points",
+        "label": "Goal points",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "city",
+        "label": "City",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "duration_days",
+        "label": "Duration days",
+        "type": "number",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 49,
+    "tool": "user_profile",
+    "title": "User Profile",
+    "group": "platform",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 50,
+    "tool": "auth_manager",
+    "title": "Account Sign In",
+    "group": "platform",
+    "fields": [
+      {
+        "name": "email",
+        "label": "Email",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "password",
+        "label": "Password",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 51,
+    "tool": "notification_sender",
+    "title": "Notification Sender",
+    "group": "platform",
+    "fields": [
+      {
+        "name": "target_user_id",
+        "label": "Target user id",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "title",
+        "label": "Title",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "body",
+        "label": "Body",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "data",
+        "label": "Data",
+        "type": "object",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 52,
+    "tool": "nudge_scheduler",
+    "title": "Nudge Scheduler",
+    "group": "platform",
+    "fields": [
+      {
+        "name": "nudge_type",
+        "label": "Nudge type",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "message",
+        "label": "Message",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "fire_at_hour",
+        "label": "Fire at hour",
+        "type": "number",
+        "required": true
+      },
+      {
+        "name": "fire_at_minute",
+        "label": "Fire at minute",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "days_of_week",
+        "label": "Days of week",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 53,
+    "tool": "social_graph_manager",
+    "title": "Social Graph Manager",
+    "group": "platform",
+    "fields": [
+      {
+        "name": "target_id",
+        "label": "Target id",
+        "type": "text",
+        "required": true
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 54,
+    "tool": "privacy_manager",
+    "title": "Delete My Account",
+    "group": "platform",
+    "fields": [],
+    "destructive": true
+  },
+  {
+    "id": 55,
+    "tool": "behavior_analyzer",
+    "title": "Behavior Analyzer",
+    "group": "platform",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 56,
+    "tool": "anomaly_explainer",
+    "title": "Anomaly Explainer",
+    "group": "platform",
+    "fields": [
+      {
+        "name": "metric",
+        "label": "Metric",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "days",
+        "label": "Days",
+        "type": "number",
+        "required": false
+      }
+    ],
+    "destructive": false
+  },
+  {
+    "id": 57,
+    "tool": "learning_cards",
+    "title": "Learning Cards",
+    "group": "platform",
+    "fields": [],
+    "destructive": false
+  },
+  {
+    "id": 58,
+    "tool": "admin_override",
+    "title": "Administrator Actions",
+    "group": "platform",
+    "fields": [
+      {
+        "name": "action",
+        "label": "Action",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "target_id",
+        "label": "Target id",
+        "type": "text",
+        "required": false
+      },
+      {
+        "name": "reason",
+        "label": "Reason",
+        "type": "text",
+        "required": false
+      }
+    ],
+    "destructive": true
+  }
+]

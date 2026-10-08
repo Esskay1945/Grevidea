@@ -271,24 +271,16 @@ pub async fn complete_card(
     .flatten()
     .ok_or_else(|| AppError::NotFound("Card not found".into()))?;
 
-    sqlx::query("INSERT INTO user_card_progress (user_id, card_id) VALUES ($1, $2) ON CONFLICT DO NOTHING")
-        .bind(user_id)
-        .bind(card_id)
-        .execute(&state.db).await?;
+    let mut tx = state.db.begin().await?;
+    let inserted = sqlx::query("INSERT INTO user_card_progress (user_id, card_id) VALUES ($1, $2) ON CONFLICT DO NOTHING")
+        .bind(user_id).bind(card_id).execute(&mut *tx).await?.rows_affected();
+    if inserted == 1 {
+        sqlx::query("INSERT INTO green_points_ledger (user_id, delta, reason, reference_id) VALUES ($1, $2, 'Completed climate learning card', $3)")
+            .bind(user_id).bind(points).bind(card_id).execute(&mut *tx).await?;
+    }
+    tx.commit().await?;
+    Ok(Json(ApiResponse::ok(json!({"completed": true,"points_earned": if inserted == 1 {points} else {0}}))))
 
-    sqlx::query(
-        "INSERT INTO green_points_ledger (user_id, delta, reason, reference_id)
-         VALUES ($1, $2, 'Completed climate learning card', $3)"
-    )
-    .bind(user_id)
-    .bind(points)
-    .bind(card_id)
-    .execute(&state.db).await?;
-
-    Ok(Json(ApiResponse::ok(json!({
-        "completed": true,
-        "points_earned": points
-    }))))
 }
 
 // ── T55 — Behavior Analyzer (Brain-Powered Pattern Detection) ─────────────────
@@ -479,11 +471,12 @@ pub async fn send_notification(
                     .json(&fcm_payload)
                     .send().await
                 {
-                    Ok(_) => (true, "fcm", "Push notification sent via Firebase"),
+                    Ok(response) if response.status().is_success() => (true, "fcm", "Push request accepted by Firebase"),
+                    Ok(_) => (false, "fcm_rejected", "Firebase rejected the notification"),
                     Err(_) => (false, "fcm_failed", "FCM delivery failed — user will see on next app open"),
                 }
             } else {
-                (true, "queued", "Notification queued (FCM key not configured)")
+                (false, "unconfigured", "Notification not sent (FCM key not configured)")
             }
         } else {
             (false, "no_token", "User has no registered device token")

@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
+  http: ^1.2.2
+  battery_plus: ^6.2.1
+  mobile_scanner: ^7.0.1
   image_picker: ^1.2.3
   google_sign_in: 6.2.2
   shared_preferences: ^2.3.2
@@ -27,3 +30,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/forest/
+    - assets/feature_catalog.json

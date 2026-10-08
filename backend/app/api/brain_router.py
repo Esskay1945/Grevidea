@@ -50,8 +50,10 @@ async def chat(request: ChatRequest, brain=Depends(get_brain)):
     """
     try:
         return await brain.chat(request)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Brain error: {str(e)}")
+    except RuntimeError:
+        raise HTTPException(status_code=503, detail="Climate Assistant is unavailable")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Brain request failed")
 
 
 # ── Status ───────────────────────────────────────────────────────────
@@ -360,3 +362,10 @@ async def simulate_mock_traffic(
         "current_rpm": brain.amygdala._calculate_rpm(),
     }
 
+
+
+@router.post("/event")
+async def record_gateway_event(payload: dict, brain=Depends(get_brain)):
+    """Gateway business events, preserving the domain event name as metadata."""
+    event_id = brain.mythos.log_event(BrainEvent(event_type=EventType.ACT, source="axum_gateway", message=str(payload.get("event_type", "gateway_event")), data={"user_id": payload.get("user_id"), "payload": payload.get("data", {})}))
+    return {"recorded": True, "id": event_id}

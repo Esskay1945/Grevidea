@@ -112,9 +112,18 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     _hasSolar = b.hasRooftopSolar;
 
     if (!_cities.contains(_selectedCity)) _selectedCity = _cities.first;
-    if (!_dietOptions.contains(_selectedDiet)) _selectedDiet = _dietOptions.first;
-    if (!_dwellingTypes.contains(_dwellingType)) _dwellingType = _dwellingTypes.first;
+    if (!_dietOptions.contains(_selectedDiet))
+      _selectedDiet = _dietOptions.first;
+    if (!_dwellingTypes.contains(_dwellingType))
+      _dwellingType = _dwellingTypes.first;
 
+    _selectedCleanEnergy =
+        _hasSolar ? _cleanEnergyOptions[1] : _cleanEnergyOptions.first;
+    if (b.commuteDistances.isNotEmpty) {
+      _selectedCommuteDistances
+        ..clear()
+        ..addAll(b.commuteDistances);
+    }
     // Parse initial commute modes if available
     if (b.primaryCommute.isNotEmpty && _selectedCommuteDistances.isEmpty) {
       _selectedCommuteDistances[b.primaryCommute] = b.dailyCommuteKm;
@@ -130,14 +139,16 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        backgroundColor:
+            isDark ? AppColors.darkSurface : AppColors.lightSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: AppColors.champagneGold, width: 1.5),
         ),
         title: const Row(
           children: [
-            Icon(Icons.solar_power_rounded, color: AppColors.champagneGold, size: 28),
+            Icon(Icons.solar_power_rounded,
+                color: AppColors.champagneGold, size: 28),
             SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -155,11 +166,14 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
               'Rooftop solar panels are installed on top of your home or building terrace to generate clean power from the sun.\n',
               style: TextStyle(fontSize: 13, height: 1.4),
             ),
-            _infoBullet('Clean Power', 'Converts sunlight directly into electricity, saving costs and cutting fossil power use.'),
+            _infoBullet('Clean Power',
+                'Converts sunlight directly into electricity, saving costs and cutting fossil power use.'),
             const SizedBox(height: 6),
-            _infoBullet('Lower Footprint', 'Significantly lowers your monthly home carbon footprint in Grevidea.'),
+            _infoBullet('Lower Footprint',
+                'Significantly lowers your monthly home carbon footprint in Grevidea.'),
             const SizedBox(height: 6),
-            _infoBullet('Bonus Points', 'Gives you +150 bonus Green Points and unlocks the Solar Champion badge.'),
+            _infoBullet('Bonus Points',
+                'Gives you +150 bonus Green Points and unlocks the Solar Champion badge.'),
           ],
         ),
         actions: [
@@ -167,7 +181,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: const Text(
               'Understood',
-              style: TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: AppColors.champagneGold, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -179,13 +194,22 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('• ', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.bold)),
+        const Text('• ',
+            style: TextStyle(
+                color: AppColors.emerald, fontWeight: FontWeight.bold)),
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary, height: 1.3),
+              style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.lightTextSecondary,
+                  height: 1.3),
               children: [
-                TextSpan(text: '$title: ', style: const TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
+                TextSpan(
+                    text: '$title: ',
+                    style: const TextStyle(
+                        color: AppColors.champagneGold,
+                        fontWeight: FontWeight.bold)),
                 TextSpan(text: desc),
               ],
             ),
@@ -195,7 +219,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     );
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     if (_formKey.currentState?.validate() ?? false) {
       final commuteSummary = _selectedCommuteDistances.entries
           .map((e) => '${e.key} (${e.value.toStringAsFixed(1)} km)')
@@ -204,7 +228,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
       widget.appState.updateBaseline(
         cityWard: _selectedCity,
         primaryCommute: commuteSummary.isNotEmpty ? commuteSummary : 'Metro',
-        dailyCommuteKm: _totalDailyCommuteKm > 0 ? _totalDailyCommuteKm : 10.0,
+        dailyCommuteKm: _totalDailyCommuteKm,
+        commuteDistances: Map.of(_selectedCommuteDistances),
         dietaryPreference: _selectedDiet,
         monthlyElectricityKwh: _monthlyKwh,
         dwellingType: _dwellingType,
@@ -213,10 +238,15 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
       );
 
       if (widget.isInitialSetup) {
-        Navigator.of(context).pushReplacement(
+        final enableTracking = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(title: const Text('Automatically measure green travel'), content: const Text('Grevidea uses your location to measure travel distance and estimate your footprint as you move. Android shows a tracking notification. You can skip this and log trips manually.'), actions: [TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Skip for now')), FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enable tracking'))]));
+        if (enableTracking == true) await widget.appState.locationService.requestOnboardingPermission();
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
+            settings: const RouteSettings(name: '/dashboard'),
             builder: (_) => DashboardScreen(appState: widget.appState),
           ),
+          (route) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -224,7 +254,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
             backgroundColor: AppColors.royalForest,
             content: Text(
               '✓ Profile and environmental baseline updated successfully',
-              style: TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: AppColors.champagneGold, fontWeight: FontWeight.w600),
             ),
           ),
         );
@@ -237,11 +268,13 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isInitialSetup ? 'Your Green Profile' : 'Update Profile'),
+        title: Text(
+            widget.isInitialSetup ? 'Your Green Profile' : 'Update Profile'),
         leading: widget.isInitialSetup
             ? null
             : IconButton(
@@ -269,7 +302,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.tune_rounded, color: AppColors.champagneGold, size: 28),
+                      const Icon(Icons.tune_rounded,
+                          color: AppColors.champagneGold, size: 28),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -318,7 +352,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                       .toList(),
                   onChanged: (v) => setState(() => _selectedCity = v!),
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.location_on_outlined, color: AppColors.champagneGold),
+                    prefixIcon: Icon(Icons.location_on_outlined,
+                        color: AppColors.champagneGold),
                   ),
                 ),
 
@@ -331,7 +366,11 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                     _SectionTitle(title: '2. How Do You Travel?'),
                     Text(
                       'Select how you travel every day',
-                      style: TextStyle(fontSize: 11, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary),
                     ),
                   ],
                 ),
@@ -342,14 +381,17 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: _allCommuteModes.map((mode) {
-                    final isSelected = _selectedCommuteDistances.containsKey(mode);
+                    final isSelected =
+                        _selectedCommuteDistances.containsKey(mode);
                     return FilterChip(
                       label: Text(
                         mode,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? AppColors.champagneGold : textColor,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color:
+                              isSelected ? AppColors.champagneGold : textColor,
                         ),
                       ),
                       selected: isSelected,
@@ -359,7 +401,11 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                         side: BorderSide(
-                          color: isSelected ? AppColors.champagneGold : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                          color: isSelected
+                              ? AppColors.champagneGold
+                              : (isDark
+                                  ? AppColors.darkCardBorder
+                                  : AppColors.lightCardBorder),
                           width: isSelected ? 1.5 : 1,
                         ),
                       ),
@@ -386,7 +432,10 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                    border: Border.all(
+                        color: isDark
+                            ? AppColors.darkCardBorder
+                            : AppColors.lightCardBorder),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -396,11 +445,15 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                         children: [
                           const Text(
                             'Daily Distance for Each Mode:',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             'Total: ${_totalDailyCommuteKm.toStringAsFixed(1)} km/day',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                            style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.emerald),
                           ),
                         ],
                       ),
@@ -412,33 +465,62 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                           child: TextFormField(
                             key: ValueKey('commute_dist_${entry.key}'),
                             initialValue: entry.value.toStringAsFixed(1),
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: textColor),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: textColor),
                             decoration: InputDecoration(
                               labelText: '${entry.key} distance',
                               hintText: 'e.g. 10.0',
                               suffixText: 'km / day',
-                              suffixStyle: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.champagneGold),
-                              prefixIcon: const Icon(Icons.directions_rounded, color: AppColors.champagneGold, size: 20),
+                              suffixStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.champagneGold),
+                              prefixIcon: const Icon(Icons.directions_rounded,
+                                  color: AppColors.champagneGold, size: 20),
                               filled: true,
-                              fillColor: isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              fillColor: isDark
+                                  ? AppColors.darkSurfaceAlt
+                                  : AppColors.lightSurfaceAlt,
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                                borderSide: BorderSide(
+                                    color: isDark
+                                        ? AppColors.darkCardBorder
+                                        : AppColors.lightCardBorder),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                                borderSide: BorderSide(
+                                    color: isDark
+                                        ? AppColors.darkCardBorder
+                                        : AppColors.lightCardBorder),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.champagneGold, width: 1.5),
+                                borderSide: const BorderSide(
+                                    color: AppColors.champagneGold, width: 1.5),
                               ),
                             ),
+                            validator: (val) {
+                              final number =
+                                  double.tryParse((val ?? '').trim());
+                              if (number == null ||
+                                  !number.isFinite ||
+                                  number < 0 ||
+                                  number > 2000) return 'Enter 0–2000 km';
+                              return null;
+                            },
                             onChanged: (val) {
                               final parsed = double.tryParse(val.trim());
-                              if (parsed != null && parsed >= 0) {
+                              if (parsed != null &&
+                                  parsed.isFinite &&
+                                  parsed >= 0 &&
+                                  parsed <= 2000) {
                                 setState(() {
                                   _selectedCommuteDistances[entry.key] = parsed;
                                 });
@@ -461,24 +543,33 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   items: _dietOptions
                       .map((d) => DropdownMenuItem(
                             value: d,
-                            child: Text(d, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                            child: Text(d,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis),
                           ))
                       .toList(),
                   onChanged: (v) => setState(() => _selectedDiet = v!),
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.restaurant_outlined, color: AppColors.champagneGold),
+                    prefixIcon: Icon(Icons.restaurant_outlined,
+                        color: AppColors.champagneGold),
                   ),
                 ),
 
                 const SizedBox(height: 22),
 
                 // ── 4. Household Electricity ─────────────────────────────────
-                _SectionTitle(title: '4. Monthly Electricity Consumption (kWh)'),
+                _SectionTitle(
+                    title: '4. Monthly Electricity Consumption (kWh)'),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Estimated monthly power usage:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                    Text('${_monthlyKwh.round()} kWh', style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.champagneGold)),
+                    const Text('Estimated monthly power usage:',
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w500)),
+                    Text('${_monthlyKwh.round()} kWh',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.champagneGold)),
                   ],
                 ),
                 Slider(
@@ -500,7 +591,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                     const SizedBox(width: 6),
                     GestureDetector(
                       onTap: () => _showSolarInfoModal(isDark),
-                      child: const Icon(Icons.info_outline_rounded, color: AppColors.champagneGold, size: 18),
+                      child: const Icon(Icons.info_outline_rounded,
+                          color: AppColors.champagneGold, size: 18),
                     ),
                   ],
                 ),
@@ -510,12 +602,15 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   items: _dwellingTypes
                       .map((d) => DropdownMenuItem(
                             value: d,
-                            child: Text(d, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                            child: Text(d,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis),
                           ))
                       .toList(),
                   onChanged: (v) => setState(() => _dwellingType = v!),
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.home_outlined, color: AppColors.champagneGold),
+                    prefixIcon: Icon(Icons.home_outlined,
+                        color: AppColors.champagneGold),
                   ),
                 ),
 
@@ -528,7 +623,9 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   items: _cleanEnergyOptions
                       .map((e) => DropdownMenuItem(
                             value: e,
-                            child: Text(e, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis),
+                            child: Text(e,
+                                style: const TextStyle(fontSize: 13),
+                                overflow: TextOverflow.ellipsis),
                           ))
                       .toList(),
                   onChanged: (v) {
@@ -538,7 +635,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                     });
                   },
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.solar_power_outlined, color: AppColors.champagneGold),
+                    prefixIcon: Icon(Icons.solar_power_outlined,
+                        color: AppColors.champagneGold),
                   ),
                 ),
 
@@ -546,11 +644,15 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
 
                 // Interactive Solar Toggle with Info Icon
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                    border: Border.all(
+                        color: isDark
+                            ? AppColors.darkCardBorder
+                            : AppColors.lightCardBorder),
                   ),
                   child: Row(
                     children: [
@@ -563,20 +665,27 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                                 const Flexible(
                                   child: Text(
                                     'Rooftop Solar Panels',
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
                                   onTap: () => _showSolarInfoModal(isDark),
-                                  child: const Icon(Icons.info_outline_rounded, color: AppColors.champagneGold, size: 16),
+                                  child: const Icon(Icons.info_outline_rounded,
+                                      color: AppColors.champagneGold, size: 16),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Produces clean solar power and reduces your energy footprint',
-                              style: TextStyle(fontSize: 11, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary),
                             ),
                           ],
                         ),
@@ -589,7 +698,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                           setState(() {
                             _hasSolar = v;
                             if (v && !_selectedCleanEnergy.contains('Solar')) {
-                              _selectedCleanEnergy = 'Rooftop Solar PV Installed (Net-Metered)';
+                              _selectedCleanEnergy =
+                                  'Rooftop Solar PV Installed (Net-Metered)';
                             }
                           });
                         },
@@ -607,8 +717,11 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                   child: ElevatedButton(
                     onPressed: _handleSave,
                     child: Text(
-                      widget.isInitialSetup ? 'Save Profile & Open App' : 'Save Changes',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      widget.isInitialSetup
+                          ? 'Save Profile & Open App'
+                          : 'Save Changes',
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),

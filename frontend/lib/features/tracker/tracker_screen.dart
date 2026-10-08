@@ -21,35 +21,61 @@ class _TrackerScreenState extends State<TrackerScreen> {
   DateTime _currentDate = DateTime.now();
 
   String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 
   // Dynamic calculations based on user's live baseline & logged actions
   double get _transportBaseDaily {
     final b = widget.appState.baseline;
-    final commuteLower = b.primaryCommute.toLowerCase();
-    double factor = 0.192; // default car
-    if (commuteLower.contains('metro') || commuteLower.contains('train')) {
-      factor = 0.015;
-    } else if (commuteLower.contains('bus')) {
-      factor = 0.035;
-    } else if (commuteLower.contains('ev')) {
-      factor = 0.050;
-    } else if (commuteLower.contains('walk') || commuteLower.contains('bicycle')) {
-      factor = 0.0;
+    double emissions(String mode, double km) {
+      final value = mode.toLowerCase();
+      double factor = 0.192;
+      if (value.contains('walk') || value.contains('bicycle')) {
+        factor = 0.0;
+      } else if (value.contains('metro')) {
+        factor = 0.028;
+      } else if (value.contains('train')) {
+        factor = 0.041;
+      } else if (value.contains('bus')) {
+        factor = 0.089;
+      } else if (value.contains('ev')) {
+        factor = 0.053;
+      } else if (value.contains('2-wheeler')) {
+        factor = 0.114;
+      }
+      return km * factor;
     }
-    return (b.dailyCommuteKm * factor).clamp(0.2, 25.0);
+
+    if (b.commuteDistances.isNotEmpty)
+      return b.commuteDistances.entries
+          .fold(0.0, (sum, e) => sum + emissions(e.key, e.value));
+    return emissions(b.primaryCommute, b.dailyCommuteKm);
   }
 
   double get _energyBaseDaily {
     final b = widget.appState.baseline;
-    final kwhDaily = (b.monthlyElectricityKwh / 30.0).clamp(1.0, 30.0);
+    final kwhDaily =
+        (b.monthlyElectricityKwh / 30.0).clamp(0.0, double.infinity);
     return kwhDaily * (b.hasRooftopSolar ? 0.08 : 0.82);
   }
 
   double get _foodBaseDaily {
     final diet = widget.appState.baseline.dietaryPreference.toLowerCase();
+    if (diet.contains('non-veg')) return 4.8;
     if (diet.contains('vegan')) return 1.5;
     if (diet.contains('veg')) return 2.1;
     return 4.8;
@@ -57,49 +83,71 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   double get _wasteBaseDaily => 0.8;
 
+  int get _periodDays => [1, 7, 30, 365][_selectedPeriod];
   double get _todayEmissions {
-    final rawSum = _transportBaseDaily + _energyBaseDaily + _foodBaseDaily + _wasteBaseDaily;
-    final net = rawSum - widget.appState.co2SavedToday;
-    return (net > 0.5 ? net : 0.5);
+    final day =
+        DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
+    final from = day.subtract(Duration(days: _periodDays - 1));
+    final until = day.add(const Duration(days: 1));
+    final deltas = widget.appState.recentActivities
+        .where(
+            (a) => !a.timestamp.isBefore(from) && a.timestamp.isBefore(until))
+        .fold(0.0, (sum, a) => sum + a.co2Kg);
+    return ((_transportBaseDaily +
+                    _energyBaseDaily +
+                    _foodBaseDaily +
+                    _wasteBaseDaily) *
+                _periodDays +
+            deltas)
+        .clamp(0.0, double.infinity);
   }
 
   List<Map<String, dynamic>> _computeCategories() {
-    final t = _transportBaseDaily;
-    final e = _energyBaseDaily;
-    final f = _foodBaseDaily;
-    final w = _wasteBaseDaily;
+    final t = _transportBaseDaily * _periodDays;
+    final e = _energyBaseDaily * _periodDays;
+    final f = _foodBaseDaily * _periodDays;
+    final w = _wasteBaseDaily * _periodDays;
     final total = t + e + f + w;
 
+    final shares = [t, e, f, w].map((v) => v / total * 100).toList();
+    final percents = shares.map((v) => v.floor()).toList();
+    final order = List.generate(4, (i) => i)
+      ..sort((a, b) =>
+          (shares[b] - percents[b]).compareTo(shares[a] - percents[a]));
+    final remaining = 100 - percents.fold(0, (a, b) => a + b);
+    for (var i = 0; i < remaining; i++) {
+      percents[order[i]]++;
+    }
     return [
       {
         'name': 'Transport',
         'co2': '${t.toStringAsFixed(1)} kg',
-        'pct': (t / total).clamp(0.05, 0.9),
-        'pctText': '${((t / total) * 100).round()}%',
+        'pct': (t / total).clamp(0.0, 1.0),
+        'pctText': '${percents[0]}%',
         'color': AppColors.sapphire,
         'icon': Icons.directions_car_rounded,
       },
       {
         'name': 'Energy',
         'co2': '${e.toStringAsFixed(1)} kg',
-        'pct': (e / total).clamp(0.05, 0.9),
-        'pctText': '${((e / total) * 100).round()}%',
+        'pct': (e / total).clamp(0.0, 1.0),
+        'pctText': '${percents[1]}%',
         'color': AppColors.amber,
         'icon': Icons.bolt_rounded,
       },
       {
         'name': 'Food',
         'co2': '${f.toStringAsFixed(1)} kg',
-        'pct': (f / total).clamp(0.05, 0.9),
-        'pctText': '${((f / total) * 100).round()}%',
+        'pct': (f / total).clamp(0.0, 1.0),
+        'pctText': '${percents[2]}%',
         'color': AppColors.emerald,
         'icon': Icons.restaurant_rounded,
       },
       {
         'name': 'Waste',
         'co2': '${w.toStringAsFixed(1)} kg',
-        'pct': (w / total).clamp(0.05, 0.9),
-        'pctText': '${((w / total) * 100).round()}%',
+        'pct': (w / total).clamp(0.0, 1.0),
+        'pctText': '${percents[3]}%',
         'color': Colors.teal,
         'icon': Icons.recycling_rounded,
       },
@@ -107,16 +155,22 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   List<double> _computeTrendPoints() {
-    final base = _todayEmissions;
-    return [
-      (base * 1.15).clamp(2.0, 30.0),
-      (base * 1.08).clamp(2.0, 30.0),
-      (base * 1.20).clamp(2.0, 30.0),
-      (base * 1.05).clamp(2.0, 30.0),
-      (base * 1.10).clamp(2.0, 30.0),
-      (base * 1.02).clamp(2.0, 30.0),
-      base.clamp(2.0, 30.0),
-    ];
+    final now =
+        DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
+    final base = _transportBaseDaily +
+        _energyBaseDaily +
+        _foodBaseDaily +
+        _wasteBaseDaily;
+    return List.generate(7, (i) {
+      final day = now.subtract(Duration(days: 6 - i));
+      final delta = widget.appState.recentActivities
+          .where((a) =>
+              a.timestamp.year == day.year &&
+              a.timestamp.month == day.month &&
+              a.timestamp.day == day.day)
+          .fold(0.0, (sum, a) => sum + a.co2Kg);
+      return (base + delta).clamp(0.0, double.infinity);
+    });
   }
 
   @override
@@ -124,7 +178,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
 
     final categories = _computeCategories();
     final trendPoints = _computeTrendPoints();
@@ -146,10 +201,13 @@ class _TrackerScreenState extends State<TrackerScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.royalForest,
         icon: const Icon(Icons.add_rounded, color: AppColors.champagneGold),
-        label: const Text('Log Activity', style: TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
+        label: const Text('Log Activity',
+            style: TextStyle(
+                color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => LogActivityScreen(appState: widget.appState)),
+            MaterialPageRoute(
+                builder: (_) => LogActivityScreen(appState: widget.appState)),
           );
         },
       ),
@@ -163,29 +221,46 @@ class _TrackerScreenState extends State<TrackerScreen> {
             Container(
               height: 42,
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
+                color:
+                    isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                border: Border.all(
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder),
               ),
               child: Row(
-                children: ['Day', 'Week', 'Month', 'Year'].asMap().entries.map((entry) {
+                children: ['Day', 'Week', 'Month', 'Year']
+                    .asMap()
+                    .entries
+                    .map((entry) {
                   final isSelected = _selectedPeriod == entry.key;
                   return Expanded(
                     child: GestureDetector(
                       onTap: () => setState(() => _selectedPeriod = entry.key),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.royalForest : Colors.transparent,
+                          color: isSelected
+                              ? AppColors.royalForest
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected ? Border.all(color: AppColors.champagneGold, width: 1) : null,
+                          border: isSelected
+                              ? Border.all(
+                                  color: AppColors.champagneGold, width: 1)
+                              : null,
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           entry.value,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected ? AppColors.champagneGold : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected
+                                ? AppColors.champagneGold
+                                : (isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary),
                           ),
                         ),
                       ),
@@ -202,21 +277,27 @@ class _TrackerScreenState extends State<TrackerScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left_rounded),
-                  onPressed: () => setState(() => _currentDate = _currentDate.subtract(const Duration(days: 1))),
+                  onPressed: () => setState(() => _currentDate =
+                      _currentDate.subtract(const Duration(days: 1))),
                 ),
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today_rounded, size: 15, color: AppColors.champagneGold),
+                    const Icon(Icons.calendar_today_rounded,
+                        size: 15, color: AppColors.champagneGold),
                     const SizedBox(width: 8),
                     Text(
                       _formatDate(_currentDate),
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: textColor),
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: textColor),
                     ),
                   ],
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right_rounded),
-                  onPressed: () => setState(() => _currentDate = _currentDate.add(const Duration(days: 1))),
+                  onPressed: () => setState(() =>
+                      _currentDate = _currentDate.add(const Duration(days: 1))),
                 ),
               ],
             ),
@@ -228,7 +309,9 @@ class _TrackerScreenState extends State<TrackerScreen> {
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4), width: 1.5),
+                border: Border.all(
+                    color: AppColors.emerald.withValues(alpha: 0.4),
+                    width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -243,9 +326,17 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Your Daily Footprint',
-                        style: TextStyle(fontSize: 13, color: AppColors.lightTextSecondary, fontWeight: FontWeight.w600),
+                      Text(
+                        'Estimated ${[
+                          'Day',
+                          'Week',
+                          'Month',
+                          'Year'
+                        ][_selectedPeriod]} Footprint',
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.lightTextSecondary,
+                            fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -257,20 +348,26 @@ class _TrackerScreenState extends State<TrackerScreen> {
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.w900,
-                              color: isDark ? Colors.white : AppColors.lightTextPrimary,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.lightTextPrimary,
                               letterSpacing: -1,
                             ),
                           ),
                           const SizedBox(width: 6),
                           const Text(
                             'kg CO₂',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.lightTextSecondary),
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.lightTextSecondary),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: AppColors.emerald.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
@@ -279,7 +376,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
                           widget.appState.co2SavedToday > 0
                               ? '↓ ${widget.appState.co2SavedToday.toStringAsFixed(1)} kg saved today'
                               : 'Daily estimate based on your profile',
-                          style: const TextStyle(color: AppColors.emerald, fontSize: 11, fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                              color: AppColors.emerald,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
@@ -290,7 +390,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       shape: BoxShape.circle,
                       color: AppColors.royalForest.withValues(alpha: 0.1),
                     ),
-                    child: const Icon(Icons.wind_power_rounded, size: 48, color: AppColors.emerald),
+                    child: const Icon(Icons.wind_power_rounded,
+                        size: 48, color: AppColors.emerald),
                   ),
                 ],
               ),
@@ -301,15 +402,23 @@ class _TrackerScreenState extends State<TrackerScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                Expanded(child: Text(
                   'Your Live Location & Movement',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor),
-                ),
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: textColor),
+                )),
                 Row(
-                  children: const [
-                    Icon(Icons.sensors_rounded, size: 14, color: AppColors.emerald),
-                    SizedBox(width: 4),
-                    Text('Location Active', style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.bold)),
+                  children: [
+                    const Icon(Icons.sensors_rounded,
+                        size: 14, color: AppColors.emerald),
+                    const SizedBox(width: 4),
+                    Text(widget.appState.locationService.lastKnownPosition == null ? 'GPS unavailable' : 'Location active',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.emerald,
+                            fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],
@@ -321,9 +430,12 @@ class _TrackerScreenState extends State<TrackerScreen> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4)),
+                border:
+                    Border.all(color: AppColors.emerald.withValues(alpha: 0.4)),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
+                  BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 8),
                 ],
               ),
               child: ClipRRect(
@@ -334,31 +446,43 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       options: MapOptions(
                         initialCenter: userCoord,
                         initialZoom: 13.5,
-                        interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
+                        interactionOptions: const InteractionOptions(
+                            flags: InteractiveFlag.all),
                       ),
                       children: [
                         TileLayer(
-                          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                           userAgentPackageName: 'com.grevidea.app',
                         ),
                         MarkerLayer(
                           markers: [
-                            Marker(
-                              point: userCoord,
-                              width: 40,
-                              height: 40,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.royalForest,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.champagneGold, width: 2.5),
-                                  boxShadow: [
-                                    BoxShadow(color: AppColors.emerald.withValues(alpha: 0.6), blurRadius: 8, spreadRadius: 2),
-                                  ],
+                            if (widget.appState.locationService
+                                    .lastKnownPosition !=
+                                null)
+                              Marker(
+                                point: userCoord,
+                                width: 40,
+                                height: 40,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.royalForest,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: AppColors.champagneGold,
+                                        width: 2.5),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: AppColors.emerald
+                                              .withValues(alpha: 0.6),
+                                          blurRadius: 8,
+                                          spreadRadius: 2),
+                                    ],
+                                  ),
+                                  child: const Icon(Icons.my_location_rounded,
+                                      color: AppColors.champagneGold, size: 18),
                                 ),
-                                child: const Icon(Icons.my_location_rounded, color: AppColors.champagneGold, size: 18),
                               ),
-                            ),
                           ],
                         ),
                       ],
@@ -367,14 +491,18 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       top: 10,
                       left: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.75),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           '📍 ${userLat.toStringAsFixed(4)}° N, ${userLng.toStringAsFixed(4)}° E',
-                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -383,16 +511,25 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       left: 12,
                       right: 12,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : AppColors.lightSurface.withValues(alpha: 0.95),
+                          color: isDark
+                              ? AppColors.darkSurface.withValues(alpha: 0.92)
+                              : AppColors.lightSurface.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Ward: ${widget.appState.baseline.cityWard}', style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
-                            const Text('OpenStreetMap Live', style: TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
+                            Text('Ward: ${widget.appState.baseline.cityWard}',
+                                style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.bold)),
+                            const Text('OpenStreetMap Live',
+                                style: TextStyle(
+                                    fontSize: 9.5,
+                                    color: AppColors.lightTextSecondary)),
                           ],
                         ),
                       ),
@@ -406,7 +543,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
             // By Category Section (Dynamically computed from baseline & logs)
             Text(
               'By Category',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
+              style: TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
             ),
             const SizedBox(height: 12),
 
@@ -415,7 +553,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
               decoration: BoxDecoration(
                 color: cardBg,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                border: Border.all(
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder),
               ),
               child: Column(
                 children: categories.map((c) {
@@ -425,13 +566,26 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(c['icon'] as IconData, size: 16, color: c['color'] as Color),
+                            Icon(c['icon'] as IconData,
+                                size: 16, color: c['color'] as Color),
                             const SizedBox(width: 8),
-                            Text(c['name'] as String, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor)),
+                            Text(c['name'] as String,
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: textColor)),
                             const Spacer(),
-                            Text(c['co2'] as String, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textColor)),
+                            Text(c['co2'] as String,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: textColor)),
                             const SizedBox(width: 10),
-                            Text(c['pctText'] as String, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: c['color'] as Color)),
+                            Text(c['pctText'] as String,
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: c['color'] as Color)),
                           ],
                         ),
                         const SizedBox(height: 6),
@@ -440,8 +594,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
                           child: LinearProgressIndicator(
                             value: c['pct'] as double,
                             minHeight: 6,
-                            backgroundColor: (c['color'] as Color).withValues(alpha: 0.15),
-                            valueColor: AlwaysStoppedAnimation<Color>(c['color'] as Color),
+                            backgroundColor:
+                                (c['color'] as Color).withValues(alpha: 0.15),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                c['color'] as Color),
                           ),
                         ),
                       ],
@@ -455,7 +611,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
             // Footprint Trend Line Chart (Mon -> Sun)
             Text(
               'Footprint Trend',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
+              style: TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
             ),
             const SizedBox(height: 12),
 
@@ -464,7 +621,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
               decoration: BoxDecoration(
                 color: cardBg,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                border: Border.all(
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,8 +632,16 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('kg CO₂', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary, fontWeight: FontWeight.bold)),
-                      Text('7-Day Dynamic Telemetry', style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
+                      Text('kg CO₂',
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.lightTextSecondary,
+                              fontWeight: FontWeight.bold)),
+                      Text('7-Day Dynamic Telemetry',
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.champagneGold,
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -481,20 +649,42 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     height: 120,
                     child: CustomPaint(
                       size: const Size(double.infinity, 120),
-                      painter: _LineTrendPainter(points: trendPoints, color: AppColors.emerald),
+                      painter: _LineTrendPainter(
+                          points: trendPoints, color: AppColors.emerald),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('Mon', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-                      Text('Tue', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-                      Text('Wed', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-                      Text('Thu', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-                      Text('Fri', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-                      Text('Sat', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-                      Text('Sun', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Mon',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
+                      Text('Tue',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
+                      Text('Wed',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
+                      Text('Thu',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
+                      Text('Fri',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
+                      Text('Sat',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
+                      Text('Sun',
+                          style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.lightTextSecondary)),
                     ],
                   ),
                 ],

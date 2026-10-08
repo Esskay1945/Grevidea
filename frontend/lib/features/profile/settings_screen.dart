@@ -726,7 +726,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
       ),
-      child: ListTile(
+      child: Material(type: MaterialType.transparency, child: ListTile(
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -739,7 +739,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         subtitle: Text(subtitle, style: TextStyle(fontSize: 11, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
         trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.lightTextSecondary),
         onTap: onTap,
-      ),
+      )),
     );
   }
 }

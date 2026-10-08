@@ -183,14 +183,13 @@ pub async fn get_leaderboard(
     let offset = ((p.page - 1) * p.limit) as i64;
     let rows = sqlx::query_as::<_, LeaderboardRow>(
         r#"SELECT u.id, u.display_name,
-                  COALESCE(SUM(gpl.delta), 0)::bigint as total_points,
-                  COALESCE(SUM(cl.co2_saved_kg), 0.0)::float8 as co2_saved,
-                  (ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(gpl.delta), 0) DESC))::bigint as rank
+                  COALESCE(g.total_points,0)::bigint as total_points,
+                  COALESCE(c.co2_saved,0.0)::float8 as co2_saved,
+                  (ROW_NUMBER() OVER (ORDER BY COALESCE(g.total_points,0) DESC, u.id))::bigint as rank
            FROM users u
-           LEFT JOIN green_points_ledger gpl ON u.id = gpl.user_id
-           LEFT JOIN carbon_logs cl ON u.id = cl.user_id
-           GROUP BY u.id, u.display_name
-           ORDER BY total_points DESC
+           LEFT JOIN (SELECT user_id,SUM(delta) as total_points FROM green_points_ledger GROUP BY user_id) g ON u.id=g.user_id
+           LEFT JOIN (SELECT user_id,SUM(co2_saved_kg) as co2_saved FROM carbon_logs GROUP BY user_id) c ON u.id=c.user_id
+           ORDER BY total_points DESC, u.id
            LIMIT $1 OFFSET $2"#
     )
     .bind(p.limit as i64)
@@ -540,30 +539,40 @@ pub async fn complete_challenge(
     let user_id = Uuid::parse_str(&auth.0.sub)
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
+    let mut tx = state.db.begin().await?;
     // Verify ownership and active
     let challenge = sqlx::query_as::<_, DailyChallenge>(
         "SELECT id, user_id, title, description, category, reward_points, difficulty, expires_at, completed, created_at
-         FROM daily_challenges WHERE id = $1 AND user_id = $2"
+         FROM daily_challenges WHERE id = $1 AND user_id = $2 FOR UPDATE"
     )
     .bind(challenge_id).bind(user_id)
-    .fetch_optional(&state.db).await?
+    .fetch_optional(&mut *tx).await?
     .ok_or_else(|| AppError::NotFound("Challenge not found".into()))?;
 
+    if challenge.expires_at < chrono::Utc::now() { return Err(AppError::BadRequest("Challenge has expired".into())); }
     if challenge.completed {
         return Err(AppError::BadRequest("Challenge already completed".into()));
     }
 
     // Mark complete and award points
     sqlx::query("UPDATE daily_challenges SET completed = TRUE, completed_at = NOW() WHERE id = $1")
-        .bind(challenge_id).execute(&state.db).await?;
+        .bind(challenge_id).execute(&mut *tx).await?;
 
     sqlx::query("INSERT INTO green_points_ledger (user_id, delta, reason, reference_id) VALUES ($1, $2, $3, $4)")
         .bind(user_id).bind(challenge.reward_points)
         .bind(format!("Completed challenge: {}", challenge.title))
         .bind(challenge_id)
-        .execute(&state.db).await?;
+        .execute(&mut *tx).await?;
 
+    tx.commit().await?;
     Ok(Json(ApiResponse::with_message(json!({
         "completed": true, "points_earned": challenge.reward_points
     }), &format!("🎉 Challenge complete! +{} Green Points!", challenge.reward_points))))
+}
+
+/// Actual ledger history rather than a sample point balance.
+pub async fn get_points_ledger(State(state):State<AppState>, auth:AuthUser) -> AppResult<Json<ApiResponse<serde_json::Value>>> {
+    let user=Uuid::parse_str(&auth.0.sub).map_err(|_|AppError::Auth("Invalid user".into()))?;
+    let rows:Vec<serde_json::Value>=sqlx::query_scalar("SELECT to_jsonb(g) FROM green_points_ledger g WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100").bind(user).fetch_all(&state.db).await?;
+    Ok(Json(ApiResponse::ok(json!(rows))))
 }

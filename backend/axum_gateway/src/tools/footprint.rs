@@ -20,15 +20,15 @@ use uuid::Uuid;
 // ── Emission factors (kg CO2 per km) ─────────────────────────────────────────
 fn emission_factor(mode: &str) -> f64 {
     match mode {
-        "car"        => 0.192,
+        "car" | "car_petrol" | "car_diesel" => 0.192,
         "motorbike"  => 0.114,
         "bus"        => 0.089,
         "train"      => 0.041,
         "metro"      => 0.028,
         "flight"     => 0.255,
-        "cycle"      => 0.0,
+        "cycle" | "bicycle" => 0.0,
         "walk"       => 0.0,
-        "ev_car"     => 0.053,
+        "ev_car" | "car_ev" => 0.053,
         _            => 0.192, // default to car
     }
 }
@@ -54,7 +54,8 @@ pub async fn carbon_calc(
     auth: AuthUser,
     Json(req): Json<CarbonCalcRequest>,
 ) -> AppResult<Json<ApiResponse<CarbonCalcResult>>> {
-    let emitted = emission_factor(&req.mode) * req.distance_km;
+    if !req.distance_km.is_finite() || !(0.0..=2000.0).contains(&req.distance_km) || req.passengers == Some(0) { return Err(AppError::BadRequest("Distance must be 0–2000 km and passenger count positive".into())); }
+    let emitted = emission_factor(&req.mode) * req.distance_km / req.passengers.unwrap_or(1) as f64;
     let baseline = car_baseline(req.distance_km);
     let saved = (baseline - emitted).max(0.0);
     let points = points_for_saving(saved);
@@ -87,14 +88,24 @@ pub async fn log_carbon_trip(
     let user_id = Uuid::parse_str(&auth.0.sub)
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
-    let emitted = emission_factor(&req.mode) * req.distance_km;
+    if !req.distance_km.is_finite() || !(0.0..=2000.0).contains(&req.distance_km) || req.passengers == Some(0) { return Err(AppError::BadRequest("Distance must be 0–2000 km and passenger count positive".into())); }
+    let emitted = emission_factor(&req.mode) * req.distance_km / req.passengers.unwrap_or(1) as f64;
     let baseline = car_baseline(req.distance_km);
     let saved = (baseline - emitted).max(0.0);
     let points = points_for_saving(saved);
 
+    let mut tx = state.db.begin().await?;
+    if req.client_id.as_ref().is_some_and(|id| id.is_empty() || id.len()>100) { return Err(AppError::BadRequest("Invalid trip identifier".into())); }
+    sqlx::query("SELECT id FROM users WHERE id=$1 FOR UPDATE").bind(user_id).fetch_one(&mut *tx).await?;
+    if let Some(ref client_id)=req.client_id {
+        if let Some(existing)=sqlx::query_as::<_,CarbonLog>("SELECT id,user_id,mode,distance_km,co2_kg,co2_saved_kg,green_points,logged_at FROM carbon_logs WHERE user_id=$1 AND client_id=$2").bind(user_id).bind(client_id).fetch_optional(&mut *tx).await? {
+            return Ok(Json(ApiResponse::ok(existing)));
+        }
+    }
+
     let log = sqlx::query_as::<_, CarbonLog>(
-        r#"INSERT INTO carbon_logs (user_id, mode, distance_km, co2_kg, co2_saved_kg, green_points)
-           VALUES ($1, $2, $3, $4, $5, $6)
+        r#"INSERT INTO carbon_logs (user_id, mode, distance_km, co2_kg, co2_saved_kg, green_points, client_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
            RETURNING id, user_id, mode, distance_km, co2_kg, co2_saved_kg, green_points, logged_at"#
     )
     .bind(user_id)
@@ -103,7 +114,8 @@ pub async fn log_carbon_trip(
     .bind(emitted)
     .bind(saved)
     .bind(points)
-    .fetch_one(&state.db)
+    .bind(&req.client_id)
+    .fetch_one(&mut *tx)
     .await?;
 
     // Award Green Points
@@ -114,7 +126,7 @@ pub async fn log_carbon_trip(
     .bind(points)
     .bind(format!("Carbon saved via {}", req.mode))
     .bind(log.id)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
 
     // Update squad totals if member
@@ -124,9 +136,10 @@ pub async fn log_carbon_trip(
     )
     .bind(points as i64)
     .bind(user_id)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
 
+    tx.commit().await?;
     state.brain.log_event("carbon_trip_logged", Some(&auth.0.sub), json!({
         "log_id": log.id,
         "mode": req.mode,

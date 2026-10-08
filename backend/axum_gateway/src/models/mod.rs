@@ -59,6 +59,7 @@ pub struct AuthResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct CarbonCalcRequest {
+    pub client_id: Option<String>,
     pub mode: String,        // "car" | "bus" | "train" | "cycle" | "walk" | "flight" | "motorbike"
     pub distance_km: f64,
     pub passengers: Option<u32>,
@@ -146,6 +147,8 @@ pub struct PollutionReport {
 
 #[derive(Debug, Deserialize)]
 pub struct DisasterSosRequest {
+    pub battery_percent: Option<i32>,
+    pub street_address: Option<String>,
     pub latitude: f64,
     pub longitude: f64,
     pub disaster_type: String,
@@ -384,9 +387,9 @@ pub struct EcoLensScanResult {
     pub brand: String,
     pub ecoscore_grade: String,        // A | B | C | D | E
     pub sustainability_score: u8,       // 0-100
-    pub co2_per_unit_kg: f64,
-    pub water_per_unit_l: f64,
-    pub packaging_score: u8,
+    pub co2_per_unit_kg: Option<f64>,
+    pub water_per_unit_l: Option<f64>,
+    pub packaging_score: Option<u8>,
     pub certifications: Vec<String>,
     pub origin_country: String,
     pub is_organic: bool,

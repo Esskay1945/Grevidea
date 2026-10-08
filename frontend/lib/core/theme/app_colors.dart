@@ -16,18 +16,18 @@ class AppColors {
 
   // ─── Light Mode Tokens ─────────────────────────────────────────────
   static const Color lightCanvas = Color(0x00000000);
-  static const Color lightSurface = Color(0xEA183D2C);
-  static const Color lightSurfaceAlt = Color(0xF0224734);
-  static const Color lightTextPrimary = Color(0xFFF5F9EE);
-  static const Color lightTextSecondary = Color(0xFFCDDCD0);
+  static const Color lightSurface = Color(0xFA102E22);
+  static const Color lightSurfaceAlt = Color(0xFA183B2B);
+  static const Color lightTextPrimary = Color(0xFFFFFDF4);
+  static const Color lightTextSecondary = Color(0xFFE0EBDD);
   static const Color lightCardBorder = Color(0x888DC494);
 
   // ─── Dark Mode Tokens ──────────────────────────────────────────────
   static const Color darkCanvas = Color(0x00000000);
-  static const Color darkSurface = Color(0xEF09252A);
-  static const Color darkSurfaceAlt = Color(0xF0103033);
-  static const Color darkTextPrimary = Color(0xFFF2FAF6);
-  static const Color darkTextSecondary = Color(0xFFBDDACD);
+  static const Color darkSurface = Color(0xFC061D22);
+  static const Color darkSurfaceAlt = Color(0xFC0C272B);
+  static const Color darkTextPrimary = Color(0xFFF6FFFA);
+  static const Color darkTextSecondary = Color(0xFFD2E9DE);
   static const Color darkCardBorder = Color(0x6683C7AE);
 
   // ─── Functional Semantic Colors ────────────────────────────────────

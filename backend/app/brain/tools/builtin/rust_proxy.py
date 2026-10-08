@@ -60,26 +60,23 @@ class RustToolProxy(BaseTool):
         Forward the tool call to the Rust Axum gateway.
         The gateway handles the actual business logic.
         """
+        token = kwargs.pop("access_token", None)
+        if not token:
+            raise RuntimeError("Authenticated gateway access_token required; no simulated tool response is available")
         settings = get_settings()
         gateway_url = getattr(settings, "axum_gateway_url", "http://localhost:3000")
         url = f"{gateway_url}{self._axum_path}"
 
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
-                resp = await client.post(url, json=kwargs)
+                resp = await client.post(url, json=kwargs, headers={"Authorization": f"Bearer {token}"})
                 resp.raise_for_status()
                 return resp.json()
         except httpx.ConnectError:
-            logger.warning(f"Axum gateway unreachable for tool '{self.name}'. Gateway may be offline.")
-            return {
-                "success": False,
-                "error": "Gateway offline — running in Brain-only mode",
-                "tool": self.name,
-                "fallback": True,
-            }
+            raise RuntimeError("Gateway unavailable") from None
         except Exception as e:
-            logger.error(f"Rust proxy error for tool '{self.name}': {e}")
-            return {"success": False, "error": str(e), "tool": self.name}
+            logger.warning("Rust proxy request failed for %s", self.name)
+            raise RuntimeError("Gateway request failed") from None
 
 
 # ── Complete 58 Feature Tool Proxies Grouped by Epic ─────────────────────────

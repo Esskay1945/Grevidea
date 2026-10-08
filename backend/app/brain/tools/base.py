@@ -88,7 +88,7 @@ class BaseTool(ABC):
             duration = (time.perf_counter() - start) * 1000
             return ToolCallRecord(
                 tool_name=self.name,
-                input_data=kwargs,
+                input_data={k:v for k,v in kwargs.items() if k not in {"access_token", "api_key", "password"}},
                 output_data=result,
                 status=ToolStatus.SUCCESS,
                 duration_ms=round(duration, 2),
@@ -97,7 +97,7 @@ class BaseTool(ABC):
             duration = (time.perf_counter() - start) * 1000
             return ToolCallRecord(
                 tool_name=self.name,
-                input_data=kwargs,
+                input_data={k:v for k,v in kwargs.items() if k not in {"access_token", "api_key", "password"}},
                 status=ToolStatus.TIMEOUT,
                 duration_ms=round(duration, 2),
                 error_message="Tool execution timed out",
@@ -106,7 +106,7 @@ class BaseTool(ABC):
             duration = (time.perf_counter() - start) * 1000
             return ToolCallRecord(
                 tool_name=self.name,
-                input_data=kwargs,
+                input_data={k:v for k,v in kwargs.items() if k not in {"access_token", "api_key", "password"}},
                 status=ToolStatus.FAILURE,
                 duration_ms=round(duration, 2),
                 error_message=str(e),

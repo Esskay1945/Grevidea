@@ -149,18 +149,19 @@ pub async fn scan_product(
     let (name, brand, ecoscore, co2, water, packaging, certs, origin, organic) = match off_resp {
         Ok(r) if r.status().is_success() => {
             if let Ok(v) = r.json::<serde_json::Value>().await {
+                if v["status"] != 1 { return Err(AppError::NotFound("Product not found".into())); }
                 let p = &v["product"];
                 let name = p["product_name"].as_str().unwrap_or("Unknown Product").to_string();
                 let brand = p["brands"].as_str().unwrap_or("Unknown").to_string();
                 let eco_grade = p["ecoscore_grade"].as_str().unwrap_or("unknown");
                 let eco_score = match eco_grade {
-                    "a" => 90u8, "b" => 72, "c" => 55, "d" => 35, "e" => 15, _ => 50,
+                    "a" => 90u8, "b" => 72, "c" => 55, "d" => 35, "e" => 15, _ => return Err(AppError::NotFound("Product has no environmental rating".into())),
                 };
                 let co2_val = p["ecoscore_data"]["agribalyse"]["co2_total"]
-                    .as_f64().unwrap_or(0.5);
-                let water_val = co2_val * 15.0; // approximation
+                    .as_f64();
+                let water_val: Option<f64> = None; // No independently sourced water footprint
                 let pkg_score = p["ecoscore_data"]["adjustments"]["packaging"]["score"]
-                    .as_u64().unwrap_or(50) as u8;
+                    .as_u64().filter(|v| *v <= 100).map(|v| v as u8);
                 let origin = p["origins"].as_str().unwrap_or("Unknown").to_string();
                 let is_organic = p["labels_tags"].as_array()
                     .map(|a| a.iter().any(|l| l.as_str().map(|s| s.contains("organic")).unwrap_or(false)))
@@ -174,10 +175,10 @@ pub async fn scan_product(
                 }
                 (name, brand, eco_score, co2_val, water_val, pkg_score, cert_list, origin, is_organic)
             } else {
-                fallback_product(&req.barcode, req.product_name.as_deref())
+                return Err(AppError::NotFound("Product not found in OpenFoodFacts".into()))
             }
         }
-        _ => fallback_product(&req.barcode, req.product_name.as_deref()),
+        _ => return Err(AppError::BrainUnavailable("Product database unavailable".into())),
     };
 
     let grade = match ecoscore {
@@ -202,20 +203,15 @@ pub async fn scan_product(
         brand,
         ecoscore_grade: grade.to_string(),
         sustainability_score: ecoscore,
-        co2_per_unit_kg: (co2 * 1000.0).round() / 1000.0,
-        water_per_unit_l: (water * 10.0).round() / 10.0,
+        co2_per_unit_kg: co2.map(|v| (v * 1000.0).round() / 1000.0),
+        water_per_unit_l: water,
         packaging_score: packaging,
         certifications: certs,
         origin_country: origin,
         is_organic: organic,
         recommendation: rec,
-        source: "openfoodfacts".to_string(),
+        source: "OpenFoodFacts. Carbon is an Agribalyse category estimate per kg, not a measured product lifecycle; water footprint is unavailable.".to_string(),
     })))
-}
-
-fn fallback_product(_barcode: &str, name: Option<&str>) -> (String, String, u8, f64, f64, u8, Vec<String>, String, bool) {
-    let product_name = name.unwrap_or("Unknown Product").to_string();
-    (product_name, "Unknown".into(), 50, 0.5, 7.5, 50, vec![], "Unknown".into(), false)
 }
 
 // ── T25 — Green Product Recommender ───────────────────────────────────────────
@@ -628,6 +624,9 @@ pub struct CarpoolListingRequest {
     pub departure_at: chrono::DateTime<chrono::Utc>,
     pub seats_available: i32,
     pub price_points: Option<i32>,
+    pub pickup_lat: f64,
+    pub pickup_lon: f64,
+    pub route_geometry: Option<serde_json::Value>,
 }
 
 #[derive(Serialize, sqlx::FromRow)]
@@ -652,12 +651,15 @@ pub async fn post_carpool(
     let driver_id = Uuid::parse_str(&auth.0.sub)
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
-    // Assume 20km avg trip — riders save car baseline minus shared fraction
-    let co2_per_rider = 0.192 * 20.0 * 0.6;
+    super::live::validate_coordinates(req.pickup_lat, req.pickup_lon)?;
+    if !(1..=8).contains(&req.seats_available) || req.price_points.unwrap_or(0) < 0 || req.departure_at <= chrono::Utc::now() {
+        return Err(AppError::BadRequest("Enter future departure, 1–8 seats and non-negative price".into()));
+    }
+    let co2_per_rider = 0.0; // Savings require actual completed trip distance.
 
     let listing = sqlx::query_as::<_, CarpoolMatch>(
-        r#"INSERT INTO carpool_listings (driver_id, origin, destination, departure_at, seats_available, price_points, co2_saved_per_rider)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
+        r#"INSERT INTO carpool_listings (driver_id, origin, destination, departure_at, seats_available, price_points, co2_saved_per_rider, pickup_lat, pickup_lon, route_geometry)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
            RETURNING id, driver_id, origin, destination, departure_at, seats_available, price_points, co2_saved_per_rider, status, created_at"#
     )
     .bind(driver_id)
@@ -667,6 +669,7 @@ pub async fn post_carpool(
     .bind(req.seats_available)
     .bind(req.price_points.unwrap_or(0))
     .bind(co2_per_rider)
+    .bind(req.pickup_lat).bind(req.pickup_lon).bind(req.route_geometry)
     .fetch_one(&state.db).await?;
 
     Ok(Json(ApiResponse::ok(listing)))

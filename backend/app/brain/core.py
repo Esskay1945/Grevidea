@@ -57,6 +57,10 @@ class GCICore:
         # 1. Open Mythos (Memory)
         self.mythos = OpenMythos(self._settings)
 
+        if self._settings.research_pdf_dir:
+            from app.brain.research_corpus import ingest_papers
+            ingest_papers(self.mythos, self._settings.research_pdf_dir)
+
         # 2. Tool Registry
         self.tools = ToolRegistry()
         discovered = self.tools.auto_discover()
@@ -143,165 +147,32 @@ class GCICore:
 
 
     async def _init_llm(self) -> None:
-        """
-        Initialize the LLM provider using the 3-tier fallback chain:
-            1. Ollama (local) → 2. Groq (cloud) → 3. Mistral (cloud)
-        """
-        # Tier 1: Ollama (local/offline)
-        if self._settings.ollama_enabled:
-            try:
-                import httpx
-                async with httpx.AsyncClient(timeout=5) as client:
-                    resp = await client.get(f"{self._settings.ollama_base_url}/api/tags")
-                    if resp.status_code == 200:
-                        self._llm_provider = "ollama"
-                        logger.info(
-                            f"✅ LLM Provider: Ollama ({self._settings.ollama_model})"
-                        )
-                        return
-            except Exception as e:
-                logger.warning(f"Ollama not available: {e}")
-
-        # Tier 2: Groq (cloud)
-        if self._settings.groq_enabled and self._settings.groq_api_key:
-            try:
-                import openai
-                self._llm_client = openai.AsyncOpenAI(
-                    base_url="https://api.groq.com/openai/v1",
-                    api_key=self._settings.groq_api_key,
-                )
-                self._llm_provider = "groq"
-                logger.info(
-                    f"✅ LLM Provider: Groq ({self._settings.groq_model})"
-                )
-                return
-            except Exception as e:
-                logger.warning(f"Groq not available: {e}")
-
-        # Tier 3: Mistral (fallback)
-        if self._settings.mistral_enabled and self._settings.mistral_api_key:
-            try:
-                from langchain_mistralai import ChatMistralAI
-                self._llm_client = ChatMistralAI(
-                    api_key=self._settings.mistral_api_key,
-                    model=self._settings.mistral_model,
-                    temperature=self._settings.llm_temperature,
-                    max_tokens=self._settings.llm_max_tokens,
-                )
-                self._llm_provider = "mistral"
-                logger.info(
-                    f"✅ LLM Provider: Mistral ({self._settings.mistral_model})"
-                )
-                return
-            except Exception as e:
-                logger.warning(f"Mistral not available: {e}")
-
-        # No LLM available
+        from app.brain.llm import LLMChain
+        self._llm_client = LLMChain(self._settings)
         self._llm_provider = "none"
-        logger.warning(
-            "⚠️ No LLM provider available. Brain will operate in "
-            "rule-based mode without AI reasoning capabilities."
-        )
 
     async def _llm_invoke(self, prompt: str) -> str:
-        """
-        Send a prompt to the active LLM provider.
-        Used by the SEAL loop and Dreamer for evaluation tasks.
-        """
-        if self._llm_provider == "ollama":
-            return await self._ollama_invoke(prompt)
-        elif self._llm_provider == "groq" and self._llm_client:
-            resp = await self._llm_client.chat.completions.create(
-                model=self._settings.groq_model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=self._settings.llm_temperature,
-                max_tokens=self._settings.llm_max_tokens,
-            )
-            return resp.choices[0].message.content or ""
-        elif self._llm_client:
-            from langchain_core.messages import HumanMessage
-            response = await self._llm_client.ainvoke([HumanMessage(content=prompt)])
-            return response.content
-        else:
-            raise RuntimeError("No LLM provider available.")
+        if self._llm_client is None:
+            await self._init_llm()
+        result = await self._llm_client.chat([{"role": "user", "content": prompt}])
+        self._llm_provider = self._llm_client.active
+        return result
 
     async def _llm_evaluate(self, prompt: str) -> str:
-        """Wrapper for SEAL loop's LLM evaluation calls."""
         return await self._llm_invoke(prompt)
 
-    async def _llm_chat(
-        self,
-        system_prompt: str,
-        messages: list[dict[str, str]],
-        user_message: str,
-    ) -> str:
-        """
-        Full chat-style LLM invocation with system prompt and history.
-        Used by the Socratic interface.
-        """
-        if self._llm_provider == "ollama":
-            # Build a single prompt from history for Ollama
-            history_text = "\n".join([
-                f"{m['role'].upper()}: {m['content']}"
-                for m in messages[-6:]
-            ])
-            full_prompt = f"{system_prompt}\n\n{history_text}\nUSER: {user_message}\nASSISTANT:"
-            return await self._ollama_invoke(full_prompt)
-
-        elif self._llm_provider == "groq" and self._llm_client:
-            groq_messages = [{"role": "system", "content": system_prompt}]
-            for m in messages[-6:]:
-                groq_messages.append({"role": m["role"], "content": m["content"]})
-            groq_messages.append({"role": "user", "content": user_message})
-            resp = await self._llm_client.chat.completions.create(
-                model=self._settings.groq_model,
-                messages=groq_messages,
-                temperature=self._settings.llm_temperature,
-                max_tokens=self._settings.llm_max_tokens,
-            )
-            return resp.choices[0].message.content or ""
-
-        elif self._llm_client:
-            from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-
-            lc_messages = [SystemMessage(content=system_prompt)]
-            for m in messages[-6:]:
-                if m["role"] == "user":
-                    lc_messages.append(HumanMessage(content=m["content"]))
-                elif m["role"] == "assistant":
-                    lc_messages.append(AIMessage(content=m["content"]))
-            lc_messages.append(HumanMessage(content=user_message))
-
-            response = await self._llm_client.ainvoke(lc_messages)
-            return response.content
-
-        else:
-            return (
-                f"GCI Brain Intelligence: Analyzed '{user_message}'. Operating in deterministic autonomous mode "
-                f"with {self.tools.total_count} registered tools across all 6 Grevidea Epics."
-            )
-
-    async def _ollama_invoke(self, prompt: str) -> str:
-        """Call the local Ollama API directly."""
-        import httpx
-
-        async with httpx.AsyncClient(
-            timeout=self._settings.llm_timeout
-        ) as client:
-            resp = await client.post(
-                f"{self._settings.ollama_base_url}/api/generate",
-                json={
-                    "model": self._settings.ollama_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": self._settings.llm_temperature,
-                        "num_predict": self._settings.llm_max_tokens,
-                    },
-                },
-            )
-            resp.raise_for_status()
-            return resp.json().get("response", "")
+    async def _llm_chat(self, system_prompt: str, messages: list[dict[str, str]], user_message: str) -> str:
+        if self._llm_client is None:
+            await self._init_llm()
+        history = [{"role": m["role"], "content": m["content"]} for m in messages[-6:]]
+        if history and history[-1] == {"role": "user", "content": user_message}:
+            history.pop()
+        result = await self._llm_client.chat([
+            {"role": "system", "content": system_prompt}, *history,
+            {"role": "user", "content": user_message},
+        ])
+        self._llm_provider = self._llm_client.active
+        return result
 
     # ── Startup & Shutdown ───────────────────────────────────────────
 
@@ -356,7 +227,7 @@ class GCICore:
         """Process a developer chat message."""
         return await self.socratic.chat(
             message=request.message,
-            session_id=request.session_id,
+            session_id=(f"{request.user_id}:{request.session_id or 'default'}" if request.user_id else request.session_id),
         )
 
     def get_status(self) -> BrainStatusResponse:
