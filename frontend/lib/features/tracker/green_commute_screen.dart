@@ -238,7 +238,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                               border: InputBorder.none,
                               labelText: 'FROM (Live Origin)',
-                              labelStyle: TextStyle(fontSize: 10, color: Colors.grey),
+                              labelStyle: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary),
                             ),
                           ),
                         ),
@@ -263,7 +263,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                               border: InputBorder.none,
                               labelText: 'TO (Destination)',
-                              labelStyle: TextStyle(fontSize: 10, color: Colors.grey),
+                              labelStyle: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary),
                             ),
                           ),
                         ),
@@ -473,7 +473,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : Colors.white.withValues(alpha: 0.95),
+                            color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : AppColors.lightSurface.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4)),
                           ),
@@ -481,7 +481,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: const [
                               Text('🟢 OpenStreetMap Live Tiles', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppColors.emerald)),
-                              Text('Live Transit Corridor', style: TextStyle(fontSize: 9.5, color: Colors.grey)),
+                              Text('Live Transit Corridor', style: TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
                             ],
                           ),
                         ),
@@ -577,12 +577,12 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: m['fare_type'] == 'Live Tariff' ? AppColors.emerald.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.15),
+                                    color: m['fare_type'] == 'Live Tariff' ? AppColors.emerald.withValues(alpha: 0.2) : AppColors.lightTextSecondary.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     m['fare_type'] as String,
-                                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: m['fare_type'] == 'Live Tariff' ? AppColors.emerald : Colors.grey),
+                                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: m['fare_type'] == 'Live Tariff' ? AppColors.emerald : AppColors.lightTextSecondary),
                                   ),
                                 ),
                               ],
@@ -592,7 +592,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         const SizedBox(height: 6),
                         Text(
                           'Source: ${m['fare_tag']}',
-                          style: const TextStyle(fontSize: 9, color: Colors.grey, fontStyle: FontStyle.italic),
+                          style: const TextStyle(fontSize: 9, color: AppColors.lightTextSecondary, fontStyle: FontStyle.italic),
                         ),
                       ],
                     ),

@@ -275,7 +275,7 @@ class _AqiMapScreenState extends State<AqiMapScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : Colors.white.withValues(alpha: 0.95),
+                color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : AppColors.lightSurface.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4)),
                 boxShadow: const [
@@ -355,7 +355,7 @@ class _AqiMapScreenState extends State<AqiMapScreen> {
                                   ),
                                   Text(
                                     '${_selectedMarker!['region']} • Status: ${_selectedMarker!['status']}',
-                                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                    style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                                   ),
                                 ],
                               ),
@@ -408,7 +408,7 @@ class _AqiMapScreenState extends State<AqiMapScreen> {
       ),
       child: Column(
         children: [
-          Text(label, style: const TextStyle(fontSize: 9.5, color: Colors.grey)),
+          Text(label, style: const TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
           const SizedBox(height: 2),
           Text(val, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
         ],

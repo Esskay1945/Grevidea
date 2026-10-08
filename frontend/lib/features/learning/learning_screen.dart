@@ -339,7 +339,7 @@ class _LearningScreenState extends State<LearningScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Quiz & Points History', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                      Text('${_history.length} completed sets • $totalHistoryPoints lifetime points', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Text('${_history.length} completed sets • $totalHistoryPoints lifetime points', style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
                     ],
                   ),
                   Container(
@@ -354,7 +354,7 @@ class _LearningScreenState extends State<LearningScreen> {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 32),
                   child: Center(
-                    child: Text('No quizzes completed yet.\nComplete your first 5-question set above!', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                    child: Text('No quizzes completed yet.\nComplete your first 5-question set above!', textAlign: TextAlign.center, style: TextStyle(color: AppColors.lightTextSecondary)),
                   ),
                 )
               else
@@ -373,7 +373,7 @@ class _LearningScreenState extends State<LearningScreen> {
                           child: const Icon(Icons.school_rounded, color: AppColors.champagneGold, size: 20),
                         ),
                         title: Text(item.theme, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        subtitle: Text('${item.correctCount}/${item.totalQuestions} correct • ${item.date.hour.toString().padLeft(2, "0")}:${item.date.minute.toString().padLeft(2, "0")}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                        subtitle: Text('${item.correctCount}/${item.totalQuestions} correct • ${item.date.hour.toString().padLeft(2, "0")}:${item.date.minute.toString().padLeft(2, "0")}', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                         trailing: Text('+${item.pointsEarned} pts', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.emerald, fontSize: 13)),
                       );
                     },
@@ -503,7 +503,7 @@ class _LearningScreenState extends State<LearningScreen> {
               ),
               Text(
                 'Q${_currentQuestionIndex + 1}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -556,7 +556,7 @@ class _LearningScreenState extends State<LearningScreen> {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isChosen ? AppColors.champagneGold : Colors.grey.withValues(alpha: 0.1),
+                          color: isChosen ? AppColors.champagneGold : AppColors.lightTextSecondary.withValues(alpha: 0.1),
                         ),
                         child: Text(
                           String.fromCharCode(65 + idx),
@@ -644,7 +644,7 @@ class _LearningScreenState extends State<LearningScreen> {
           Text(
             'Theme: $_selectedTheme',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -689,7 +689,7 @@ class _LearningScreenState extends State<LearningScreen> {
       ),
       child: Column(
         children: [
-          Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+          Text(label, style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
           const SizedBox(height: 2),
           Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: valColor)),
         ],

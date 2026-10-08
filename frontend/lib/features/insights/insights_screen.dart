@@ -243,7 +243,7 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
                     SizedBox(height: 3),
                     Text(
                       'Adopting plant-based lunches triggered a 14% reduction in transport emissions within 14 days.',
-                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                      style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                     ),
                   ],
                 ),
@@ -334,7 +334,7 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
               ],
             ),
           ),

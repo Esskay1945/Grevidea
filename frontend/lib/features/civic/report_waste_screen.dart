@@ -210,7 +210,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> with SingleTicker
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.4),
+                    color: AppColors.lightTextSecondary.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -223,7 +223,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> with SingleTicker
                 const Text(
                   'Select how you would like to provide photo evidence for municipal verification',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                 ),
                 const SizedBox(height: 18),
                 ListTile(
@@ -368,7 +368,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> with SingleTicker
                     const SizedBox(height: 4),
                     Text('Target Agency: ${dept.nodalAgency}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     Text('Assigned Dept: ${dept.departmentName}', style: const TextStyle(fontSize: 11)),
-                    Text('Resolution SLA: ${dept.resolutionSla}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                    Text('Resolution SLA: ${dept.resolutionSla}', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                   ],
                 ),
               ),
@@ -744,11 +744,11 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> with SingleTicker
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-            const Icon(Icons.inbox_rounded, size: 60, color: Colors.grey),
+            const Icon(Icons.inbox_rounded, size: 60, color: AppColors.lightTextSecondary),
             const SizedBox(height: 12),
             Center(child: Text('No active dispatches', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor))),
             const SizedBox(height: 4),
-            const Center(child: Text('Pull to refresh or submit a report to track live dispatches.', style: TextStyle(fontSize: 12, color: Colors.grey))),
+            const Center(child: Text('Pull to refresh or submit a report to track live dispatches.', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary))),
           ],
         ),
       );
@@ -808,14 +808,14 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> with SingleTicker
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                  const Icon(Icons.location_on_outlined, size: 14, color: AppColors.lightTextSecondary),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       ticket.location,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                     ),
                   ),
                 ],
@@ -841,7 +841,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen> with SingleTicker
                 children: [
                   Text(
                     'Dispatched: ${ticket.timestamp.hour}:${ticket.timestamp.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(fontSize: 10.5, color: Colors.grey),
+                    style: const TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary),
                   ),
                   const Text(
                     'SLA: In Progress',

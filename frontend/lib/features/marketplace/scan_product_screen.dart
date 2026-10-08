@@ -61,7 +61,7 @@ class _ScanProductScreenState extends State<ScanProductScreen> with SingleTicker
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.4),
+                    color: AppColors.lightTextSecondary.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -73,7 +73,7 @@ class _ScanProductScreenState extends State<ScanProductScreen> with SingleTicker
                 const SizedBox(height: 4),
                 const Text(
                   'Scan a product barcode or packaging in real time',
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                 ),
                 const SizedBox(height: 20),
                 ListTile(
@@ -335,7 +335,7 @@ class _ScanProductScreenState extends State<ScanProductScreen> with SingleTicker
                           const SizedBox(height: 2),
                           Text(
                             _scannedProduct?['brand'] ?? 'EarthChoice India',
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
                           ),
                         ],
                       ),
@@ -368,7 +368,7 @@ class _ScanProductScreenState extends State<ScanProductScreen> with SingleTicker
 
                 Text(
                   _scannedProduct?['packaging'] ?? '85% Paperboard FSC certified, 15% Bio-polyethylene',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -421,7 +421,7 @@ class _ScanProductScreenState extends State<ScanProductScreen> with SingleTicker
   Widget _buildScanMetric(String label, String val, Color color) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600)),
+        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary, fontWeight: FontWeight.w600)),
         const SizedBox(height: 4),
         Text(val, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: color)),
       ],

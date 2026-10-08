@@ -266,7 +266,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isUnlocked ? color.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.1),
+                              color: isUnlocked ? color.withValues(alpha: 0.15) : AppColors.lightTextSecondary.withValues(alpha: 0.1),
                               border: Border.all(
                                 color: isUnlocked ? color : Colors.grey.shade400,
                                 width: 1.2,
@@ -274,7 +274,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             ),
                             child: Icon(
                               badge.icon,
-                              color: isUnlocked ? color : Colors.grey,
+                              color: isUnlocked ? color : AppColors.lightTextSecondary,
                               size: 22,
                             ),
                           ),
@@ -287,7 +287,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: isUnlocked ? textColor : Colors.grey,
+                              color: isUnlocked ? textColor : AppColors.lightTextSecondary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -296,7 +296,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             style: TextStyle(
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
-                              color: isUnlocked ? AppColors.emerald : Colors.grey,
+                              color: isUnlocked ? AppColors.emerald : AppColors.lightTextSecondary,
                             ),
                           ),
                         ],

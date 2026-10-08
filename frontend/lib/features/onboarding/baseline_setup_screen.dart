@@ -183,7 +183,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(fontSize: 12, color: Colors.grey, height: 1.3),
+              style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary, height: 1.3),
               children: [
                 TextSpan(text: '$title: ', style: const TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
                 TextSpan(text: desc),

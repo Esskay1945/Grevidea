@@ -237,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Baseline Configuration Summary
               Text(
                 'Environmental Baseline Summary',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
               ),
               const SizedBox(height: 12),
               Container(
@@ -269,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Minted Achievement Badges Showcase
               Text(
                 'Minted Achievement Crests',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
               ),
               const SizedBox(height: 12),
               const Row(
@@ -319,7 +319,7 @@ class _ProfileSummaryRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.lightTextSecondary)),
         Flexible(
           child: Text(
             value,
@@ -348,15 +348,15 @@ class _BadgeWidget extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: unlocked ? AppColors.royalForest : Colors.grey.withOpacity(0.15),
+            color: unlocked ? AppColors.royalForest : AppColors.lightTextSecondary.withOpacity(0.15),
             border: Border.all(
-              color: unlocked ? AppColors.champagneGold : Colors.grey.withOpacity(0.3),
+              color: unlocked ? AppColors.champagneGold : AppColors.lightTextSecondary.withOpacity(0.3),
               width: 1.5,
             ),
           ),
           child: Icon(
             icon,
-            color: unlocked ? AppColors.champagneGold : Colors.grey,
+            color: unlocked ? AppColors.champagneGold : AppColors.lightTextSecondary,
             size: 24,
           ),
         ),
@@ -366,7 +366,7 @@ class _BadgeWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: unlocked ? FontWeight.w700 : FontWeight.w500,
-            color: unlocked ? AppColors.champagneGold : Colors.grey,
+            color: unlocked ? AppColors.champagneGold : AppColors.lightTextSecondary,
           ),
         ),
       ],

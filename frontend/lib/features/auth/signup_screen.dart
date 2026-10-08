@@ -159,7 +159,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 6),
               const Text(
                 'Choose a Google account to continue to Grevidea',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
+                style: TextStyle(fontSize: 13, color: AppColors.lightTextSecondary),
               ),
               const SizedBox(height: 18),
               ListTile(
@@ -332,7 +332,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.4,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                               ),
                             ),
                             const Text(
@@ -368,7 +368,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w800,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                     letterSpacing: -0.6,
                   ),
                 ),
@@ -389,7 +389,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -410,7 +410,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -432,7 +432,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -465,7 +465,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),

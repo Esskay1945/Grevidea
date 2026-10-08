@@ -171,7 +171,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Column(
                       children: [
-                        Icon(Icons.pie_chart_outline_rounded, size: 52, color: Colors.grey.withValues(alpha: 0.4)),
+                        Icon(Icons.pie_chart_outline_rounded, size: 52, color: AppColors.lightTextSecondary.withValues(alpha: 0.4)),
                         const SizedBox(height: 12),
                         Text(
                           'No activities logged for $_selectedPeriod',
@@ -183,7 +183,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                           child: Text(
                             'Log your public transit commute, home solar, or recycling actions to generate your live carbon breakdown.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 11.5, color: Colors.grey),
+                            style: TextStyle(fontSize: 11.5, color: AppColors.lightTextSecondary),
                           ),
                         ),
                       ],
@@ -206,8 +206,8 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(totalCo2.toStringAsFixed(1), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, letterSpacing: -1)),
-                                const Text('kg CO₂', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
-                                Text(_selectedPeriod, style: const TextStyle(fontSize: 9.5, color: Colors.grey)),
+                                const Text('kg CO₂', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.lightTextSecondary)),
+                                Text(_selectedPeriod, style: const TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
                               ],
                             ),
                           ],
@@ -230,7 +230,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                                 const SizedBox(width: 8),
                                 Text(c['name'] as String, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
                                 const Spacer(),
-                                Text(c['co2'] as String, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                Text(c['co2'] as String, style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
                                 const SizedBox(width: 12),
                                 Text('${c['pct']}%', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: c['color'] as Color)),
                               ],
@@ -275,7 +275,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(val.toStringAsFixed(1), style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                          Text(val.toStringAsFixed(1), style: const TextStyle(fontSize: 9, color: AppColors.lightTextSecondary)),
                           const SizedBox(height: 4),
                           Container(
                             width: 24,
@@ -286,7 +286,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text('Day ${dayLabels[e.key]}', style: const TextStyle(fontSize: 9.5, color: Colors.grey)),
+                          Text('Day ${dayLabels[e.key]}', style: const TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
                         ],
                       );
                     }).toList(),

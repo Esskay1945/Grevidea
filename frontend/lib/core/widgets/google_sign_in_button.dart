@@ -47,7 +47,7 @@ class GoogleSignInButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                 letterSpacing: 0.2,
               ),
             ),
