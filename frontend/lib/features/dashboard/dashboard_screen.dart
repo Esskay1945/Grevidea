@@ -432,7 +432,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Greeting Header (Matching Screen 01)
+            // User Greeting Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -452,7 +452,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        "Here's your environmental impact summary for today.",
+                        "Here is your green summary for today.",
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
@@ -466,7 +466,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Environmental Score Card (Matching Screen 01 in reference mockup)
+            // Environmental Score Card
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -484,61 +484,65 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Environmental Score',
-                        style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '${widget.appState.score}',
-                            style: const TextStyle(
-                              fontSize: 42,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.champagneGold,
-                              letterSpacing: -1,
-                            ),
-                          ),
-                          const Text(
-                            ' /100',
-                            style: TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Great!',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.emerald),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        "You're doing better than 78% of users!",
-                        style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8)),
-                      ),
-                      const SizedBox(height: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => InsightsScreen(appState: widget.appState)));
-                        },
-                        child: Row(
-                          children: const [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Your Eco Score',
+                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
                             Text(
-                              'View Insights',
-                              style: TextStyle(color: AppColors.champagneGold, fontSize: 12, fontWeight: FontWeight.bold),
+                              '${widget.appState.score}',
+                              style: const TextStyle(
+                                fontSize: 42,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.champagneGold,
+                                letterSpacing: -1,
+                              ),
                             ),
-                            SizedBox(width: 4),
-                            Icon(Icons.arrow_forward_rounded, color: AppColors.champagneGold, size: 14),
+                            const Text(
+                              ' /100',
+                              style: TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.bold),
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Great!',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "You're doing better than 78% of people this week!",
+                          style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8)),
+                        ),
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() => _currentTabIndex = 1);
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Text(
+                                'View Full Details in Tracker',
+                                style: TextStyle(color: AppColors.champagneGold, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.arrow_forward_rounded, color: AppColors.champagneGold, size: 14),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 12),
                   // Radial Leaf Progress Meter
                   Container(
                     width: 82,
@@ -561,143 +565,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 22),
 
-            // 4 Stats Cards in a Row (Matching Screen 01)
-            Row(
-              children: [
-                _buildStatMiniCard('CO₂ Saved Today', '${widget.appState.co2SavedToday} kg', '↓ 18% vs avg', Icons.eco_rounded, AppColors.emerald, cardBg, isDark),
-                const SizedBox(width: 8),
-                _buildStatMiniCard('Streak', '${widget.appState.streakDays} days', 'Keep it up!', Icons.local_fire_department_rounded, AppColors.amber, cardBg, isDark),
-                const SizedBox(width: 8),
-                _buildStatMiniCard('Green Points', '${widget.appState.greenPoints}', '+150 this month', Icons.stars_rounded, AppColors.champagneGold, cardBg, isDark),
-                const SizedBox(width: 8),
-                _buildStatMiniCard('Trees Equiv', '${widget.appState.treesEquivalent}', 'Lifetime', Icons.park_rounded, AppColors.emerald, cardBg, isDark),
-              ],
-            ),
-            const SizedBox(height: 18),
-
-            // Two Cards: Your Impact Breakdown Donut & Current AQI (Thane) (Matching Screen 01)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Impact Breakdown Card
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Your Impact Breakdown',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.sapphire, width: 3.5),
-                              ),
-                              child: const Center(
-                                child: Text('12.4\nkg', textAlign: TextAlign.center, style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  _MiniLegend(color: AppColors.sapphire, label: 'Transport 42%'),
-                                  _MiniLegend(color: AppColors.amber, label: 'Energy 28%'),
-                                  _MiniLegend(color: AppColors.emerald, label: 'Food 16%'),
-                                  _MiniLegend(color: Colors.teal, label: 'Waste 8%'),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => ImpactBreakdownScreen(appState: widget.appState)));
-                          },
-                          child: const Text('Detailed Report →', style: TextStyle(color: AppColors.champagneGold, fontSize: 10, fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-
-                // Current AQI Thane Card
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text('Current AQI (Thane)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Text(
-                              '${widget.appState.currentAqi}',
-                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.emerald),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.emerald.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                widget.appState.aqiCategory,
-                                style: const TextStyle(color: AppColors.emerald, fontSize: 10, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        const Text('PM2.5: 21 • PM10: 38 • O3: 28', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9.0, color: Colors.grey)),
-                        const SizedBox(height: 12),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => AqiMapScreen(appState: widget.appState)));
-                          },
-                          child: const Text('View AQI Map →', style: TextStyle(color: AppColors.champagneGold, fontSize: 10, fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-
-            // ── Dynamic Daily Eco-Quests ──────────────────────────────────────
+            // ── Today's Easy Tasks ─────────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -706,7 +576,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const Icon(Icons.bolt_rounded, color: AppColors.champagneGold, size: 20),
                     const SizedBox(width: 6),
                     Text(
-                      'Daily Eco-Quests',
+                      "Today's Easy Tasks",
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor),
                     ),
                   ],
@@ -718,12 +588,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SnackBar(
                         backgroundColor: AppColors.royalForest,
                         duration: Duration(milliseconds: 1400),
-                        content: Text('🔀 Shuffled! New random daily quests assigned.', style: TextStyle(color: AppColors.champagneGold)),
+                        content: Text('🔀 New daily tasks assigned!', style: TextStyle(color: AppColors.champagneGold)),
                       ),
                     );
                   },
                   icon: const Icon(Icons.shuffle_rounded, size: 14, color: AppColors.champagneGold),
-                  label: const Text('Shuffle Quests', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.champagneGold)),
+                  label: const Text('New Tasks', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.champagneGold)),
                 ),
               ],
             ),
@@ -815,120 +685,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               }),
             ),
-            const SizedBox(height: 20),
-
-            // Quick Actions Horizontal Pills (Matching Screen 01 in reference mockup)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Quick Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor)),
-                InkWell(
-                  onTap: () => _showInTransitPrompt(32.0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.royalForest,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.champagneGold.withValues(alpha: 0.5)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.speed_rounded, size: 12, color: AppColors.champagneGold),
-                        SizedBox(width: 4),
-                        Text('Transit Tracker', style: TextStyle(fontSize: 10, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildQuickActionChip('Log Activity', Icons.add_circle_outline_rounded, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => LogActivityScreen(appState: widget.appState)));
-                  }, isDark),
-                  _buildQuickActionChip('Scan Product', Icons.qr_code_scanner_rounded, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => ScanProductScreen(appState: widget.appState)));
-                  }, isDark),
-                  _buildQuickActionChip('AQI Map', Icons.map_rounded, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => AqiMapScreen(appState: widget.appState)));
-                  }, isDark),
-                  _buildQuickActionChip('Leaderboard', Icons.leaderboard_rounded, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => LeaderboardScreen(appState: widget.appState)));
-                  }, isDark),
-                  _buildQuickActionChip('Challenges', Icons.flag_rounded, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => ChallengesScreen(appState: widget.appState)));
-                  }, isDark),
-                  _buildQuickActionChip('Rewards Shop', Icons.storefront_rounded, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => RewardsShopScreen(appState: widget.appState)));
-                  }, isDark),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Recent Activities Header (Matching Screen 01)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Recent Activities', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor)),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => LogActivityScreen(appState: widget.appState)));
-                  },
-                  child: const Text('See All', style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Recent 3 Activities
-            ...widget.appState.recentActivities.take(3).map((act) {
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.royalForest.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(act.icon, color: AppColors.emerald, size: 18),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(act.title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor)),
-                          Text(act.subtitle, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      act.co2Kg < 0 ? '${act.co2Kg.abs().toStringAsFixed(1)} kg saved' : '${act.co2Kg.toStringAsFixed(1)} kg',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: act.co2Kg < 0 ? AppColors.emerald : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
             const SizedBox(height: 80),
           ],
         ),

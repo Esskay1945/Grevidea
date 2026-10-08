@@ -139,7 +139,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
       drawer: FeatureDirectoryDrawer(appState: widget.appState),
       appBar: GrevideaAppBar(
         title: 'My Tracker',
-        subtitle: 'Live Automated Telemetry',
+        subtitle: 'Your Carbon & Travel Tracker',
         showBack: Navigator.of(context).canPop(),
         appState: widget.appState,
       ),
@@ -244,7 +244,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Total CO₂ Footprint',
+                        'Your Daily Footprint',
                         style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
@@ -278,7 +278,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                         child: Text(
                           widget.appState.co2SavedToday > 0
                               ? '↓ ${widget.appState.co2SavedToday.toStringAsFixed(1)} kg saved today'
-                              : 'Live baseline telemetry',
+                              : 'Daily estimate based on your profile',
                           style: const TextStyle(color: AppColors.emerald, fontSize: 11, fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -302,14 +302,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Live Location Sensor & Active Corridor',
+                  'Your Live Location & Movement',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor),
                 ),
                 Row(
                   children: const [
                     Icon(Icons.sensors_rounded, size: 14, color: AppColors.emerald),
                     SizedBox(width: 4),
-                    Text('GPS Active', style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.bold)),
+                    Text('Location Active', style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],

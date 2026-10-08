@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../../state/app_state.dart';
 import '../../features/tracker/green_commute_screen.dart';
+import '../../features/tracker/log_activity_screen.dart';
 import '../../features/civic/disaster_alerts_screen.dart';
+import '../../features/civic/report_waste_screen.dart';
+import '../../features/civic/aqi_map_screen.dart';
+import '../../features/marketplace/scan_product_screen.dart';
+import '../../features/marketplace/rewards_shop_screen.dart';
+import '../../features/climategpt/climategpt_screen.dart';
+import '../../features/gamification/challenges_screen.dart';
 import '../../features/gamification/achievements_screen.dart';
+import '../../features/leaderboard/leaderboard_screen.dart';
 import '../../features/learning/learning_screen.dart';
 import '../../features/profile/settings_screen.dart';
 
-/// Extended Modules & Civic Tools Drawer
-/// Contains specialized modules not directly present on the bottom navigation or main dashboard.
+/// All Features & Quick Actions Drawer
 class FeatureDirectoryDrawer extends StatelessWidget {
   final AppState appState;
 
@@ -48,14 +55,14 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: AppColors.champagneGold),
                         ),
-                        child: const Icon(Icons.hub_rounded, color: AppColors.champagneGold, size: 24),
+                        child: const Icon(Icons.energy_savings_leaf_rounded, color: AppColors.champagneGold, size: 24),
                       ),
                       const SizedBox(width: 12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            'Extended Tools',
+                            'Grevidea Menu',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
@@ -63,7 +70,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Civic, Hazard & Specialized Modules',
+                            'Quick Actions & Community Tools',
                             style: TextStyle(
                               fontSize: 11,
                               color: Colors.white70,
@@ -105,53 +112,119 @@ class FeatureDirectoryDrawer extends StatelessWidget {
               ),
             ),
 
-            // Filtered Non-Redundant Extended Features List
+            // Complete Quick Actions and Feature List
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 children: [
-                  _buildSectionHeader('CIVIC GOVERNANCE & RESILIENCE'),
+                  _buildSectionHeader('QUICK ACTIONS'),
                   _buildNavTile(
                     context: context,
-                    icon: Icons.warning_amber_rounded,
-                    title: 'Disaster Alerts & SOS',
-                    subtitle: 'Thane flood hazard alerts, radar & emergency SOS beacon (T36, T37)',
+                    icon: Icons.add_circle_outline_rounded,
+                    title: 'Log Daily Activity',
+                    subtitle: 'Record your travel, plant-based meals, or home energy',
+                    color: AppColors.champagneGold,
+                    onTap: () => _navigateTo(context, LogActivityScreen(appState: appState)),
+                  ),
+                  _buildNavTile(
+                    context: context,
+                    icon: Icons.qr_code_scanner_rounded,
+                    title: 'Scan Product (EcoLens)',
+                    subtitle: 'Scan barcodes to see packaging and sustainability ratings',
+                    color: AppColors.champagneGold,
+                    onTap: () => _navigateTo(context, ScanProductScreen(appState: appState)),
+                  ),
+                  _buildNavTile(
+                    context: context,
+                    icon: Icons.delete_sweep_rounded,
+                    title: 'Report Pollution & Waste',
+                    subtitle: 'Snap a photo and report trash dumping or smoke to the city',
                     color: AppColors.coral,
-                    onTap: () => _navigateTo(context, DisasterAlertsScreen(appState: appState)),
+                    onTap: () => _navigateTo(context, ReportWasteScreen(appState: appState)),
+                  ),
+                  _buildNavTile(
+                    context: context,
+                    icon: Icons.psychology_rounded,
+                    title: 'Ask Climate Assistant',
+                    subtitle: 'Get instant, friendly answers to any sustainability question',
+                    color: AppColors.emerald,
+                    onTap: () => _navigateTo(context, ClimateGptScreen(appState: appState)),
+                  ),
+                  _buildNavTile(
+                    context: context,
+                    icon: Icons.map_rounded,
+                    title: 'City Air Quality Map',
+                    subtitle: 'Check live AQI and smog levels across your neighborhood',
+                    color: AppColors.emerald,
+                    onTap: () => _navigateTo(context, AqiMapScreen(appState: appState)),
+                  ),
+                  _buildNavTile(
+                    context: context,
+                    icon: Icons.flag_rounded,
+                    title: 'Eco Challenges',
+                    subtitle: 'Join weekly challenges and build green habits with friends',
+                    color: AppColors.amber,
+                    onTap: () => _navigateTo(context, ChallengesScreen(appState: appState)),
+                  ),
+                  _buildNavTile(
+                    context: context,
+                    icon: Icons.storefront_rounded,
+                    title: 'Rewards Shop',
+                    subtitle: 'Redeem your earned green points for local sustainable rewards',
+                    color: AppColors.champagneGold,
+                    onTap: () => _navigateTo(context, RewardsShopScreen(appState: appState)),
                   ),
 
-                  _buildSectionHeader('MOBILITY & EDUCATION'),
+                  _buildSectionHeader('TRAVEL & WEATHER'),
                   _buildNavTile(
                     context: context,
                     icon: Icons.alt_route_rounded,
-                    title: 'Green Commute Route Advisor',
-                    subtitle: 'Multi-modal route emissions comparison: Metro vs Bus vs EV vs Car (T12)',
+                    title: 'Clean Air Commute',
+                    subtitle: 'Find the least polluted travel routes: Metro, Bus, or EV',
                     color: AppColors.emerald,
                     onTap: () => _navigateTo(context, GreenCommuteScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
+                    icon: Icons.warning_amber_rounded,
+                    title: 'Weather & Disaster Alerts',
+                    subtitle: 'Severe storm warnings, flood advisories, and emergency help',
+                    color: AppColors.coral,
+                    onTap: () => _navigateTo(context, DisasterAlertsScreen(appState: appState)),
+                  ),
+
+                  _buildSectionHeader('LEARNING & ACHIEVEMENTS'),
+                  _buildNavTile(
+                    context: context,
                     icon: Icons.school_rounded,
-                    title: 'Climate Learn (Micro-Quizzes)',
-                    subtitle: '2-minute daily bite-sized climate wisdom cards & quiz rewards (T57)',
+                    title: 'Daily Learning Cards',
+                    subtitle: 'Quick 2-minute green facts, tips, and mini quizzes',
                     color: AppColors.champagneGold,
                     onTap: () => _navigateTo(context, LearningScreen(appState: appState)),
                   ),
-
-                  _buildSectionHeader('RECOGNITION & SYSTEM'),
                   _buildNavTile(
                     context: context,
                     icon: Icons.military_tech_rounded,
                     title: 'Achievements & Badges',
-                    subtitle: 'Metallic trophies, milestone tracking & sustainability honors (T40)',
+                    subtitle: 'See your trophies and unlocked eco milestones',
                     color: AppColors.champagneGold,
                     onTap: () => _navigateTo(context, AchievementsScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
+                    icon: Icons.leaderboard_rounded,
+                    title: 'Community Leaderboard',
+                    subtitle: 'See who is leading the green impact in your city',
+                    color: AppColors.amber,
+                    onTap: () => _navigateTo(context, LeaderboardScreen(appState: appState)),
+                  ),
+
+                  _buildSectionHeader('ACCOUNT & PREFERENCES'),
+                  _buildNavTile(
+                    context: context,
                     icon: Icons.settings_rounded,
                     title: 'Settings',
-                    subtitle: 'Notification preferences, units, connected apps & system controls',
+                    subtitle: 'Notification preferences, units, and account details',
                     color: AppColors.champagneGold,
                     onTap: () => _navigateTo(context, SettingsScreen(appState: appState)),
                   ),
@@ -173,7 +246,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Primary tools (Home, Tracker, Community, Leaderboard & Action Wheel) are directly on your bottom bar.',
+                      'All features and quick actions are in this menu. Main tabs (Home, Tracker, Community, Ranks) stay at the bottom.',
                       style: TextStyle(fontSize: 10, color: Colors.grey, height: 1.3),
                     ),
                   ),
