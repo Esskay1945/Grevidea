@@ -269,7 +269,7 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: item.co2Kg < 0 ? AppColors.emerald : Colors.grey,
+              color: item.co2Kg < 0 ? AppColors.emerald : AppColors.lightTextSecondary,
             ),
           ),
         ],

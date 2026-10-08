@@ -357,7 +357,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
-                          child: Text('No trees planted yet.\nPlant a sapling to begin earning monthly growth points!', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                          child: Text('No trees planted yet.\nPlant a sapling to begin earning monthly growth points!', textAlign: TextAlign.center, style: TextStyle(color: AppColors.lightTextSecondary)),
                         ),
                       )
                     else
@@ -404,7 +404,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
               children: [
                 Text(r['title'] as String, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor)),
                 const SizedBox(height: 3),
-                Text(r['subtitle'] as String, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Text(r['subtitle'] as String, style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
               ],
             ),
           ),
@@ -451,7 +451,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(p.species, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: textColor)),
-                    Text('Location: ${p.location}', style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
+                    Text('Location: ${p.location}', style: const TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
                   ],
                 ),
               ),
@@ -476,8 +476,8 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
             children: [
               _buildMonthDot('Month 1', true, AppColors.emerald),
               _buildMonthDot('Month 2', p.isMonthVerified, p.isForfeited ? AppColors.coral : AppColors.amber),
-              _buildMonthDot('Month 3', false, Colors.grey),
-              _buildMonthDot('Month 4', false, Colors.grey),
+              _buildMonthDot('Month 3', false, AppColors.lightTextSecondary),
+              _buildMonthDot('Month 4', false, AppColors.lightTextSecondary),
             ],
           ),
           const SizedBox(height: 14),
@@ -545,7 +545,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
           ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 9.5, color: Colors.grey)),
+        Text(label, style: const TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
       ],
     );
   }
@@ -643,7 +643,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
                 const Icon(Icons.route_rounded, size: 34, color: AppColors.emerald),
                 const SizedBox(height: 4),
                 Text('Active Corridor: ${_carpoolOrigin.text} → ${_carpoolDest.text}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                const Text('5-Factor Algorithm: Proximity • Route Path • Departure Window • EV Bias', style: TextStyle(fontSize: 9.5, color: Colors.grey)),
+                const Text('5-Factor Algorithm: Proximity • Route Path • Departure Window • EV Bias', style: TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
               ],
             ),
           ),
@@ -663,7 +663,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
             ),
             child: Column(
               children: [
-                const Icon(Icons.directions_car_outlined, size: 40, color: Colors.grey),
+                const Icon(Icons.directions_car_outlined, size: 40, color: AppColors.lightTextSecondary),
                 const SizedBox(height: 10),
                 Text(
                   _hasSearchedCarpool ? 'No matching corridor rides found.' : 'Search to find matching verified rides.',
@@ -673,7 +673,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
                 const Text(
                   'No electric or hybrid carpoolers are currently scheduled on this exact route. Be the pioneer to offer a green ride or get notified when a neighbor posts one!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
                 ),
                 const SizedBox(height: 14),
                 ElevatedButton.icon(
@@ -718,7 +718,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen> with SingleTicker
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(d['driver'] as String, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                        Text('${d['vehicle']} • ${d['time']}', style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
+                        Text('${d['vehicle']} • ${d['time']}', style: const TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
                         Text('${d['match']} • ${d['seats']} seats left', style: const TextStyle(fontSize: 10, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
                       ],
                     ),

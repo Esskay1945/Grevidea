@@ -147,7 +147,7 @@ class _CivicScreenState extends State<CivicScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.royalForest,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -232,7 +232,7 @@ class _CivicScreenState extends State<CivicScreen> {
                           children: [
                             Icon(Icons.camera_alt_outlined, color: AppColors.champagneGold, size: 28),
                             SizedBox(height: 6),
-                            Text('Attach Camera Photo of Waste Hotspot', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                            Text('Attach Camera Photo of Waste Hotspot', style: TextStyle(fontSize: 13, color: AppColors.lightTextSecondary)),
                           ],
                         ),
                 ),

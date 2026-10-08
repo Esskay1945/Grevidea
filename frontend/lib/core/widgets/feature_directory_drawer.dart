@@ -247,7 +247,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'All features and quick actions are in this menu. Main tabs (Home, Tracker, Community, Ranks) stay at the bottom.',
-                      style: TextStyle(fontSize: 10, color: Colors.grey, height: 1.3),
+                      style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary, height: 1.3),
                     ),
                   ),
                 ],
@@ -329,7 +329,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
             color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
           ),
         ),
-        trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: Colors.grey),
+        trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.lightTextSecondary),
         onTap: onTap,
       ),
     );

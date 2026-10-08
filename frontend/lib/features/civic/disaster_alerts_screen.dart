@@ -303,7 +303,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Safe Shelters & Evacuation Map', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text('Authoritative TMC Civil Defense Registry (${widget.appState.baseline.cityWard})', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                      Text('Authoritative TMC Civil Defense Registry (${widget.appState.baseline.cityWard})', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                     ],
                   ),
                   const Icon(Icons.shield_rounded, color: AppColors.emerald, size: 24),
@@ -334,7 +334,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${s['location']} • ${s['distance']}', style: const TextStyle(fontSize: 10.5, color: Colors.grey)),
+                          Text('${s['location']} • ${s['distance']}', style: const TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
                           Text('Cap: ${s['capacity']} • Helpline: ${s['helpline']}', style: const TextStyle(fontSize: 10, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -462,7 +462,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Heavy rainfall predicted in next 24 hours. High tide may cause temporary water-logging near Majiwada bridge. 3 TMC safe shelters are on standby.',
-                  style: TextStyle(fontSize: 11.5, color: isDark ? Colors.grey.shade300 : Colors.black87),
+                  style: TextStyle(fontSize: 11.5, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
                 ),
                 const SizedBox(height: 14),
 
@@ -584,14 +584,14 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                   children: [
                     Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor)),
                     const SizedBox(height: 2),
-                    Text('$source • $timestamp', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                    Text('$source • $timestamp', style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(desc, style: TextStyle(fontSize: 11, color: isDark ? Colors.grey.shade300 : Colors.grey.shade800)),
+          Text(desc, style: TextStyle(fontSize: 11, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
         ],
       ),
     );

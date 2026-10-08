@@ -149,7 +149,7 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
               Text(
                 'Speak your climate, waste, or commute question for ${widget.appState.baseline.cityWard}...',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -285,7 +285,7 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                 children: const [
                   SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.emerald)),
                   SizedBox(width: 8),
-                  Text('ClimateGPT is analyzing...', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text('ClimateGPT is analyzing...', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 ],
               ),
             ),

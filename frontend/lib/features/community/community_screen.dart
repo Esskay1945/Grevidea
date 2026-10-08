@@ -277,7 +277,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                               physics: const AlwaysScrollableScrollPhysics(),
                               children: [
                                 SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                                const Icon(Icons.forum_outlined, size: 60, color: Colors.grey),
+                                const Icon(Icons.forum_outlined, size: 60, color: AppColors.lightTextSecondary),
                                 const SizedBox(height: 12),
                                 Center(child: Text('Community Feed is Ready', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor))),
                                 const SizedBox(height: 6),
@@ -287,7 +287,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                     child: Text(
                                       'Be the first to share an eco-deed in ${widget.appState.baseline.cityWard}! Tap the + button to share.',
                                       textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                      style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
                                     ),
                                   ),
                                 ),
@@ -328,7 +328,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(post['author'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
-                                            Text('${post['time']} • ${post['location']}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                                            Text('${post['time']} • ${post['location']}', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                                           ],
                                         ),
                                       ),
@@ -365,19 +365,19 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                             Icon(
                                               post['isLiked'] ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                                               size: 18,
-                                              color: post['isLiked'] ? AppColors.coral : Colors.grey,
+                                              color: post['isLiked'] ? AppColors.coral : AppColors.lightTextSecondary,
                                             ),
                                             const SizedBox(width: 4),
-                                            Text('${post['likes']}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                            Text('${post['likes']}', style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(width: 20),
-                                      const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: Colors.grey),
+                                      const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: AppColors.lightTextSecondary),
                                       const SizedBox(width: 4),
-                                      Text('${post['comments']}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                      Text('${post['comments']}', style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
                                       const Spacer(),
-                                      const Icon(Icons.share_outlined, size: 16, color: Colors.grey),
+                                      const Icon(Icons.share_outlined, size: 16, color: AppColors.lightTextSecondary),
                                     ],
                                   ),
                                 ],
@@ -394,7 +394,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.emoji_events_outlined, size: 54, color: Colors.grey.withValues(alpha: 0.5)),
+                        Icon(Icons.emoji_events_outlined, size: 54, color: AppColors.lightTextSecondary.withValues(alpha: 0.5)),
                         const SizedBox(height: 14),
                         Text(
                           'No challenges added yet',
@@ -404,7 +404,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                         Text(
                           'Community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
                         ),
                       ],
                     ),
@@ -418,7 +418,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.group_outlined, size: 54, color: Colors.grey.withValues(alpha: 0.5)),
+                        Icon(Icons.group_outlined, size: 54, color: AppColors.lightTextSecondary.withValues(alpha: 0.5)),
                         const SizedBox(height: 14),
                         Text(
                           'No local groups in your ward yet',
@@ -428,7 +428,7 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                         Text(
                           'Be the first to create an Eco Squad in ${widget.appState.baseline.cityWard}!',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
                         ),
                       ],
                     ),

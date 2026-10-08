@@ -189,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('In-Transit Detected (${speedKmH.toStringAsFixed(0)} km/h)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const Text('You are moving faster than 25 km/h. Which vehicle are you using?', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        const Text('You are moving faster than 25 km/h. Which vehicle are you using?', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
                       ],
                     ),
                   ),
@@ -220,7 +220,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: ListTile(
         leading: Icon(icon, color: color),
         title: Text(mode, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        subtitle: Text(sub, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        subtitle: Text(sub, style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
         trailing: Text(
           co2Kg < 0 ? '${co2Kg.abs()} kg saved' : '+$co2Kg kg CO₂',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: co2Kg < 0 ? AppColors.emerald : AppColors.coral),
@@ -470,7 +470,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.royalForest,
+                color: cardBg,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: AppColors.champagneGold, width: 1.5),
                 boxShadow: [
@@ -610,8 +610,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDone
-                        ? (isDark ? const Color(0xFF13281D) : const Color(0xFFE8F5E9))
-                        : (isDark ? AppColors.darkSurface : const Color(0xFFF9F6ED)),
+                        ? (isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt)
+                        : (isDark ? AppColors.darkSurface : AppColors.lightSurface),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isDone ? AppColors.emerald : AppColors.champagneGold.withValues(alpha: 0.35),
@@ -653,7 +653,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               task['description'] as String,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary),
                             ),
                           ],
                         ),
@@ -715,7 +715,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Text(val, maxLines: 1, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900)),
             ),
             const SizedBox(height: 2),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 8.5, color: Colors.grey)),
+            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 8.5, color: AppColors.lightTextSecondary)),
             const SizedBox(height: 2),
             Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 8, color: color, fontWeight: FontWeight.bold)),
           ],
@@ -756,7 +756,7 @@ class _MiniLegend extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 9.0, color: Colors.grey),
+              style: const TextStyle(fontSize: 9.0, color: AppColors.lightTextSecondary),
             ),
           ),
         ],

@@ -226,7 +226,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : const Color(0xFFF1F8F4),
+                color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4), width: 1.5),
                 boxShadow: [
@@ -245,7 +245,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     children: [
                       const Text(
                         'Your Daily Footprint',
-                        style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 13, color: AppColors.lightTextSecondary, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Row(
@@ -257,14 +257,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
                             style: TextStyle(
                               fontSize: 36,
                               fontWeight: FontWeight.w900,
-                              color: isDark ? Colors.white : AppColors.royalForest,
+                              color: isDark ? Colors.white : AppColors.lightTextPrimary,
                               letterSpacing: -1,
                             ),
                           ),
                           const SizedBox(width: 6),
                           const Text(
                             'kg CO₂',
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.grey),
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.lightTextSecondary),
                           ),
                         ],
                       ),
@@ -385,14 +385,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : Colors.white.withValues(alpha: 0.95),
+                          color: isDark ? AppColors.darkSurface.withValues(alpha: 0.92) : AppColors.lightSurface.withValues(alpha: 0.95),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('Ward: ${widget.appState.baseline.cityWard}', style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
-                            const Text('OpenStreetMap Live', style: TextStyle(fontSize: 9.5, color: Colors.grey)),
+                            const Text('OpenStreetMap Live', style: TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
                           ],
                         ),
                       ),
@@ -472,7 +472,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('kg CO₂', style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                      Text('kg CO₂', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary, fontWeight: FontWeight.bold)),
                       Text('7-Day Dynamic Telemetry', style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
                     ],
                   ),
@@ -488,13 +488,13 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('Mon', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                      Text('Tue', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                      Text('Wed', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                      Text('Thu', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                      Text('Fri', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                      Text('Sat', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                      Text('Sun', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                      Text('Mon', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Tue', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Wed', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Thu', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Fri', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Sat', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                      Text('Sun', style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
                     ],
                   ),
                 ],

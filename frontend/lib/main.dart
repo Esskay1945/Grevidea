@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/forest_backdrop.dart';
 import 'features/auth/login_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
 import 'state/app_state.dart';
@@ -39,6 +40,9 @@ class GrevideaApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: appState.themeMode,
+          builder: (context, child) => ForestBackdrop(
+            child: child ?? const SizedBox.shrink(),
+          ),
           home: (appState.isAuthenticated && appState.hasCompletedOnboarding)
               ? DashboardScreen(appState: appState)
               : LoginScreen(appState: appState),

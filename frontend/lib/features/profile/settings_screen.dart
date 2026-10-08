@@ -50,12 +50,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text('Manage real-time notifications, severe weather, and municipal dispatches.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const Text('Manage real-time notifications, severe weather, and municipal dispatches.', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
               const SizedBox(height: 16),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Push Notifications', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Device status bar alerts for urgent eco events', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Device status bar alerts for urgent eco events', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _pushNotifications,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -67,7 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Daily Eco-Quest Reminders', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Morning prompts with your 3 assigned daily quests', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Morning prompts with your 3 assigned daily quests', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _dailyQuestReminders,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -79,7 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Severe Hyperlocal AQI Warnings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Immediate alert when PM2.5 crosses Hazardous in your ward', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Immediate alert when PM2.5 crosses Hazardous in your ward', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _aqiAlerts,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -91,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Municipal Grievance Updates', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Dispatches, clean-up SLA milestones and resolution notices', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Dispatches, clean-up SLA milestones and resolution notices', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _civicDispatchUpdates,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('In-Transit Speed Prompts (>25 km/h)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Ask vehicle mode during high-speed travel to log emissions accurately', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Ask vehicle mode during high-speed travel to log emissions accurately', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _speedTransitPrompts,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -152,12 +152,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text('Manage device permissions, differential privacy, and stored sessions.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const Text('Manage device permissions, differential privacy, and stored sessions.', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
               const SizedBox(height: 16),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Biometric Fingerprint / Face Unlock', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Require biometric prompt when launching Grevidea', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Require biometric prompt when launching Grevidea', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _biometricAuth,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -169,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('High-Accuracy GPS Location', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Required for real-time AQI station matching and speed detection', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Required for real-time AQI station matching and speed detection', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _locationTracking,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -181,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Anonymize Civic Reports', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                subtitle: const Text('Hide your name when sending waste & pollution tickets to TMC', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Hide your name when sending waste & pollution tickets to TMC', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: _anonymizeReports,
                 activeColor: AppColors.champagneGold,
                 activeTrackColor: AppColors.royalForest,
@@ -248,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text('Sync physical steps, smart home devices, and fitness sensors to automatically earn green points.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const Text('Sync physical steps, smart home devices, and fitness sensors to automatically earn green points.', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
               const SizedBox(height: 18),
 
               // Google Fit / Health Connect
@@ -275,7 +275,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _googleFitConnected
                                 ? '✓ Synced: $_syncedSteps steps today (+1.2 kg CO₂ saved)'
                                 : 'Sync walking steps to earn green points automatically',
-                            style: TextStyle(fontSize: 11, color: _googleFitConnected ? AppColors.emerald : Colors.grey),
+                            style: TextStyle(fontSize: 11, color: _googleFitConnected ? AppColors.emerald : AppColors.lightTextSecondary),
                           ),
                         ],
                       ),
@@ -340,7 +340,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _googleHomeConnected
                                 ? '✓ Connected: Live MSEDCL Grid Net-Metering'
                                 : 'Connect smart inverter to log clean energy generation',
-                            style: TextStyle(fontSize: 11, color: _googleHomeConnected ? AppColors.emerald : Colors.grey),
+                            style: TextStyle(fontSize: 11, color: _googleHomeConnected ? AppColors.emerald : AppColors.lightTextSecondary),
                           ),
                         ],
                       ),
@@ -405,13 +405,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text('Select your preferred units of measurement for carbon, distance, and temperature.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              const Text('Select your preferred units of measurement for carbon, distance, and temperature.', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
               const SizedBox(height: 16),
               RadioListTile<bool>(
                 contentPadding: EdgeInsets.zero,
                 activeColor: AppColors.champagneGold,
                 title: Text('Metric System (Recommended)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
-                subtitle: const Text('Kilograms of CO₂ (kg), Kilometers (km), Celsius (°C)', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Kilograms of CO₂ (kg), Kilometers (km), Celsius (°C)', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: true,
                 groupValue: widget.appState.useMetricUnits,
                 onChanged: (val) {
@@ -427,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 contentPadding: EdgeInsets.zero,
                 activeColor: AppColors.champagneGold,
                 title: Text('Imperial System', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
-                subtitle: const Text('Pounds of CO₂ (lbs), Miles (mi), Fahrenheit (°F)', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                subtitle: const Text('Pounds of CO₂ (lbs), Miles (mi), Fahrenheit (°F)', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
                 value: false,
                 groupValue: widget.appState.useMetricUnits,
                 onChanged: (val) {
@@ -498,7 +498,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SizedBox(height: 12),
             Text(
               'Version 1.0.0 (Production Release) • Build 58\nBuilt with CPCB Open Data, TMC Citizen Governance & Google Cloud AI.',
-              style: TextStyle(fontSize: 11, color: Colors.grey),
+              style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
             ),
           ],
         ),
@@ -737,7 +737,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor)),
         subtitle: Text(subtitle, style: TextStyle(fontSize: 11, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
-        trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Colors.grey),
+        trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.lightTextSecondary),
         onTap: onTap,
       ),
     );

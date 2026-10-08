@@ -70,7 +70,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Search challenges...',
-                prefixIcon: const Icon(Icons.search_rounded, color: Colors.grey),
+                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.lightTextSecondary),
                 filled: true,
                 fillColor: cardBg,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
@@ -115,7 +115,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.emoji_events_outlined, size: 56, color: Colors.grey.withValues(alpha: 0.5)),
+                            Icon(Icons.emoji_events_outlined, size: 56, color: AppColors.lightTextSecondary.withValues(alpha: 0.5)),
                             const SizedBox(height: 14),
                             Text(
                               'No challenges added yet',
@@ -127,7 +127,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                               child: Text(
                                 'Official civic and community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
                               ),
                             ),
                           ],
@@ -185,9 +185,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      const Icon(Icons.timer_outlined, size: 12, color: Colors.grey),
+                                      const Icon(Icons.timer_outlined, size: 12, color: AppColors.lightTextSecondary),
                                       const SizedBox(width: 4),
-                                      Text('${item['days_left']} days left', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                      Text('${item['days_left']} days left', style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
                                       const SizedBox(width: 10),
                                       Text(
                                         item['difficulty'] as String,
@@ -234,14 +234,14 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                         },
                                   style: OutlinedButton.styleFrom(
                                     visualDensity: VisualDensity.compact,
-                                    side: BorderSide(color: isCompleted ? Colors.grey : AppColors.emerald),
+                                    side: BorderSide(color: isCompleted ? AppColors.lightTextSecondary : AppColors.emerald),
                                   ),
                                   child: Text(
                                     isCompleted ? 'Done' : 'Claim',
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: isCompleted ? Colors.grey : AppColors.emerald,
+                                      color: isCompleted ? AppColors.lightTextSecondary : AppColors.emerald,
                                     ),
                                   ),
                                 ),

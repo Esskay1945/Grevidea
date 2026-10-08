@@ -214,7 +214,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                               Text(
                                 'You are currently the leading eco-citizen in this boundary! As neighbors join and log sustainable actions, their live rankings will appear here.',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton.icon(
@@ -281,7 +281,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(user['user_name'] ?? 'Citizen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                Text('${user['city'] ?? ""} • ${user['streak_days'] ?? 0}d streak', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                Text('${user['city'] ?? ""} • ${user['streak_days'] ?? 0}d streak', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
               ],
             ),
           ),
