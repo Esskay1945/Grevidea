@@ -50,7 +50,7 @@ jobs:
           backend/axum_gateway/target/x86_64-unknown-linux-gnu/debug/grevidea-gateway > /tmp/gateway.log 2>&1 &
           python backend/tests/gateway_acceptance.py
       - if: failure()
-        run: cat /tmp/gateway.log
+        run: cat /tmp/gateway.log 2>/dev/null || true
   flutter:
     runs-on: ubuntu-latest
     steps:
