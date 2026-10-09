@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grevidea/main.dart';
 import 'package:grevidea/state/app_state.dart';
 import 'package:grevidea/core/models/plant_record.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   group('1. Smoke & UI Initialization', () {
-    testWidgets('Grevidea app launches with title Grevidea and initializes correctly', (WidgetTester tester) async {
+    testWidgets(
+        'Grevidea app launches with title Grevidea and initializes correctly',
+        (WidgetTester tester) async {
       final appState = AppState();
       await tester.pumpWidget(GrevideaApp(appState: appState));
       expect(find.text('Grevidea'), findsWidgets);
@@ -14,7 +19,9 @@ void main() {
   });
 
   group('2. Pure Dynamic AppState Zero-State & Defaults', () {
-    test('Brand new user initializes with pure zero metrics and unachieved stats', () {
+    test(
+        'Brand new user initializes with pure zero metrics and unachieved stats',
+        () {
       final state = AppState();
       expect(state.greenPoints, equals(0));
       expect(state.streakDays, equals(0));
@@ -37,7 +44,9 @@ void main() {
   });
 
   group('3. Dynamic Activity Logging & Impact Ledger', () {
-    test('Logging an eco activity increments green points and accumulates CO2 savings', () async {
+    test(
+        'Logging an eco activity increments green points and accumulates CO2 savings',
+        () async {
       final state = AppState();
       expect(state.greenPoints, equals(0));
       expect(state.totalCo2Saved, equals(0.0));
@@ -58,7 +67,8 @@ void main() {
       expect(state.treesEquivalent, greaterThan(0.0));
     });
 
-    test('Multiple activities aggregate accurately into totalCo2Saved', () async {
+    test('Multiple activities aggregate accurately into totalCo2Saved',
+        () async {
       final state = AppState();
 
       await state.logActivity(
@@ -86,7 +96,9 @@ void main() {
   });
 
   group('4. Strict Plant-a-Tree Check-in & Point Revocation', () {
-    test('Missed tree check-in deduction penalty deducts previously earned points completely', () async {
+    test(
+        'Missed tree check-in deduction penalty deducts previously earned points completely',
+        () async {
       final state = AppState();
 
       // Initial tree planting (+100 pts)
@@ -126,36 +138,47 @@ void main() {
   });
 
   group('5. Mathematical Leaderboard Rank Determination', () {
-    test('Rank is dynamically computed: User with highest score is mathematically #1', () {
+    test(
+        'Rank is dynamically computed: User with highest score is mathematically #1',
+        () {
       final dataset = [
         {'user_name': 'Neighbor A', 'points': 80, 'is_current_user': false},
         {'user_name': 'Neighbor B', 'points': 50, 'is_current_user': false},
       ];
 
       const userPoints = 120;
-      final higherCount = dataset.where((u) => ((u['points'] as int?) ?? 0) > userPoints).length;
+      final higherCount = dataset
+          .where((u) => ((u['points'] as int?) ?? 0) > userPoints)
+          .length;
       final calculatedRank = higherCount + 1;
 
       expect(calculatedRank, equals(1));
     });
 
-    test('Rank is dynamically computed: User below a higher scorer is mathematically #2', () {
+    test(
+        'Rank is dynamically computed: User below a higher scorer is mathematically #2',
+        () {
       final dataset = [
         {'user_name': 'Neighbor A', 'points': 200, 'is_current_user': false},
         {'user_name': 'Neighbor B', 'points': 50, 'is_current_user': false},
       ];
 
       const userPoints = 100;
-      final higherCount = dataset.where((u) => ((u['points'] as int?) ?? 0) > userPoints).length;
+      final higherCount = dataset
+          .where((u) => ((u['points'] as int?) ?? 0) > userPoints)
+          .length;
       final calculatedRank = higherCount + 1;
 
       expect(calculatedRank, equals(2));
     });
 
-    test('When no other users exist in dataset, user rank is mathematically #1', () {
+    test('When no other users exist in dataset, user rank is mathematically #1',
+        () {
       final List<Map<String, dynamic>> emptyDataset = [];
       const userPoints = 0;
-      final higherCount = emptyDataset.where((u) => ((u['points'] as int?) ?? 0) > userPoints).length;
+      final higherCount = emptyDataset
+          .where((u) => ((u['points'] as int?) ?? 0) > userPoints)
+          .length;
       final calculatedRank = higherCount + 1;
 
       expect(calculatedRank, equals(1));
@@ -163,7 +186,8 @@ void main() {
   });
 
   group('6. High-Speed Transit Speed Threshold Detection (>25 km/h)', () {
-    test('Speed at 15 km/h (walking/jogging) does not trigger transit prompt', () {
+    test('Speed at 15 km/h (walking/jogging) does not trigger transit prompt',
+        () {
       const currentSpeedKmh = 15.0;
       final isHighSpeedTransit = currentSpeedKmh > 25.0;
       expect(isHighSpeedTransit, isFalse);
@@ -177,18 +201,28 @@ void main() {
   });
 
   group('7. One-Time Onboarding Gating & User Database Persistence', () {
-    test('New user starts with hasCompletedOnboarding = false and empty plant tracker', () {
+    test(
+        'New user starts with hasCompletedOnboarding = false and empty plant tracker',
+        () {
       final state = AppState();
-      state.signup(name: 'New Tester', email: 'newtester@example.com', password: 'Password123!');
+      state.signup(
+          name: 'New Tester',
+          email: 'newtester@example.com',
+          password: 'Password123!');
       expect(state.hasCompletedOnboarding, isFalse);
       expect(state.plants.isEmpty, isTrue);
       expect(state.userEmail, equals('newtester@example.com'));
       expect(state.userPassword, equals('Password123!'));
     });
 
-    test('Completing onboarding sets hasCompletedOnboarding = true and preserves status', () {
+    test(
+        'Completing onboarding sets hasCompletedOnboarding = true and preserves status',
+        () {
       final state = AppState();
-      state.signup(name: 'Eco Warrior', email: 'warrior@example.com', password: 'Pass123!@#');
+      state.signup(
+          name: 'Eco Warrior',
+          email: 'warrior@example.com',
+          password: 'Pass123!@#');
       expect(state.hasCompletedOnboarding, isFalse);
 
       state.completeOnboarding();
@@ -202,8 +236,11 @@ void main() {
 
     test('Wrong password returns false on login', () {
       final state = AppState();
-      state.signup(name: 'Secure User', email: 'secure@example.com', password: 'CorrectPassword123');
-      
+      state.signup(
+          name: 'Secure User',
+          email: 'secure@example.com',
+          password: 'CorrectPassword123');
+
       final failedLogin = state.login('secure@example.com', 'WrongPassword456');
       expect(failedLogin, isFalse);
 
@@ -213,9 +250,13 @@ void main() {
   });
 
   group('8. Plant Tracker Zero-State & Adoption Lifecycle', () {
-    test('Brand new user has 0 plants initially, adoption increments count', () {
+    test('Brand new user has 0 plants initially, adoption increments count',
+        () {
       final state = AppState();
-      state.signup(name: 'Gardener', email: 'gardener@example.com', password: 'PlantPassword123');
+      state.signup(
+          name: 'Gardener',
+          email: 'gardener@example.com',
+          password: 'PlantPassword123');
       expect(state.plants.isEmpty, isTrue);
 
       state.addPlant(
@@ -231,7 +272,8 @@ void main() {
       );
 
       expect(state.plants.length, equals(1));
-      expect(state.plants.first.species, equals('Neem Sapling (Azadirachta indica)'));
+      expect(state.plants.first.species,
+          equals('Neem Sapling (Azadirachta indica)'));
       expect(state.greenPoints, equals(100));
     });
   });

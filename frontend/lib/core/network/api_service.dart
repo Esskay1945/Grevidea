@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// API Service connecting Grevidea Flutter Frontend to Axum Gateway (port 3000)
 class ApiService {
@@ -13,9 +14,20 @@ class ApiService {
   String get baseUrl => _baseUrl;
   void setBaseUrl(String url) => _baseUrl = url.replaceFirst(RegExp(r'/$'), '');
   String? _authToken;
+  String? _authenticatedEmail;
+  String? get authenticatedEmail => _authenticatedEmail;
+  int _authGeneration = 0;
   String? _userId;
   String? get userId => _userId;
-  void setAuthToken(String? token) { _authToken = token; if(token==null)_userId=null; }
+  void setAuthToken(String? token) {
+    _authGeneration++;
+    _authToken = token;
+    if (token == null) {
+      _userId = null;
+      _authenticatedEmail = null;
+    }
+  }
+
   bool _isBackendReachable = false;
   bool get isBackendReachable => _isBackendReachable;
   final http.Client _client = http.Client();
@@ -31,7 +43,20 @@ class ApiService {
     return _isBackendReachable;
   }
 
-  Future<dynamic> request(String path, {Map<String, dynamic>? data}) async {
+  WebSocketChannel? openLiveChannel() {
+    if (_authToken == null) return null;
+    final base = Uri.parse(_baseUrl);
+    return WebSocketChannel.connect(
+        base.replace(
+            scheme: base.scheme == 'https' ? 'wss' : 'ws',
+            path: '${base.path}/api/v1/live'),
+        protocols: ['grevidea', 'grevidea.jwt.$_authToken']);
+  }
+
+  Future<dynamic> request(String path, {Map<String, dynamic>? data}) async =>
+      (await requestDetailed(path, data: data)).data;
+  Future<ApiResult> requestDetailed(String path,
+      {Map<String, dynamic>? data, String method = 'POST'}) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
@@ -40,15 +65,21 @@ class ApiService {
       final url = Uri.parse('$_baseUrl$path');
       final response = await (data == null
               ? _client.get(url, headers: headers)
-              : _client.post(url, headers: headers, body: jsonEncode(data)))
+              : method == 'DELETE'
+                  ? _client.delete(url,
+                      headers: headers, body: jsonEncode(data))
+                  : _client.post(url, headers: headers, body: jsonEncode(data)))
           .timeout(const Duration(seconds: 90));
-      if (response.statusCode < 200 || response.statusCode >= 300) return null;
+      if (response.statusCode < 200 || response.statusCode >= 300)
+        return ApiResult(response.statusCode, null);
       final decoded = jsonDecode(response.body);
-      return decoded is Map && decoded.containsKey('data')
-          ? decoded['data']
-          : decoded;
+      return ApiResult(
+          response.statusCode,
+          decoded is Map && decoded.containsKey('data')
+              ? decoded['data']
+              : decoded);
     } catch (_) {
-      return null;
+      return const ApiResult(0, null);
     }
   }
 
@@ -58,12 +89,15 @@ class ApiService {
 
   // ── EPIC 6: Auth & Token Management (T49, T50) ─────────────────────────────
   Future<Map<String, dynamic>?> login(String email, String password) async {
+    setAuthToken(null);
+    final generation = _authGeneration;
     final res = await _post('/api/v1/auth/login', {
       'email': email,
       'password': password,
     });
-    if (res != null && res['token'] != null) {
+    if (generation == _authGeneration && res != null && res['token'] != null) {
       _authToken = res['token'];
+      _authenticatedEmail = email.trim().toLowerCase();
       _userId = res['user_id']?.toString();
       return Map<String, dynamic>.from(res);
     }
@@ -75,13 +109,16 @@ class ApiService {
     required String password,
     required String displayName,
   }) async {
+    setAuthToken(null);
+    final generation = _authGeneration;
     final res = await _post('/api/v1/auth/register', {
       'email': email,
       'password': password,
       'display_name': displayName,
     });
-    if (res != null && res['token'] != null) {
+    if (generation == _authGeneration && res != null && res['token'] != null) {
       _authToken = res['token'];
+      _authenticatedEmail = email.trim().toLowerCase();
       _userId = res['user_id']?.toString();
       return Map<String, dynamic>.from(res);
     }
@@ -352,8 +389,11 @@ class ApiService {
       {String scope = 'city'}) async {
     final res = await _get('/api/v1/leaderboard?scope=$scope');
     if (res is List)
-      return List<Map<String, dynamic>>.from((res as List).map((u) =>
-          {...Map<String, dynamic>.from(u), 'points': u['total_points'], 'is_current_user': u['user_id']==_userId}));
+      return List<Map<String, dynamic>>.from((res as List).map((u) => {
+            ...Map<String, dynamic>.from(u),
+            'points': u['total_points'],
+            'is_current_user': u['user_id'] == _userId
+          }));
     if (res != null && res['leaderboard'] != null) {
       return List<Map<String, dynamic>>.from(res['leaderboard']);
     }
@@ -386,4 +426,11 @@ class ApiService {
       'barcode': barcode
     };
   }
+}
+
+class ApiResult {
+  final int status;
+  final dynamic data;
+  const ApiResult(this.status, this.data);
+  bool get permanentFailure => [400, 403, 404, 409, 422].contains(status);
 }

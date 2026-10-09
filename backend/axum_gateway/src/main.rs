@@ -36,6 +36,7 @@ pub struct AppState {
     pub db: PgPool,
     pub brain: BrainClient,
     pub config: Arc<Config>,
+    pub live_changes: tokio::sync::broadcast::Sender<()>,
 }
 
 impl axum::extract::FromRef<AppState> for Arc<Config> {
@@ -92,7 +93,10 @@ async fn main() -> anyhow::Result<()> {
     let brain = BrainClient::new(&config);
     let config = Arc::new(config);
 
-    let state = AppState { db, brain, config };
+    let (live_changes,_)=tokio::sync::broadcast::channel(128);
+    let state = AppState { db, brain, config,live_changes };
+    tokio::spawn(tools::delivery::run_worker(state.clone()));
+    tokio::spawn(tools::realtime::listen_changes(state.clone()));
 
     // CORS for Android (allow all origins in dev)
     let cors = CorsLayer::new()
@@ -101,6 +105,18 @@ async fn main() -> anyhow::Result<()> {
         .allow_headers(Any);
 
     let app = Router::new()
+        .route("/api/v1/live",get(tools::realtime::connect))
+        .route("/api/v1/activities",get(tools::analytics::history).post(tools::analytics::record))
+        .route("/api/v1/baseline",get(tools::analytics::get_baseline).post(tools::analytics::save_baseline))
+        .route("/api/v1/transit/infer",post(tools::transit::infer))
+        .route("/api/v1/hazards",get(tools::hazards::alerts))
+        .route("/api/v1/rewards/:id/cancel",post(tools::delivery::cancel_reward))
+        .route("/api/v1/deliveries",get(tools::delivery::list))
+        .route("/api/v1/deliveries/:id/retry",post(tools::delivery::retry))
+        .route("/api/v1/trusted-contacts",get(tools::delivery::contacts).post(tools::delivery::save_contact))
+        .route("/api/v1/trusted-contacts/:id",delete(tools::delivery::delete_contact))
+        .route("/integrations/delivery/receipt",post(tools::delivery::callback))
+        .route("/api/v1/integrations/readiness",get(tools::delivery::readiness))
         // ── Health ───────────────────────────────────────────────────
         .route("/api/v1/location/search", get(tools::live::geocode))
         .route("/api/v1/location/address", get(tools::live::reverse_geocode))

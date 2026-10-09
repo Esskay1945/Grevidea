@@ -39,6 +39,10 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         ? null
         : await widget.appState.api.request(
             '/api/v1/shelters?lat=${position.latitude}&lon=${position.longitude}&radius_km=5');
+    final hazards = position == null
+        ? null
+        : await widget.appState.api.request(
+            '/api/v1/hazards?lat=${position.latitude}&lon=${position.longitude}');
     if (!mounted) return;
     _authoritativeShelters.clear();
     if (shelters is List)
@@ -87,6 +91,43 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
             : 'US AQI: $aqi. This is model data, not a CPCB station measurement.'
       });
     }
+    if (hazards?['alerts'] is List) {
+      for (final raw in hazards['alerts']) {
+        final alert = Map<String, dynamic>.from(raw);
+        _liveAlerts.add({
+          'title': alert['title'],
+          'description': alert['description'] ?? '',
+          'source': hazards['source'],
+          'timestamp': alert['issued_at'],
+          'severity': alert['severity'] ?? 'Warning',
+          'icon': Icons.flood,
+          'color': AppColors.coral
+        });
+      }
+    }
+    if (hazards?['official_status'] != 'available')
+      _liveAlerts.add({
+        'title': 'Official hazard alerts unavailable',
+        'description':
+            'No official safety status can be determined. Check local authority instructions.',
+        'source': 'Authority feed not available',
+        'timestamp': '',
+        'severity': 'Unavailable',
+        'icon': Icons.warning_amber,
+        'color': AppColors.amber
+      });
+    final river = hazards?['river_forecast']?['daily'];
+    if (river?['river_discharge'] is List)
+      _liveAlerts.add({
+        'title': 'River discharge forecast',
+        'description':
+            'Next days: ${(river['river_discharge'] as List).join(', ')} m³/s. GloFAS daily 5 km model; not a flash-flood warning.',
+        'source': 'Open-Meteo / GloFAS',
+        'timestamp': '',
+        'severity': 'Model context',
+        'icon': Icons.water,
+        'color': AppColors.sapphire
+      });
     setState(() => _isLoadingFeed = false);
   }
 
@@ -117,7 +158,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(result == null
             ? 'SOS not saved. Live GPS, sign-in and a connection are required.'
-            : 'SOS stored in Grevidea. Emergency services and trusted contacts have not been notified.')));
+            : 'SOS saved and queued. Check Deliveries & Contacts for a confirmed provider receipt. If you need immediate help, call your local emergency number.')));
   }
 
   void _triggerSos(BuildContext context) {

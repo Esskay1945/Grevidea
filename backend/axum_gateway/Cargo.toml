@@ -30,6 +30,7 @@ rand = "0.8"
 base64 = "0.21"
 sha2 = "0.10"
 hex = "0.4"
+hmac = "0.12"
 
 [profile.release]
 opt-level = 3

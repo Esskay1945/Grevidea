@@ -67,12 +67,27 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
   bool _redeeming = false;
   Future<void> _handleRewardTap(Map<String, dynamic> item) async {
     if (_redeeming) return;
+    final address = TextEditingController(), phone = TextEditingController();
     final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
                 title: Text(item['title']),
-                content: Text(
-                    'Redeem for ${item['cost']} Green Points? Fulfillment is pending after redemption.'),
+                content: SingleChildScrollView(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Text(
+                      'Redeem for ${item['cost']} Green Points? Confirmation depends on the fulfillment provider.'),
+                  if (item['id'] == 'eco_merchandise') ...[
+                    TextField(
+                        controller: address,
+                        decoration: const InputDecoration(
+                            labelText: 'Delivery address')),
+                    TextField(
+                        controller: phone,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                            labelText: 'Phone with country code (optional)'))
+                  ]
+                ])),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
@@ -81,10 +96,21 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                       onPressed: () => Navigator.pop(ctx, true),
                       child: const Text('Redeem'))
                 ]));
-    if (confirmed != true) return;
+    if (confirmed != true) {
+      address.dispose();
+      phone.dispose();
+      return;
+    }
     _redeeming = true;
-    final result = await widget.appState.api
-        .request('/api/v1/rewards/redeem', data: {'reward_id': item['id']});
+    final result =
+        await widget.appState.api.request('/api/v1/rewards/redeem', data: {
+      'reward_id': item['id'],
+      if (address.text.trim().isNotEmpty)
+        'delivery_address': address.text.trim(),
+      if (phone.text.trim().isNotEmpty) 'phone': phone.text.trim()
+    });
+    address.dispose();
+    phone.dispose();
     _redeeming = false;
     if (!mounted) return;
     if (result != null) {
@@ -118,20 +144,20 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
             Text(
-              'To earn Green Points for planting a tree, take a live photo of your newly planted sapling:',
+              'Record a sapling for your personal journal. Photo verification requires a partner integration.',
               style: TextStyle(fontSize: 12),
             ),
             SizedBox(height: 12),
-            Text('• Initial Bonus: +100 Green Points',
+            Text('• No points awarded until verification',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 11,
                     color: AppColors.emerald)),
-            Text('• Monthly Check-in: +50 Green Points each month of growth',
+            Text('• Growth check-ins require verified evidence',
                 style: TextStyle(fontSize: 11, color: AppColors.champagneGold)),
             SizedBox(height: 8),
             Text(
-              '⚠️ Critical Rule: If a monthly photo check-in is missed, all points previously earned for this tree will be deducted completely!',
+              'Self-reported records do not establish tree survival or carbon credits.',
               style: TextStyle(
                   fontSize: 11,
                   color: AppColors.coral,
@@ -365,7 +391,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
                           child: Text(
-                              'No trees planted yet.\nPlant a sapling to begin earning monthly growth points!',
+                              'No trees planted yet.\nRecord a sapling to track its growth.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   color: AppColors.lightTextSecondary)),
@@ -523,7 +549,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMonthDot('Month 1', true, AppColors.emerald),
+              _buildMonthDot('Month 1', p.isMonthVerified, AppColors.emerald),
               _buildMonthDot('Month 2', p.isMonthVerified,
                   p.isForfeited ? AppColors.coral : AppColors.amber),
               _buildMonthDot('Month 3', false, AppColors.lightTextSecondary),
@@ -545,7 +571,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                             borderRadius: BorderRadius.circular(10)),
                       ),
                       icon: const Icon(Icons.camera_alt_rounded, size: 14),
-                      label: const Text('Verify Month 2 (+50 pts)',
+                      label: const Text('Check verification status',
                           style: TextStyle(
                               fontSize: 11, fontWeight: FontWeight.bold)),
                       onPressed: () => _verifyMonthlyCheckIn(index),
@@ -555,7 +581,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                   IconButton(
                     icon: const Icon(Icons.delete_outline_rounded,
                         color: AppColors.coral, size: 20),
-                    tooltip: 'Simulate Missed Verification (Deduct All Points)',
+                    tooltip: 'Archive sapling record',
                     onPressed: () => _simulateMissedCheckInDeduction(index),
                   ),
                 ],

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -24,6 +26,71 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
   String? _pickupDistance;
   bool _busy = false;
   Timer? _poll;
+  Timer? _reconnect;
+  WebSocketChannel? _channel;
+  StreamSubscription? _liveSubscription;
+  bool _foreground = true;
+  bool _liveConnected = false;
+  final List<LatLng> _walkingPath = [];
+  int _rideGeneration = 0;
+  Future<void> _connectLive() async {
+    if (!_foreground || _channel != null) return;
+    final position = await widget.appState.locationService.getCurrentLocation();
+    if (!mounted || !_foreground || position == null) return;
+    final channel = widget.appState.api.openLiveChannel();
+    if (channel == null) return;
+    _channel = channel;
+    void disconnected() {
+      if (!mounted || !_foreground) return;
+      _channel = null;
+      _liveConnected = false;
+      _poll ??= Timer.periodic(const Duration(seconds: 15), (_) => _refresh());
+      _reconnect?.cancel();
+      _reconnect = Timer(const Duration(seconds: 5), _connectLive);
+    }
+
+    try {
+      await channel.ready;
+      if (!mounted || !_foreground) {
+        channel.sink.close();
+        return;
+      }
+      _liveSubscription = channel.stream.listen((message) {
+        try {
+          final data = jsonDecode(message as String);
+          if (data['type'] == 'snapshot' && mounted) {
+            setState(() {
+              _items = List<Map<String, dynamic>>.from(
+                  data[widget.carpools ? 'carpools' : 'mutual_aid']);
+              _error = null;
+              _liveConnected = true;
+            });
+            _poll?.cancel();
+            _poll = null;
+          }
+        } catch (_) {}
+      }, onError: (_) => disconnected(), onDone: disconnected);
+      channel.sink.add(jsonEncode({
+        'lat': position.latitude,
+        'lon': position.longitude,
+        'radius_km': 5
+      }));
+    } catch (_) {
+      channel.sink.close();
+      disconnected();
+    }
+  }
+
+  void _stopLive() {
+    _reconnect?.cancel();
+    _reconnect = null;
+    _liveSubscription?.cancel();
+    _liveSubscription = null;
+    _channel?.sink.close();
+    _channel = null;
+    _liveConnected = false;
+  }
+
   String get _path => widget.carpools ? 'carpool/nearby' : 'mutual-aid';
   @override
   void initState() {
@@ -34,14 +101,18 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
 
   void _start() {
     _refresh();
+    _connectLive();
     _poll ??= Timer.periodic(const Duration(seconds: 15), (_) => _refresh());
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      _foreground = true;
       _start();
     } else {
+      _foreground = false;
+      _stopLive();
       _poll?.cancel();
       _poll = null;
     }
@@ -49,6 +120,8 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
 
   @override
   void dispose() {
+    _foreground = false;
+    _stopLive();
     _poll?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -203,7 +276,8 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
     await _refresh();
   }
 
-  void _showRide(Map<String, dynamic> item) {
+  Future<void> _showRide(Map<String, dynamic> item) async {
+    final generation = ++_rideGeneration;
     final coords = item['route_geometry']?['coordinates'];
     final location = widget.appState.locationService;
     final distance = location.lastKnownPosition == null
@@ -222,8 +296,39 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
           : [];
       _pickupDistance = distance == null
           ? null
-          : 'Pickup ${distance.toStringAsFixed(2)} km away (straight-line estimate; walking route not available)';
+          : 'Pickup ${distance.toStringAsFixed(2)} km away in a straight line; finding a walking route';
+      _walkingPath.clear();
     });
+    final position = location.lastKnownPosition;
+    if (position == null) return;
+    final route =
+        await widget.appState.api.request('/api/v1/location/route', data: {
+      'profile': 'foot',
+      'origin_lat': position.latitude,
+      'origin_lon': position.longitude,
+      'destination_lat': item['pickup_lat'],
+      'destination_lon': item['pickup_lon']
+    });
+    if (!mounted || generation != _rideGeneration) return;
+    final routes = route?['routes'];
+    if (routes is! List || routes.isEmpty) {
+      setState(() => _pickupDistance =
+          'Walking route unavailable. Straight-line distance: ${distance?.toStringAsFixed(2)} km.');
+      return;
+    }
+    if (routes is List &&
+        routes.isNotEmpty &&
+        routes.first['distance'] is num) {
+      final first = routes.first;
+      setState(() {
+        _pickupDistance =
+            'Walking route: ${((first['distance'] as num) / 1000).toStringAsFixed(2)} km to pickup';
+        _walkingPath
+          ..clear()
+          ..addAll((first['geometry']['coordinates'] as List).map((p) =>
+              LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble())));
+      });
+    }
   }
 
   @override
@@ -234,7 +339,9 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
         appBar: GrevideaAppBar(
             title:
                 widget.carpools ? 'Nearby Carpooling' : 'Community Mutual Aid',
-            subtitle: 'Within 5 km · refreshed every 15 seconds',
+            subtitle: _liveConnected
+                ? 'Within 5 km · live updates'
+                : 'Within 5 km · reconnecting / periodic refresh',
             showBack: true,
             appState: widget.appState),
         body: Column(children: [
@@ -248,6 +355,11 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
                             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         userAgentPackageName: 'com.grevidea.app'),
                     PolylineLayer(polylines: [
+                      if (_walkingPath.isNotEmpty)
+                        Polyline(
+                            points: _walkingPath,
+                            color: AppColors.champagneGold,
+                            strokeWidth: 4),
                       if (_corridor.isNotEmpty)
                         Polyline(
                             points: _corridor,
