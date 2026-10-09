@@ -124,7 +124,7 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: Color(0xFFF2B47F),
         onPrimary: AppColors.midnightObsidian,
-        secondary: AppColors.emerald,
+        secondary: Color(0xFFC1D29B),
         surface: AppColors.darkSurface,
         surfaceContainerLowest: AppColors.darkSurface,
         surfaceContainerLow: AppColors.darkSurface,

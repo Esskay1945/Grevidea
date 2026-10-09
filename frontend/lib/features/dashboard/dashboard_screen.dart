@@ -689,7 +689,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   () => task['checked'] = value == true,
                                 ),
                           activeColor: AppColors.accentOf(context),
-                          checkColor: Colors.white,
+                          checkColor: isDark ? AppColors.midnightObsidian : Colors.white,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -715,7 +715,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               task['description'] as String,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
                                 color: isDark
                                     ? AppColors.darkTextSecondary

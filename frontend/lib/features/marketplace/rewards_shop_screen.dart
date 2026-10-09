@@ -19,7 +19,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  final List<Map<String, dynamic>> _rewards = [
+  List<Map<String, dynamic>> get _rewards => [
     {
       'id': 'plant_tree',
       'title': 'Plant a Tree',

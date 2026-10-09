@@ -4,7 +4,7 @@ import 'app_colors.dart';
 
 class AppTypography {
   static const String fontFamilySans =
-      'Lora'; // Standard system sans with crisp geometric fallbacks
+      'Lora'; // Bundled serif matching the autumn concept
 
   static TextStyle displayGold(
     BuildContext context, {

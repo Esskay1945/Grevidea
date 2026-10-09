@@ -35,7 +35,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  final List<AchievementDefinition> _achievementDefinitions = [
+  List<AchievementDefinition> get _achievementDefinitions => [
     AchievementDefinition(
       id: 'starter',
       title: 'Green Starter',
