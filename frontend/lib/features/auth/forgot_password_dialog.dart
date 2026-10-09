@@ -56,7 +56,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       fontWeight: FontWeight.w700,
                       color: isDark
                           ? AppColors.darkTextPrimary
-                          : AppColors.lightTextPrimary,
+                          : AppColors.inkOf(context),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -67,7 +67,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       fontSize: 13,
                       color: isDark
                           ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary,
+                          : AppColors.mutedOf(context),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -93,7 +93,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                             fontWeight: FontWeight.w700,
                             color: isDark
                                 ? AppColors.darkTextPrimary
-                                : AppColors.lightTextPrimary,
+                                : AppColors.inkOf(context),
                           ),
                         ),
                         IconButton(
@@ -109,7 +109,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                         fontSize: 13,
                         color: isDark
                             ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
+                            : AppColors.mutedOf(context),
                       ),
                     ),
                     const SizedBox(height: 20),

@@ -95,7 +95,7 @@ class _AqiMapScreenState extends State<AqiMapScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final userLat = widget.appState.locationService.currentLatitude;
     final userLng = widget.appState.locationService.currentLongitude;
@@ -380,9 +380,9 @@ class _AqiMapScreenState extends State<AqiMapScreen> {
                                   ),
                                   Text(
                                     '${_selectedMarker!['region']} • Status: ${_selectedMarker!['status']}',
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       fontSize: 11,
-                                      color: AppColors.lightTextSecondary,
+                                      color: AppColors.mutedOf(context),
                                     ),
                                   ),
                                 ],
@@ -455,9 +455,9 @@ class _AqiMapScreenState extends State<AqiMapScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 9.5,
-              color: AppColors.lightTextSecondary,
+              color: AppColors.mutedOf(context),
             ),
           ),
           const SizedBox(height: 2),

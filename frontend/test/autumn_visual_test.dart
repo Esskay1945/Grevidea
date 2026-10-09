@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -35,7 +36,24 @@ void main() {
         };
         final loader = FontLoader('Lora')
           ..addFont(rootBundle.load('assets/fonts/Lora.ttf'));
-        await tester.runAsync(loader.load);
+        final icons = FontLoader('MaterialIcons')
+          ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+        final cupertino = FontLoader('CupertinoIcons')
+          ..addFont(rootBundle.load('packages/cupertino_icons/assets/CupertinoIcons.ttf'));
+        await tester.runAsync(() async {
+          await loader.load();
+          await icons.load();
+          await cupertino.load();
+          final emojiFile = File('/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf');
+          if (emojiFile.existsSync()) {
+            final emoji = FontLoader('NotoColorEmoji')
+              ..addFont(Future.value(ByteData.sublistView(emojiFile.readAsBytesSync())));
+            await emoji.load();
+          }
+        });
+        final oldShadows = debugDisableShadows;
+        debugDisableShadows = false;
+        addTearDown(() => debugDisableShadows = oldShadows);
         await tester.pumpWidget(
           MaterialApp(
             theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
@@ -80,6 +98,7 @@ void main() {
         });
         await tester.pumpWidget(const SizedBox.shrink());
         state.dispose();
+        debugDisableShadows = oldShadows;
       });
     }
   }

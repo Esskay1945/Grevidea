@@ -473,9 +473,9 @@ class _LearningScreenState extends State<LearningScreen> {
                       ),
                       Text(
                         '${_history.length} completed sets • $totalHistoryPoints lifetime points',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 12,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                     ],
@@ -502,13 +502,13 @@ class _LearningScreenState extends State<LearningScreen> {
               ),
               const SizedBox(height: 16),
               if (_history.isEmpty)
-                const Padding(
+                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 32),
                   child: Center(
                     child: Text(
                       'No quizzes completed yet.\nComplete your first 5-question set above!',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.lightTextSecondary),
+                      style: TextStyle(color: AppColors.mutedOf(context)),
                     ),
                   ),
                 )
@@ -544,9 +544,9 @@ class _LearningScreenState extends State<LearningScreen> {
                         ),
                         subtitle: Text(
                           '${item.correctCount}/${item.totalQuestions} correct • ${item.date.hour.toString().padLeft(2, "0")}:${item.date.minute.toString().padLeft(2, "0")}',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 11,
-                            color: AppColors.lightTextSecondary,
+                            color: AppColors.mutedOf(context),
                           ),
                         ),
                         trailing: Text(
@@ -575,7 +575,7 @@ class _LearningScreenState extends State<LearningScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -726,9 +726,9 @@ class _LearningScreenState extends State<LearningScreen> {
               ),
               Text(
                 'Q${_currentQuestionIndex + 1}',
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -794,7 +794,7 @@ class _LearningScreenState extends State<LearningScreen> {
                           shape: BoxShape.circle,
                           color: isChosen
                               ? AppColors.accentOf(context)
-                              : AppColors.lightTextSecondary.withValues(
+                              : AppColors.mutedOf(context).withValues(
                                   alpha: 0.1,
                                 ),
                         ),
@@ -924,9 +924,9 @@ class _LearningScreenState extends State<LearningScreen> {
           Text(
             'Theme: $_selectedTheme',
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 12,
-              color: AppColors.lightTextSecondary,
+              color: AppColors.mutedOf(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -994,9 +994,9 @@ class _LearningScreenState extends State<LearningScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 10,
-              color: AppColors.lightTextSecondary,
+              color: AppColors.mutedOf(context),
             ),
           ),
           const SizedBox(height: 2),

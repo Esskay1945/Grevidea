@@ -69,11 +69,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
+               Text(
                 'Manage real-time notifications, severe weather, and municipal dispatches.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 16),
@@ -87,11 +87,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Device status bar alerts for urgent eco events',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _pushNotifications,
@@ -112,11 +112,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Morning prompts with your 3 assigned daily quests',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _dailyQuestReminders,
@@ -137,11 +137,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Immediate alert when PM2.5 crosses Hazardous in your ward',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _aqiAlerts,
@@ -162,11 +162,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Dispatches, clean-up SLA milestones and resolution notices',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _civicDispatchUpdates,
@@ -187,11 +187,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Ask vehicle mode during high-speed travel to log emissions accurately',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _speedTransitPrompts,
@@ -268,11 +268,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
+               Text(
                 'Manage device permissions, differential privacy, and stored sessions.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 16),
@@ -286,11 +286,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Require biometric prompt when launching Grevidea',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _biometricAuth,
@@ -311,11 +311,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Required for real-time AQI station matching and speed detection',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _locationTracking,
@@ -336,11 +336,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Hide your name when sending waste & pollution tickets to TMC',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: _anonymizeReports,
@@ -451,11 +451,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
+               Text(
                 'Sync physical steps, smart home devices, and fitness sensors to automatically earn green points.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 18),
@@ -503,7 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               fontSize: 11,
                               color: _googleFitConnected
                                   ? AppColors.leafOf(context)
-                                  : AppColors.lightTextSecondary,
+                                  : AppColors.mutedOf(context),
                             ),
                           ),
                         ],
@@ -601,7 +601,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               fontSize: 11,
                               color: _googleHomeConnected
                                   ? AppColors.leafOf(context)
-                                  : AppColors.lightTextSecondary,
+                                  : AppColors.mutedOf(context),
                             ),
                           ),
                         ],
@@ -706,11 +706,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
+               Text(
                 'Select your preferred units of measurement for carbon, distance, and temperature.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 16),
@@ -725,11 +725,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Kilograms of CO₂ (kg), Kilometers (km), Celsius (°C)',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: true,
@@ -754,11 +754,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: textColor,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle:  Text(
                   'Pounds of CO₂ (lbs), Miles (mi), Fahrenheit (°F)',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 value: false,
@@ -866,7 +866,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Version 1.0.0 (Production Release) • Build 58\nBuilt with CPCB Open Data, TMC Citizen Governance & Google Cloud AI.',
               style: TextStyle(
                 fontSize: 11,
-                color: AppColors.lightTextSecondary,
+                color: AppColors.mutedOf(context),
               ),
             ),
           ],
@@ -900,7 +900,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -1098,7 +1098,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           fontSize: 11,
                           color: isDark
                               ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary,
+                              : AppColors.mutedOf(context),
                         ),
                       ),
                     ],
@@ -1190,15 +1190,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               fontSize: 11,
               color: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
             ),
           ),
           trailing:
               trailing ??
-              const Icon(
+               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 12,
-                color: AppColors.lightTextSecondary,
+                color: AppColors.mutedOf(context),
               ),
           onTap: onTap,
         ),

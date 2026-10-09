@@ -62,7 +62,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final userPoints = widget.appState.greenPoints;
     final userName = widget.appState.userName.isNotEmpty
@@ -134,7 +134,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                     labelColor: AppColors.accentOf(context),
                     unselectedLabelColor: isDark
                         ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                        : AppColors.mutedOf(context),
                     labelStyle: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -302,9 +302,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                               Text(
                                 'You are currently the leading eco-citizen in this boundary! As neighbors join and log sustainable actions, their live rankings will appear here.',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.lightTextSecondary,
+                                  color: AppColors.mutedOf(context),
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -358,7 +358,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                   fontWeight: FontWeight.w800,
                                   color: isDark
                                       ? AppColors.darkTextSecondary
-                                      : AppColors.lightTextSecondary,
+                                      : AppColors.mutedOf(context),
                                 ),
                               ),
                               Text(
@@ -368,7 +368,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                   fontWeight: FontWeight.w800,
                                   color: isDark
                                       ? AppColors.darkTextSecondary
-                                      : AppColors.lightTextSecondary,
+                                      : AppColors.mutedOf(context),
                                 ),
                               ),
                             ],
@@ -434,9 +434,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 ),
                 Text(
                   '${user['city'] ?? ""} • ${user['streak_days'] ?? 0}d streak',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
               ],

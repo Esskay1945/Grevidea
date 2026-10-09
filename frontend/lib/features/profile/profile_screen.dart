@@ -302,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontWeight: FontWeight.w700,
                   color: isDark
                       ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                      : AppColors.inkOf(context),
                 ),
               ),
               const SizedBox(height: 12),
@@ -367,7 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontWeight: FontWeight.w700,
                   color: isDark
                       ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                      : AppColors.inkOf(context),
                 ),
               ),
               const SizedBox(height: 12),
@@ -441,9 +441,9 @@ class _ProfileSummaryRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 13,
-            color: AppColors.lightTextSecondary,
+            color: AppColors.mutedOf(context),
           ),
         ),
         Flexible(
@@ -480,11 +480,11 @@ class _BadgeWidget extends StatelessWidget {
             shape: BoxShape.circle,
             color: unlocked
                 ? AppColors.royalForest
-                : AppColors.lightTextSecondary.withOpacity(0.15),
+                : AppColors.mutedOf(context).withOpacity(0.15),
             border: Border.all(
               color: unlocked
                   ? AppColors.accentOf(context)
-                  : AppColors.lightTextSecondary.withOpacity(0.3),
+                  : AppColors.mutedOf(context).withOpacity(0.3),
               width: 1.5,
             ),
           ),
@@ -492,7 +492,7 @@ class _BadgeWidget extends StatelessWidget {
             icon,
             color: unlocked
                 ? AppColors.accentOf(context)
-                : AppColors.lightTextSecondary,
+                : AppColors.mutedOf(context),
             size: 24,
           ),
         ),
@@ -504,7 +504,7 @@ class _BadgeWidget extends StatelessWidget {
             fontWeight: unlocked ? FontWeight.w700 : FontWeight.w500,
             color: unlocked
                 ? AppColors.accentOf(context)
-                : AppColors.lightTextSecondary,
+                : AppColors.mutedOf(context),
           ),
         ),
       ],

@@ -56,7 +56,7 @@ class PasswordStrengthBar extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isFilled
                         ? color
-                        : AppColors.lightTextSecondary.withOpacity(0.2),
+                        : AppColors.mutedOf(context).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(2),
                     boxShadow: isFilled
                         ? [

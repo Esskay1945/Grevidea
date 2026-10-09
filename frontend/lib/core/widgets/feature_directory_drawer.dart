@@ -77,25 +77,27 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Grevidea Menu',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.champagneGold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Grevidea Menu',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.champagneGold,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'All features & preferences',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.white70,
+                            Text(
+                              'All features & preferences',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -455,7 +457,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                       'All features and quick actions are in this menu. Home, Tracker, Community and Ranks stay in the footer.',
                       style: TextStyle(
                         fontSize: 10,
-                        color: AppColors.lightTextSecondary,
+                        color: AppColors.mutedOf(context),
                         height: 1.3,
                       ),
                     ),
@@ -495,7 +497,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -546,13 +548,13 @@ class FeatureDirectoryDrawer extends StatelessWidget {
               height: 1.3,
               color: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
             ),
           ),
-          trailing: const Icon(
+          trailing:  Icon(
             Icons.chevron_right_rounded,
             size: 18,
-            color: AppColors.lightTextSecondary,
+            color: AppColors.mutedOf(context),
           ),
           onTap: onTap,
         ),

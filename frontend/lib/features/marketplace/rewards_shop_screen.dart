@@ -293,7 +293,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -391,7 +391,7 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
               labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
               labelStyle: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
@@ -458,14 +458,14 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                     ),
                     const SizedBox(height: 10),
                     if (_plants.isEmpty)
-                      const Center(
+                       Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
                           child: Text(
                             'No trees planted yet.\nRecord a sapling to track its growth.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                         ),
@@ -540,9 +540,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                 const SizedBox(height: 3),
                 Text(
                   r['subtitle'] as String,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
               ],
@@ -627,9 +627,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                     ),
                     Text(
                       'Location: ${p.location}',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 10.5,
-                        color: AppColors.lightTextSecondary,
+                        color: AppColors.mutedOf(context),
                       ),
                     ),
                   ],
@@ -674,8 +674,8 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                 p.isMonthVerified,
                 p.isForfeited ? AppColors.coral : AppColors.amber,
               ),
-              _buildMonthDot('Month 3', false, AppColors.lightTextSecondary),
-              _buildMonthDot('Month 4', false, AppColors.lightTextSecondary),
+              _buildMonthDot('Month 3', false, AppColors.mutedOf(context)),
+              _buildMonthDot('Month 4', false, AppColors.mutedOf(context)),
             ],
           ),
           const SizedBox(height: 14),
@@ -781,9 +781,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 9.5,
-            color: AppColors.lightTextSecondary,
+            color: AppColors.mutedOf(context),
           ),
         ),
       ],

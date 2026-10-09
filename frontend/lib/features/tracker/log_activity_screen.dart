@@ -240,7 +240,7 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final activities = widget.appState.recentActivities;
 
@@ -357,7 +357,7 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                     fontSize: 11,
                     color: isDark
                         ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                        : AppColors.mutedOf(context),
                   ),
                 ),
               ],
@@ -372,7 +372,7 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
               fontWeight: FontWeight.w800,
               color: item.co2Kg < 0
                   ? AppColors.leafOf(context)
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
             ),
           ),
         ],

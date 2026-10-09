@@ -37,20 +37,28 @@ class PersistentFeatureTray extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    Widget item(int index, IconData icon, String label) => InkWell(
-      onTap: () => _tab(index),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: AppColors.accentOf(context), size: 24),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(fontSize: 10, color: AppColors.inkOf(context)),
-            ),
-          ],
+    Widget item(int index, IconData icon, String label) => Expanded(
+      child: InkWell(
+        onTap: () => _tab(index),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: AppColors.accentOf(context), size: 24),
+              const SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.inkOf(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -43,7 +43,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final filtered = _challenges.where((c) {
       final matchesFilter =
@@ -75,9 +75,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Search challenges...',
-                prefixIcon: const Icon(
+                prefixIcon:  Icon(
                   Icons.search_rounded,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
                 filled: true,
                 fillColor: cardBg,
@@ -144,7 +144,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                         Icon(
                           Icons.emoji_events_outlined,
                           size: 56,
-                          color: AppColors.lightTextSecondary.withValues(
+                          color: AppColors.mutedOf(context).withValues(
                             alpha: 0.5,
                           ),
                         ),
@@ -163,9 +163,9 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                           child: Text(
                             'Official civic and community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 12,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                         ),
@@ -240,23 +240,23 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                       fontSize: 11,
                                       color: isDark
                                           ? AppColors.darkTextSecondary
-                                          : AppColors.lightTextSecondary,
+                                          : AppColors.mutedOf(context),
                                     ),
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      const Icon(
+                                       Icon(
                                         Icons.timer_outlined,
                                         size: 12,
-                                        color: AppColors.lightTextSecondary,
+                                        color: AppColors.mutedOf(context),
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
                                         '${item['days_left']} days left',
-                                        style: const TextStyle(
+                                        style:  TextStyle(
                                           fontSize: 10,
-                                          color: AppColors.lightTextSecondary,
+                                          color: AppColors.mutedOf(context),
                                         ),
                                       ),
                                       const SizedBox(width: 10),
@@ -333,7 +333,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                     visualDensity: VisualDensity.compact,
                                     side: BorderSide(
                                       color: isCompleted
-                                          ? AppColors.lightTextSecondary
+                                          ? AppColors.mutedOf(context)
                                           : AppColors.leafOf(context),
                                     ),
                                   ),
@@ -343,7 +343,7 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: isCompleted
-                                          ? AppColors.lightTextSecondary
+                                          ? AppColors.mutedOf(context)
                                           : AppColors.leafOf(context),
                                     ),
                                   ),

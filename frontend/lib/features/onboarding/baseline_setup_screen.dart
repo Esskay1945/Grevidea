@@ -218,9 +218,9 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 12,
-                color: AppColors.lightTextSecondary,
+                color: AppColors.mutedOf(context),
                 height: 1.3,
               ),
               children: [
@@ -312,7 +312,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -421,7 +421,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                         fontSize: 11,
                         color: isDark
                             ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
+                            : AppColors.mutedOf(context),
                       ),
                     ),
                   ],
@@ -795,7 +795,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                                 fontSize: 11,
                                 color: isDark
                                     ? AppColors.darkTextSecondary
-                                    : AppColors.lightTextSecondary,
+                                    : AppColors.mutedOf(context),
                               ),
                             ),
                           ],

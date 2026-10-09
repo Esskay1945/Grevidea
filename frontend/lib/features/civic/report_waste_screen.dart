@@ -201,7 +201,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   width: 38,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.lightTextSecondary.withValues(alpha: 0.3),
+                    color: AppColors.mutedOf(context).withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -222,11 +222,11 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 ],
               ),
               const SizedBox(height: 4),
-              const Text(
+               Text(
                 'Direct phone helpline connection to civic grievance desks & disaster control.',
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 16),
@@ -299,9 +299,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             ),
             Text(
               subtitle,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 10,
-                color: AppColors.lightTextSecondary,
+                color: AppColors.mutedOf(context),
               ),
             ),
           ],
@@ -372,7 +372,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                       width: 38,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.lightTextSecondary.withValues(
+                        color: AppColors.mutedOf(context).withValues(
                           alpha: 0.3,
                         ),
                         borderRadius: BorderRadius.circular(2),
@@ -805,7 +805,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.lightTextSecondary.withValues(alpha: 0.4),
+                    color: AppColors.mutedOf(context).withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -815,12 +815,12 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                 Text(
                   'Select how you would like to provide photo evidence for municipal verification',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -1028,9 +1028,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     ),
                     Text(
                       'Resolution SLA: ${dept.resolutionSla}',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 11,
-                        color: AppColors.lightTextSecondary,
+                        color: AppColors.mutedOf(context),
                       ),
                     ),
                   ],
@@ -1143,7 +1143,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final currentDept = _getDepartment(
       _selectedWasteType ?? 'Garbage Dumping',
@@ -1170,7 +1170,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
               tabs: [
                 const Tab(
                   icon: Icon(Icons.add_location_alt_rounded, size: 18),
@@ -1225,7 +1225,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             fontSize: 11,
             color: isDark
                 ? AppColors.darkTextSecondary
-                : AppColors.lightTextSecondary,
+                : AppColors.mutedOf(context),
           ),
         ),
         const SizedBox(height: 18),
@@ -1298,11 +1298,11 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 ],
               ),
               const SizedBox(height: 8),
-              const Text(
+               Text(
                 'Choose how you want to reach out: call the official grievance helpline directly, or send an official email to the Municipal Commissioner directly from the app (no Gmail redirect).',
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 14),
@@ -1370,26 +1370,26 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               Wrap(
                 spacing: 12,
                 runSpacing: 4,
-                children: const [
+                children:  [
                   Text(
                     '📞 022-25331590 / 022-25331211',
                     style: TextStyle(
                       fontSize: 10.5,
-                      color: AppColors.lightTextSecondary,
+                      color: AppColors.mutedOf(context),
                     ),
                   ),
                   Text(
                     '✉️ mc@thanecity.gov.in',
                     style: TextStyle(
                       fontSize: 10.5,
-                      color: AppColors.lightTextSecondary,
+                      color: AppColors.mutedOf(context),
                     ),
                   ),
                   Text(
                     '🚨 Regional Helpline: 1800222108',
                     style: TextStyle(
                       fontSize: 10.5,
-                      color: AppColors.lightTextSecondary,
+                      color: AppColors.mutedOf(context),
                     ),
                   ),
                 ],
@@ -1505,7 +1505,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   fontSize: 11,
                   color: isDark
                       ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
+                      : AppColors.mutedOf(context),
                 ),
               ),
               Text(
@@ -1514,7 +1514,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   fontSize: 11,
                   color: isDark
                       ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary,
+                      : AppColors.mutedOf(context),
                 ),
               ),
               const Divider(height: 16),
@@ -1680,7 +1680,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                           fontSize: 10.5,
                           color: isDark
                               ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary,
+                              : AppColors.mutedOf(context),
                         ),
                       ),
                     ],
@@ -1822,10 +1822,10 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-            const Icon(
+             Icon(
               Icons.inbox_rounded,
               size: 60,
-              color: AppColors.lightTextSecondary,
+              color: AppColors.mutedOf(context),
             ),
             const SizedBox(height: 12),
             Center(
@@ -1839,12 +1839,12 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               ),
             ),
             const SizedBox(height: 4),
-            const Center(
+             Center(
               child: Text(
                 'Pull to refresh or submit a report to track live dispatches.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
             ),
@@ -1931,10 +1931,10 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(
+                     Icon(
                       Icons.location_on_outlined,
                       size: 14,
-                      color: AppColors.lightTextSecondary,
+                      color: AppColors.mutedOf(context),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
@@ -1942,9 +1942,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                         ticket.location,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 11,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                     ),
@@ -1979,9 +1979,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   children: [
                     Text(
                       'Dispatched: ${ticket.timestamp.hour}:${ticket.timestamp.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 10.5,
-                        color: AppColors.lightTextSecondary,
+                        color: AppColors.mutedOf(context),
                       ),
                     ),
                     const Text(

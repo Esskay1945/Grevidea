@@ -122,7 +122,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final breakdown = _computeBreakdown();
     final double totalCo2 = breakdown['total'] as double;
@@ -195,7 +195,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                         Icon(
                           Icons.pie_chart_outline_rounded,
                           size: 52,
-                          color: AppColors.lightTextSecondary.withValues(
+                          color: AppColors.mutedOf(context).withValues(
                             alpha: 0.4,
                           ),
                         ),
@@ -209,14 +209,14 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Padding(
+                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 24),
                           child: Text(
                             'Log your public transit commute, home solar, or recycling actions to generate your live carbon breakdown.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 11.5,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                         ),
@@ -249,19 +249,19 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                                     letterSpacing: -1,
                                   ),
                                 ),
-                                const Text(
+                                 Text(
                                   'kg CO₂',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.lightTextSecondary,
+                                    color: AppColors.mutedOf(context),
                                   ),
                                 ),
                                 Text(
                                   _selectedPeriod,
-                                  style: const TextStyle(
+                                  style:  TextStyle(
                                     fontSize: 9.5,
-                                    color: AppColors.lightTextSecondary,
+                                    color: AppColors.mutedOf(context),
                                   ),
                                 ),
                               ],
@@ -303,9 +303,9 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                               const Spacer(),
                               Text(
                                 c['co2'] as String,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.lightTextSecondary,
+                                  color: AppColors.mutedOf(context),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -388,9 +388,9 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                         children: [
                           Text(
                             val.toStringAsFixed(1),
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 9,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -409,9 +409,9 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                           const SizedBox(height: 6),
                           Text(
                             'Day ${dayLabels[e.key]}',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 9.5,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                         ],

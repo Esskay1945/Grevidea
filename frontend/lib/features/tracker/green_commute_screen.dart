@@ -283,7 +283,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final modes = _computeModes();
 
@@ -332,14 +332,14 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               fontWeight: FontWeight.bold,
                               color: textColor,
                             ),
-                            decoration: const InputDecoration(
+                            decoration:  InputDecoration(
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                               border: InputBorder.none,
                               labelText: 'FROM (Live Origin)',
                               labelStyle: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.lightTextSecondary,
+                                color: AppColors.mutedOf(context),
                               ),
                             ),
                           ),
@@ -371,14 +371,14 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               color: textColor,
                             ),
                             onSubmitted: _recalculateRoute,
-                            decoration: const InputDecoration(
+                            decoration:  InputDecoration(
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                               border: InputBorder.none,
                               labelText: 'TO (Destination)',
                               labelStyle: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.lightTextSecondary,
+                                color: AppColors.mutedOf(context),
                               ),
                             ),
                           ),
@@ -835,7 +835,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                     color: m['fare_type'] == 'Estimated'
                                         ? AppColors.leafOf(context)
                                               .withValues(alpha: 0.2)
-                                        : AppColors.lightTextSecondary
+                                        : AppColors.mutedOf(context)
                                               .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
@@ -846,7 +846,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                       fontWeight: FontWeight.bold,
                                       color: m['fare_type'] == 'Estimated'
                                           ? AppColors.leafOf(context)
-                                          : AppColors.lightTextSecondary,
+                                          : AppColors.mutedOf(context),
                                     ),
                                   ),
                                 ),
@@ -857,9 +857,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         const SizedBox(height: 6),
                         Text(
                           'Source: ${m['fare_tag']}',
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 9,
-                            color: AppColors.lightTextSecondary,
+                            color: AppColors.mutedOf(context),
                             fontStyle: FontStyle.italic,
                           ),
                         ),

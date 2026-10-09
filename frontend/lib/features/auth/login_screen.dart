@@ -161,11 +161,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
+               Text(
                 'Choose a Google account to continue to Grevidea',
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.mutedOf(context),
                 ),
               ),
               const SizedBox(height: 18),
@@ -419,7 +419,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 letterSpacing: -0.4,
                                 color: isDark
                                     ? AppColors.darkTextPrimary
-                                    : AppColors.lightTextPrimary,
+                                    : AppColors.inkOf(context),
                               ),
                             ),
                             Text(
@@ -463,7 +463,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w800,
                     color: isDark
                         ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+                        : AppColors.inkOf(context),
                     letterSpacing: -0.6,
                   ),
                 ),
@@ -474,7 +474,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 14,
                     color: isDark
                         ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                        : AppColors.mutedOf(context),
                   ),
                 ),
 
@@ -488,7 +488,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w600,
                     color: isDark
                         ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+                        : AppColors.inkOf(context),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -515,7 +515,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w600,
                     color: isDark
                         ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+                        : AppColors.inkOf(context),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -611,7 +611,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           letterSpacing: 0.8,
                           color: isDark
                               ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary,
+                              : AppColors.mutedOf(context),
                         ),
                       ),
                     ),
@@ -646,7 +646,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 13,
                         color: isDark
                             ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
+                            : AppColors.mutedOf(context),
                       ),
                     ),
                     GestureDetector(

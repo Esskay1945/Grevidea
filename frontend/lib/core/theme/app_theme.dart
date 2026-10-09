@@ -47,6 +47,7 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
         titleTextStyle: TextStyle(
+          fontFamily: 'Lora',
           color: AppColors.lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -142,6 +143,7 @@ class AppTheme {
         systemOverlayStyle: SystemUiOverlayStyle.light,
         iconTheme: IconThemeData(color: AppColors.darkTextPrimary),
         titleTextStyle: TextStyle(
+          fontFamily: 'Lora',
           color: AppColors.darkTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w700,

@@ -453,7 +453,7 @@ class _NearbyBoardScreenState extends State<NearbyBoardScreen>
                                 ? Icons.directions_car
                                 : Icons.volunteer_activism,
                             color: item['status'] == 'coordinated'
-                                ? AppColors.lightTextSecondary
+                                ? AppColors.mutedOf(context)
                                 : AppColors.leafOf(context),
                           ),
                         ),

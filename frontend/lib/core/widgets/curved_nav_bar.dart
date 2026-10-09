@@ -24,7 +24,7 @@ class CurvedNavBar extends StatelessWidget {
       height: 76.0 + safeBottomOffset,
       padding: EdgeInsets.only(bottom: safeBottomOffset),
       decoration: BoxDecoration(
-        color: AppColors.royalForest,
+        color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
         border: const Border(
           top: BorderSide(color: AppColors.goldBorder, width: 1.2),
         ),
@@ -138,7 +138,7 @@ class _NavItem extends StatelessWidget {
               size: 24,
               color: isSelected
                   ? AppColors.accentOf(context)
-                  : Colors.white.withOpacity(0.6),
+                  : AppColors.mutedOf(context).withOpacity(0.6),
             ),
             const SizedBox(height: 4),
             Text(

@@ -199,9 +199,9 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
               Text(
                 'Speak your climate, waste, or commute question for ${widget.appState.baseline.cityWard}...',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 12,
-                  color: AppColors.lightTextSecondary,
+                  color: AppColors.champagneGold.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 20),
@@ -242,7 +242,7 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -384,7 +384,7 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                     'ClimateGPT is analyzing...',
                     style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.lightTextSecondary,
+                      color: AppColors.mutedOf(context),
                     ),
                   ),
                 ],

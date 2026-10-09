@@ -292,7 +292,7 @@ class _CommunityScreenState extends State<CommunityScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -331,7 +331,7 @@ class _CommunityScreenState extends State<CommunityScreen>
               labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
               labelStyle: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -365,10 +365,10 @@ class _CommunityScreenState extends State<CommunityScreen>
                             SizedBox(
                               height: MediaQuery.of(context).size.height * 0.2,
                             ),
-                            const Icon(
+                             Icon(
                               Icons.forum_outlined,
                               size: 60,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.champagneGold.withValues(alpha: 0.8),
                             ),
                             const SizedBox(height: 12),
                             Center(
@@ -390,9 +390,9 @@ class _CommunityScreenState extends State<CommunityScreen>
                                 child: Text(
                                   'Be the first to share an eco-deed in ${widget.appState.baseline.cityWard}! Tap the + button to share.',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style:  TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.lightTextSecondary,
+                                    color: AppColors.champagneGold.withValues(alpha: 0.8),
                                   ),
                                 ),
                               ),
@@ -454,10 +454,9 @@ class _CommunityScreenState extends State<CommunityScreen>
                                             ),
                                             Text(
                                               '${post['time']} • ${post['location']}',
-                                              style: const TextStyle(
+                                              style:  TextStyle(
                                                 fontSize: 11,
-                                                color: AppColors
-                                                    .lightTextSecondary,
+                                                color: AppColors.champagneGold.withValues(alpha: 0.8),
                                               ),
                                             ),
                                           ],
@@ -517,40 +516,38 @@ class _CommunityScreenState extends State<CommunityScreen>
                                               size: 18,
                                               color: post['isLiked']
                                                   ? AppColors.coral
-                                                  : AppColors
-                                                        .lightTextSecondary,
+                                                  : AppColors.champagneGold.withValues(alpha: 0.8),
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
                                               '${post['likes']}',
-                                              style: const TextStyle(
+                                              style:  TextStyle(
                                                 fontSize: 12,
-                                                color: AppColors
-                                                    .lightTextSecondary,
+                                                color: AppColors.champagneGold.withValues(alpha: 0.8),
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(width: 20),
-                                      const Icon(
+                                       Icon(
                                         Icons.chat_bubble_outline_rounded,
                                         size: 16,
-                                        color: AppColors.lightTextSecondary,
+                                        color: AppColors.champagneGold.withValues(alpha: 0.8),
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
                                         '${post['comments']}',
-                                        style: const TextStyle(
+                                        style:  TextStyle(
                                           fontSize: 12,
-                                          color: AppColors.lightTextSecondary,
+                                          color: AppColors.champagneGold.withValues(alpha: 0.8),
                                         ),
                                       ),
                                       const Spacer(),
-                                      const Icon(
+                                       Icon(
                                         Icons.share_outlined,
                                         size: 16,
-                                        color: AppColors.lightTextSecondary,
+                                        color: AppColors.champagneGold.withValues(alpha: 0.8),
                                       ),
                                     ],
                                   ),
@@ -571,7 +568,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                         Icon(
                           Icons.emoji_events_outlined,
                           size: 54,
-                          color: AppColors.lightTextSecondary.withValues(
+                          color: AppColors.mutedOf(context).withValues(
                             alpha: 0.5,
                           ),
                         ),
@@ -588,9 +585,9 @@ class _CommunityScreenState extends State<CommunityScreen>
                         Text(
                           'Community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 12,
-                            color: AppColors.lightTextSecondary,
+                            color: AppColors.mutedOf(context),
                           ),
                         ),
                       ],
@@ -608,7 +605,7 @@ class _CommunityScreenState extends State<CommunityScreen>
                         Icon(
                           Icons.group_outlined,
                           size: 54,
-                          color: AppColors.lightTextSecondary.withValues(
+                          color: AppColors.mutedOf(context).withValues(
                             alpha: 0.5,
                           ),
                         ),
@@ -625,9 +622,9 @@ class _CommunityScreenState extends State<CommunityScreen>
                         Text(
                           'Be the first to create an Eco Squad in ${widget.appState.baseline.cityWard}!',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 12,
-                            color: AppColors.lightTextSecondary,
+                            color: AppColors.mutedOf(context),
                           ),
                         ),
                       ],

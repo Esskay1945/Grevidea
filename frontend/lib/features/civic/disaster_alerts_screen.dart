@@ -526,9 +526,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                       ),
                       Text(
                         'Authoritative TMC Civil Defense Registry (${widget.appState.baseline.cityWard})',
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 11,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                     ],
@@ -581,9 +581,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                         children: [
                           Text(
                             '${s['location']} • ${s['distance']}',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 10.5,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                           Text(
@@ -649,7 +649,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -745,7 +745,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children:  [
                       Text(
                         'Regional Disaster Helpline',
                         style: TextStyle(
@@ -759,7 +759,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                     ],
@@ -793,7 +793,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               fontSize: 13,
               color: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
             ),
           ),
           const SizedBox(height: 12),
@@ -846,7 +846,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                     fontSize: 11.5,
                     color: isDark
                         ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
+                        : AppColors.mutedOf(context),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -1014,9 +1014,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                     const SizedBox(height: 2),
                     Text(
                       '$source • $timestamp',
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 10,
-                        color: AppColors.lightTextSecondary,
+                        color: AppColors.mutedOf(context),
                       ),
                     ),
                   ],
@@ -1031,7 +1031,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               fontSize: 11,
               color: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
             ),
           ),
         ],

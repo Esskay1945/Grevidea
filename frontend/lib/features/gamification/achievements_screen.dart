@@ -191,7 +191,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final unlockedCount = _achievementDefinitions
         .where((a) => a.isUnlocked(widget.appState))
@@ -232,7 +232,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
               labelStyle: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -295,7 +295,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                               shape: BoxShape.circle,
                               color: isUnlocked
                                   ? color.withValues(alpha: 0.15)
-                                  : AppColors.lightTextSecondary.withValues(
+                                  : AppColors.mutedOf(context).withValues(
                                       alpha: 0.1,
                                     ),
                               border: Border.all(
@@ -309,7 +309,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                               badge.icon,
                               color: isUnlocked
                                   ? color
-                                  : AppColors.lightTextSecondary,
+                                  : AppColors.mutedOf(context),
                               size: 22,
                             ),
                           ),
@@ -324,7 +324,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                               fontWeight: FontWeight.w700,
                               color: isUnlocked
                                   ? textColor
-                                  : AppColors.lightTextSecondary,
+                                  : AppColors.mutedOf(context),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -335,7 +335,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                               fontWeight: FontWeight.bold,
                               color: isUnlocked
                                   ? AppColors.leafOf(context)
-                                  : AppColors.lightTextSecondary,
+                                  : AppColors.mutedOf(context),
                             ),
                           ),
                         ],

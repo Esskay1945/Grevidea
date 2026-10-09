@@ -31,7 +31,7 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryTextColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -100,7 +100,7 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
                 fontWeight: FontWeight.w500,
                 color: isDark
                     ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
+                    : AppColors.mutedOf(context),
               ),
             ),
         ],
@@ -174,7 +174,7 @@ class GesturefulProfileAvatar extends StatelessWidget {
     final bg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     showModalBottomSheet(
       context: context,
@@ -193,7 +193,7 @@ class GesturefulProfileAvatar extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.lightTextSecondary.withValues(alpha: 0.4),
+                  color: AppColors.mutedOf(context).withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -247,7 +247,7 @@ class GesturefulProfileAvatar extends StatelessWidget {
                             fontSize: 12,
                             color: isDark
                                 ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary,
+                                : AppColors.mutedOf(context),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),

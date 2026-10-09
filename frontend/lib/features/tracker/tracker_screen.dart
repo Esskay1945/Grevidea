@@ -226,7 +226,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     final categories = _computeCategories();
     final trendPoints = _computeTrendPoints();
@@ -316,7 +316,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                 ? AppColors.accentOf(context)
                                 : (isDark
                                       ? AppColors.darkTextSecondary
-                                      : AppColors.lightTextSecondary),
+                                      : AppColors.mutedOf(context)),
                           ),
                         ),
                       ),
@@ -397,7 +397,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                         'Estimated ${['Day', 'Week', 'Month', 'Year'][_selectedPeriod]} Footprint',
                         style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -413,17 +413,17 @@ class _TrackerScreenState extends State<TrackerScreen> {
                               fontWeight: FontWeight.w900,
                               color: isDark
                                   ? AppColors.inkOf(context)
-                                  : AppColors.lightTextPrimary,
+                                  : AppColors.inkOf(context),
                               letterSpacing: -1,
                             ),
                           ),
                           const SizedBox(width: 6),
-                          const Text(
+                           Text(
                             'kg CO₂',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                         ],
@@ -626,11 +626,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const Text(
+                             Text(
                               'OpenStreetMap Live',
                               style: TextStyle(
                                 fontSize: 9.5,
-                                color: AppColors.lightTextSecondary,
+                                color: AppColors.mutedOf(context),
                               ),
                             ),
                           ],
@@ -761,7 +761,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                         'kg CO₂',
                         style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -789,54 +789,54 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children:  [
                       Text(
                         'Mon',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                       Text(
                         'Tue',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                       Text(
                         'Wed',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                       Text(
                         'Thu',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                       Text(
                         'Fri',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                       Text(
                         'Sat',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                       Text(
                         'Sun',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.lightTextSecondary,
+                          color: AppColors.mutedOf(context),
                         ),
                       ),
                     ],

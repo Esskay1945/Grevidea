@@ -326,37 +326,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isSelected = _currentTabIndex == index;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return InkWell(
-      onTap: () => widget.appState.setMainTab(index),
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: isSelected
-                  ? AppColors.accentOf(context)
-                  : (isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+    return Expanded(
+      child: InkWell(
+        onTap: () => widget.appState.setMainTab(index),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 22,
                 color: isSelected
                     ? AppColors.accentOf(context)
                     : (isDark
                           ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary),
+                          : AppColors.mutedOf(context)),
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                    color: isSelected
+                        ? AppColors.accentOf(context)
+                        : (isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.mutedOf(context)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -367,7 +372,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return ResponsiveWrapper(
       child: SingleChildScrollView(
@@ -401,7 +406,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           fontSize: 12,
                           color: isDark
                               ? AppColors.darkTextSecondary
-                              : AppColors.lightTextSecondary,
+                              : AppColors.mutedOf(context),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -461,28 +466,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                '${widget.appState.score}',
-                                style: TextStyle(
-                                  fontSize: 42,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.accentOf(context),
-                                  letterSpacing: -1,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Text(
+                                  '${widget.appState.score}',
+                                  style: TextStyle(
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColors.accentOf(context),
+                                    letterSpacing: -1,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                ' /100',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: AppColors.mutedOf(context),
-                                  fontWeight: FontWeight.bold,
+                                Text(
+                                  ' /100',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: AppColors.mutedOf(context),
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -592,23 +601,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.bolt_rounded,
-                      color: AppColors.accentOf(context),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "Today's Easy Tasks",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: textColor,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.bolt_rounded,
+                        color: AppColors.accentOf(context),
+                        size: 20,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          "Today's Easy Tasks",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: textColor,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 TextButton.icon(
                   onPressed: () {
@@ -689,7 +704,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   () => task['checked'] = value == true,
                                 ),
                           activeColor: AppColors.accentOf(context),
-                          checkColor: isDark ? AppColors.midnightObsidian : Colors.white,
+                          checkColor: isDark
+                              ? AppColors.midnightObsidian
+                              : Colors.white,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -704,7 +721,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: isDark
                                     ? AppColors.darkTextPrimary
-                                    : AppColors.lightTextPrimary,
+                                    : AppColors.inkOf(context),
                                 decoration: isDone
                                     ? TextDecoration.lineThrough
                                     : null,
@@ -719,7 +736,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 fontSize: 10,
                                 color: isDark
                                     ? AppColors.darkTextSecondary
-                                    : AppColors.lightTextSecondary,
+                                    : AppColors.mutedOf(context),
                               ),
                             ),
                           ],
@@ -754,7 +771,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             fontWeight: FontWeight.bold,
                             color: isDone
                                 ? AppColors.accentOf(context)
-                                : AppColors.champagneGold,
+                                : task['checked'] == true
+                                    ? AppColors.champagneGold
+                                    : AppColors.mutedOf(context),
                           ),
                         ),
                       ),
@@ -819,9 +838,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 8.5,
-                color: AppColors.lightTextSecondary,
+                color: AppColors.mutedOf(context),
               ),
             ),
             const SizedBox(height: 2),
@@ -889,9 +908,9 @@ class _MiniLegend extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 9.0,
-                color: AppColors.lightTextSecondary,
+                color: AppColors.mutedOf(context),
               ),
             ),
           ),

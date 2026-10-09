@@ -36,7 +36,7 @@ class _InsightsScreenState extends State<InsightsScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -72,7 +72,7 @@ class _InsightsScreenState extends State<InsightsScreen>
               labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
+                  : AppColors.mutedOf(context),
               labelStyle: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -356,7 +356,7 @@ class _InsightsScreenState extends State<InsightsScreen>
                       'Adopting plant-based lunches triggered a 14% reduction in transport emissions within 14 days.',
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.lightTextSecondary,
+                        color: AppColors.mutedOf(context),
                       ),
                     ),
                   ],
@@ -512,9 +512,9 @@ class _InsightsScreenState extends State<InsightsScreen>
                 ),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
               ],

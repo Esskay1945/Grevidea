@@ -54,7 +54,7 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.lightTextSecondary.withValues(alpha: 0.4),
+                    color: AppColors.mutedOf(context).withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -64,11 +64,11 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                 Text(
                   'Scan a product barcode or packaging in real time',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -259,7 +259,7 @@ class _ScanProductScreenState extends State<ScanProductScreen>
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final textColor = isDark
         ? AppColors.darkTextPrimary
-        : AppColors.lightTextPrimary;
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -281,7 +281,7 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                 fontSize: 12,
                 color: isDark
                     ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
+                    : AppColors.mutedOf(context),
               ),
             ),
           ),
@@ -519,9 +519,9 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                           const SizedBox(height: 2),
                           Text(
                             _scannedProduct?['brand'] ?? 'Unavailable',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 12,
-                              color: AppColors.lightTextSecondary,
+                              color: AppColors.mutedOf(context),
                             ),
                           ),
                         ],
@@ -576,9 +576,9 @@ class _ScanProductScreenState extends State<ScanProductScreen>
 
                 Text(
                   _scannedProduct?['packaging'] ?? 'Packaging data unavailable',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 11,
-                    color: AppColors.lightTextSecondary,
+                    color: AppColors.mutedOf(context),
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -657,9 +657,9 @@ class _ScanProductScreenState extends State<ScanProductScreen>
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style:  TextStyle(
             fontSize: 11,
-            color: AppColors.lightTextSecondary,
+            color: AppColors.mutedOf(context),
             fontWeight: FontWeight.w600,
           ),
         ),
