@@ -1,5 +1,5 @@
 """Real gateway/PostGIS/WS with LOCAL partner fixtures and disposable identities."""
-import asyncio,datetime,json,time,uuid,os,hashlib,hmac,urllib.request,urllib.error
+import asyncio,datetime,json,time,uuid,os,hashlib,hmac,math,urllib.request,urllib.error
 from gateway_acceptance import request,data
 
 def callback(body,valid=True):
@@ -41,7 +41,7 @@ def run():
     history=data(request('/api/v1/activities?days=366',token=owner))['activities'];assert len(history)==2
     transport=next(r for r in history if r['category']=='Transport');assert transport['co2_delta_kg']==-triprow['co2_saved_kg']
     route=data(request('/api/v1/location/route',{'profile':'foot','origin_lat':19.2183,'origin_lon':72.9781,'destination_lat':19.22,'destination_lon':72.98},owner));assert route['profile']=='foot' and route['routes'][0]['distance']==1234.5
-    station_route=data(request('/api/v1/location/route',{'origin_lat':19.2183,'origin_lon':72.9781,'destination_lat':19.22,'destination_lon':72.98},owner));assert station_route['air_quality_scores'][0]['mean_station_pm2_5_ug_m3']==12.
+    station_route=data(request('/api/v1/location/route',{'origin_lat':19.2183,'origin_lon':72.9781,'destination_lat':19.22,'destination_lon':72.98},owner));assert math.isclose(station_route['air_quality_scores'][0]['mean_station_pm2_5_ug_m3'],12.,abs_tol=1e-9),station_route['air_quality_scores']
     inference=data(request('/api/v1/transit/infer',{'peak_speed_kmh':40,'points':[{'latitude':lat,'longitude':72.9,'accuracy':10} for lat in (19.2,19.21,19.22)]},owner));assert inference['mode']=='metro'
     hazards=data(request('/api/v1/hazards?lat=19.2&lon=72.9',token=owner));assert hazards['official_status']=='available' and hazards['alerts'][0]['id']=='fixture-flood'
     assert request('/api/v1/trusted-contacts',{'name':'Contact','phone':'+919876543210','consent_attested':False},owner)[0]==400
