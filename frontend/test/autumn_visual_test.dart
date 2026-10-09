@@ -81,7 +81,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
         if (page == 'menu') {
           await tester.tap(find.byTooltip('All 58 Features & Modules'));
+          await tester.pump();
           await tester.pump(const Duration(milliseconds: 500));
+          expect(find.byType(Drawer), findsOneWidget);
         }
         expect(tester.takeException(), isNull);
         await tester.runAsync(() async {
