@@ -59,6 +59,7 @@ class UserBaselineProfile {
 }
 
 class ActivityLogItem {
+  final String? clientId;
   final String title;
   final String category;
   final String subtitle;
@@ -67,6 +68,7 @@ class ActivityLogItem {
   final DateTime timestamp;
 
   ActivityLogItem({
+    this.clientId,
     required this.title,
     required this.category,
     required this.subtitle,
@@ -76,6 +78,7 @@ class ActivityLogItem {
   });
 
   Map<String, dynamic> toJson() => {
+        'clientId': clientId,
         'title': title,
         'category': category,
         'subtitle': subtitle,
@@ -101,6 +104,7 @@ class ActivityLogItem {
 
   factory ActivityLogItem.fromJson(Map<String, dynamic> json) =>
       ActivityLogItem(
+        clientId: json['clientId'] as String?,
         title: json['title'] as String? ?? 'Activity',
         category: json['category'] as String? ?? 'General',
         subtitle: json['subtitle'] as String? ?? '',
@@ -132,15 +136,22 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   bool _syncing = false;
   String get _outboxKey => 'grevidea_outbox_$_userEmail';
   Future<void> _enqueue(String path, Map<String, dynamic> data) async {
+    final owner = _userEmail;
+    final key = _outboxKey;
     _prefs ??= await SharedPreferences.getInstance();
-    final entries = _prefs!.getStringList(_outboxKey) ?? [];
+    final entries = _prefs!.getStringList(key) ?? [];
     entries.add(jsonEncode({'path': path, 'data': data}));
-    await _prefs!.setStringList(_outboxKey, entries);
-    unawaited(syncPendingLedger());
+    await _prefs!.setStringList(key, entries);
+    if (owner == _userEmail) unawaited(syncPendingLedger());
   }
 
+  List<String> get failedSyncEntries =>
+      _prefs?.getStringList('failed_$_outboxKey') ?? [];
   Future<void> syncPendingLedger() async {
-    if (_syncing || !_isAuthenticated || _prefs == null) return;
+    if (_syncing ||
+        !_isAuthenticated ||
+        _prefs == null ||
+        _api.authenticatedEmail != _userEmail.toLowerCase()) return;
     _syncing = true;
     final owner = _userEmail;
     final key = _outboxKey;
@@ -149,9 +160,16 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
         final entries = _prefs!.getStringList(key) ?? [];
         if (entries.isEmpty) break;
         final entry = jsonDecode(entries.first) as Map<String, dynamic>;
-        final response = await _api.request(entry['path'] as String,
+        final response = await _api.requestDetailed(entry['path'] as String,
             data: Map<String, dynamic>.from(entry['data']));
-        if (response == null || _userEmail != owner) break;
+        if (_userEmail != owner ||
+            _api.authenticatedEmail != owner.toLowerCase()) break;
+        if (response.data == null && !response.permanentFailure) break;
+        if (response.permanentFailure) {
+          final failed = _prefs!.getStringList('failed_$key') ?? [];
+          failed.add(jsonEncode({...entry, 'status': response.status}));
+          await _prefs!.setStringList('failed_$key', failed);
+        }
         final latest = _prefs!.getStringList(key) ?? [];
         if (latest.isNotEmpty && latest.first == entries.first) {
           latest.removeAt(0);
@@ -159,6 +177,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
         }
       }
       if (_userEmail == owner) {
+        await refreshSharedHistory();
         final balance = await _api.request('/api/v1/points');
         if (balance?['total_points'] is num &&
             (_prefs!.getStringList(key) ?? []).isEmpty)
@@ -169,19 +188,86 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  bool _refreshingHistory = false;
+  Future<void> refreshSharedHistory() async {
+    if (_refreshingHistory ||
+        !_isAuthenticated ||
+        _api.authenticatedEmail != _userEmail.toLowerCase()) return;
+    _refreshingHistory = true;
+    final owner = _userEmail;
+    try {
+      final history = await _api.request('/api/v1/activities?days=366');
+      if (owner != _userEmail || history?['activities'] is! List) return;
+      final merged = <String, ActivityLogItem>{};
+      for (final a in _recentActivities) {
+        if (a.clientId != null) merged[a.clientId!] = a;
+      }
+      for (final value in history['activities']) {
+        final row = Map<String, dynamic>.from(value);
+        final id = row['client_id'] as String;
+        merged[id] = ActivityLogItem(
+            clientId: id,
+            title: row['title'] as String,
+            category: row['category'] as String,
+            subtitle: row['subtitle'] as String? ?? '',
+            co2Kg: (row['co2_delta_kg'] as num).toDouble(),
+            icon: ActivityLogItem._categoryToIcon(row['category'] as String),
+            timestamp: DateTime.parse(row['occurred_at'] as String).toLocal());
+      }
+      final legacy =
+          _recentActivities.where((a) => a.clientId == null).toList();
+      _recentActivities
+        ..clear()
+        ..addAll([...merged.values, ...legacy]
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp)));
+      final remoteBaseline = await _api.request('/api/v1/baseline');
+      final pendingBaseline = (_prefs?.getStringList(_outboxKey) ?? [])
+          .any((e) => jsonDecode(e)['path'] == '/api/v1/baseline');
+      if (owner == _userEmail &&
+          !pendingBaseline &&
+          remoteBaseline?['profile'] is Map) {
+        _baseline = UserBaselineProfile.fromJson(
+            Map<String, dynamic>.from(remoteBaseline['profile']));
+        _hasCompletedOnboarding = remoteBaseline['completed'] == true;
+      }
+      if (owner == _userEmail) {
+        recalculateMetrics();
+        _saveCurrentUserToDb();
+        notifyListeners();
+      }
+    } finally {
+      _refreshingHistory = false;
+    }
+  }
+
   AppState() {
     recalculateMetrics();
     WidgetsBinding.instance.addObserver(this);
     _initBackend();
     _locationService.addListener(_locationChanged);
-    _tripSubscription = _locationService.completedTrips.listen((trip) {
+    _tripSubscription = _locationService.completedTrips.listen((trip) async {
+      final owner = _userEmail;
+      if (!_isAuthenticated) return;
+      if (trip.mode == 'unknown_transit' &&
+          _selectedTransitMode == null &&
+          trip.points.length >= 3) {
+        final inference = await _api.request('/api/v1/transit/infer',
+            data: {'points': trip.points, 'peak_speed_kmh': trip.peakSpeedKmh});
+        if (owner != _userEmail || !_isAuthenticated) return;
+        if (inference?['confidence'] is num &&
+            inference['confidence'] >= 0.9 &&
+            ['metro', 'train'].contains(inference['mode'])) {
+          await recordTrip(trip, inference['mode']);
+          return;
+        }
+      }
       if (trip.mode == 'unknown_transit') {
         if (_selectedTransitMode != null) {
           recordTrip(trip, _selectedTransitMode!);
           _selectedTransitMode = null;
           return;
         }
-        _pendingTrip = trip;
+        if (!_pendingTrips.any((t) => t.id == trip.id)) _pendingTrips.add(trip);
         notifyListeners();
         return;
       }
@@ -190,7 +276,9 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   StreamSubscription<TravelTrip>? _tripSubscription;
-  TravelTrip? _pendingTrip;
+  final List<TravelTrip> _pendingTrips = [];
+  TravelTrip? get _pendingTrip =>
+      _pendingTrips.isEmpty ? null : _pendingTrips.first;
   String? _selectedTransitMode;
   void selectTransitMode(String mode) {
     if (_pendingTrip != null) {
@@ -203,12 +291,18 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   TravelTrip? get pendingTrip => _pendingTrip;
   void _locationChanged() => notifyListeners();
   Future<void> recordTrip(TravelTrip trip, String mode) async {
+    final tripOwner = _userEmail;
+    final tripId = trip.id ?? 'trip-${DateTime.now().microsecondsSinceEpoch}';
     final calculation =
         await _api.calculateCarbon(mode: mode, distanceKm: trip.distanceKm);
+    if (tripOwner != _userEmail || !_isAuthenticated) return;
     final emitted = (calculation['co2_kg'] as num?)?.toDouble() ?? 0;
     final saved =
         (trip.distanceKm * .192 - emitted).clamp(0.0, double.infinity);
     await logActivity(
+        clientId: tripId,
+        timestamp: trip.finishedAt,
+        syncToServer: false,
         title: '$mode trip',
         category: 'Transport',
         subtitle:
@@ -220,9 +314,12 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     await _enqueue('/api/v1/carbon/log', {
       'mode': mode,
       'distance_km': trip.distanceKm,
-      'client_id': 'trip-${DateTime.now().microsecondsSinceEpoch}'
+      'client_id': tripId,
+      'occurred_at':
+          (trip.finishedAt ?? DateTime.now()).toUtc().toIso8601String()
     });
-    _pendingTrip = null;
+    if (trip.id != null) await _locationService.acknowledgeTrip(trip.id!);
+    _pendingTrips.removeWhere((t) => t.id == trip.id);
     notifyListeners();
   }
 
@@ -257,8 +354,14 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
       final currentEmail = _prefs?.getString('grevidea_current_user_email');
       if (currentEmail != null && currentEmail.isNotEmpty) {
         _loadUserFromDb(currentEmail);
-        if (_userPassword.isNotEmpty)
-          await _api.login(_userEmail, _userPassword);
+        if (_userPassword.isNotEmpty) {
+          final owner = _userEmail;
+          unawaited(_api.login(_userEmail, _userPassword).then((_) async {
+            if (owner != _userEmail || !_isAuthenticated) return;
+            await syncPendingLedger();
+            await refreshSharedHistory();
+          }));
+        }
       } else {
         // Default clean state for first launch before login
         _isAuthenticated = false;
@@ -270,6 +373,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
           const Duration(minutes: 1), (_) => syncPendingLedger());
       unawaited(syncPendingLedger());
       // Acquire live GPS coordinates
+      await _locationService.bindAccount(_isAuthenticated ? _userEmail : null);
       await _locationService.startSilentTracking();
     } catch (e) {
       debugPrint('Error initializing AppState persistence: $e');
@@ -361,6 +465,8 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
 
   void completeOnboarding() {
     _hasCompletedOnboarding = true;
+    _enqueue(
+        '/api/v1/baseline', {'profile': _baseline.toJson(), 'completed': true});
     _saveCurrentUserToDb();
     notifyListeners();
   }
@@ -388,6 +494,8 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
       primaryGoal: primaryGoal,
     );
     _hasCompletedOnboarding = true;
+    _enqueue(
+        '/api/v1/baseline', {'profile': _baseline.toJson(), 'completed': true});
     _saveCurrentUserToDb();
     recalculateMetrics();
     notifyListeners();
@@ -563,17 +671,24 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     required String subtitle,
     required double co2Kg,
     required IconData icon,
-    int pointsEarned = 15,
+    int pointsEarned = 0,
+    String? clientId,
+    bool syncToServer = true,
+    DateTime? timestamp,
   }) async {
+    clientId ??= 'activity-${DateTime.now().microsecondsSinceEpoch}';
+    if (_recentActivities.any((a) => a.clientId == clientId)) return;
+    final occurredAt = timestamp ?? DateTime.now();
     _recentActivities.insert(
       0,
       ActivityLogItem(
+        clientId: clientId,
         title: title,
         category: category,
         subtitle: subtitle,
         co2Kg: co2Kg,
         icon: icon,
-        timestamp: DateTime.now(),
+        timestamp: occurredAt,
       ),
     );
     _greenPoints += pointsEarned;
@@ -581,7 +696,16 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     _saveCurrentUserToDb();
     notifyListeners();
 
-    // Habit estimates stay local; trip endpoints require a real mode and distance.
+    if (syncToServer)
+      await _enqueue('/api/v1/activities', {
+        'client_id': clientId,
+        'category': category,
+        'title': title,
+        'subtitle': subtitle,
+        'co2_delta_kg': co2Kg,
+        'occurred_at': occurredAt.toUtc().toIso8601String()
+      });
+    // Estimates are user-reported; the server's authoritative point ledger is separate.
     // Do not invent a five-kilometre trip for unrelated food/energy/waste actions.
   }
 
@@ -651,6 +775,8 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _loadUserFromDb(String email) {
+    _pendingTrips.clear();
+    _selectedTransitMode = null;
     final db = _getUsersDb();
     final user = db[email.trim().toLowerCase()];
     if (user != null && user is Map<String, dynamic>) {
@@ -768,6 +894,9 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     }
     _isAuthenticated = true;
     _saveCurrentUserToDb();
+    _locationService
+        .bindAccount(_userEmail)
+        .then((_) => _locationService.startSilentTracking());
 
     // Async sync with Axum
     _api.login(cleanEmail, password).then((res) {
@@ -803,6 +932,8 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
       return true;
     }
 
+    _pendingTrips.clear();
+    _selectedTransitMode = null;
     // Brand new user: empty zero-state
     _userEmail = cleanEmail;
     _userName =
@@ -816,6 +947,9 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     _isAuthenticated = true;
 
     _saveCurrentUserToDb();
+    _locationService
+        .bindAccount(_userEmail)
+        .then((_) => _locationService.startSilentTracking());
 
     // Async sync with Axum
     _api.register(
@@ -826,7 +960,10 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void logout() {
+    _pendingTrips.clear();
+    _selectedTransitMode = null;
     _isAuthenticated = false;
+    _locationService.bindAccount(null);
     _prefs?.remove('grevidea_current_user_email');
     _api.setAuthToken(null);
     notifyListeners();

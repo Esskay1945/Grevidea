@@ -89,6 +89,8 @@ pub async fn log_carbon_trip(
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
     if !req.distance_km.is_finite() || !(0.0..=2000.0).contains(&req.distance_km) || req.passengers == Some(0) { return Err(AppError::BadRequest("Distance must be 0–2000 km and passenger count positive".into())); }
+    let occurred_at=req.occurred_at.unwrap_or_else(Utc::now);
+    if occurred_at>Utc::now()+chrono::Duration::minutes(5) || occurred_at<Utc::now()-chrono::Duration::days(366){return Err(AppError::BadRequest("Invalid trip timestamp".into()));}
     let emitted = emission_factor(&req.mode) * req.distance_km / req.passengers.unwrap_or(1) as f64;
     let baseline = car_baseline(req.distance_km);
     let saved = (baseline - emitted).max(0.0);
@@ -104,8 +106,8 @@ pub async fn log_carbon_trip(
     }
 
     let log = sqlx::query_as::<_, CarbonLog>(
-        r#"INSERT INTO carbon_logs (user_id, mode, distance_km, co2_kg, co2_saved_kg, green_points, client_id)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)
+        r#"INSERT INTO carbon_logs (user_id, mode, distance_km, co2_kg, co2_saved_kg, green_points, client_id,logged_at)
+           VALUES ($1, $2, $3, $4, $5, $6, $7,$8)
            RETURNING id, user_id, mode, distance_km, co2_kg, co2_saved_kg, green_points, logged_at"#
     )
     .bind(user_id)
@@ -115,9 +117,15 @@ pub async fn log_carbon_trip(
     .bind(saved)
     .bind(points)
     .bind(&req.client_id)
+    .bind(occurred_at)
     .fetch_one(&mut *tx)
     .await?;
 
+    let activity_id=req.client_id.clone().unwrap_or_else(||format!("server-trip-{}",log.id));
+    {
+        let client_id=&activity_id;
+        sqlx::query("INSERT INTO activity_events(user_id,client_id,category,title,subtitle,co2_delta_kg,occurred_at) VALUES($1,$2,'Transport',$3,$4,$5,$6) ON CONFLICT(user_id,client_id) DO NOTHING").bind(user_id).bind(client_id).bind(format!("{} trip",req.mode)).bind(format!("{:.2} km; emitted {:.3} kg; saved {:.3} kg versus driving",req.distance_km,emitted,saved)).bind(-saved).bind(occurred_at).execute(&mut *tx).await?;
+    }
     // Award Green Points
     sqlx::query(
         "INSERT INTO green_points_ledger (user_id, delta, reason, reference_id) VALUES ($1, $2, $3, $4)"

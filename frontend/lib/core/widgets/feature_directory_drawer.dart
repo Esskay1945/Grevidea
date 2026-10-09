@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../features/integrations/delivery_center_screen.dart';
 import '../../features/profile/ecosystem_catalog_screen.dart';
 import '../../features/community/nearby_board_screen.dart';
 import '../theme/app_colors.dart';
@@ -292,6 +293,13 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                     onTap: () => _navigateTo(
                         context, SettingsScreen(appState: appState)),
                   ),
+                  Material(
+                      color: Colors.transparent,
+                      child: ListTile(
+                          leading: const Icon(Icons.local_shipping_outlined),
+                          title: const Text('Deliveries & emergency contacts'),
+                          onTap: () => _navigateTo(context,
+                              DeliveryCenterScreen(appState: appState)))),
                   const SizedBox(height: 24),
                 ],
               ),

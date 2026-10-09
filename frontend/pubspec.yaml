@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
+  web_socket_channel: ^3.0.1
   http: ^1.2.2
   battery_plus: ^6.2.1
   mobile_scanner: ^7.0.1

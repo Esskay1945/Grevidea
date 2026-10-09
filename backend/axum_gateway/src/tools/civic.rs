@@ -88,6 +88,9 @@ pub async fn submit_pollution_report(
     let user_id = Uuid::parse_str(&auth.0.sub)
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
+    super::live::validate_coordinates(req.latitude,req.longitude)?;
+    if req.description.trim().is_empty() || req.description.len()>4000 || !(1..=5).contains(&req.severity) || req.photo_url.as_ref().is_some_and(|s|s.len()>1500000) {return Err(AppError::BadRequest("Invalid complaint/attachment".into()));}
+    let mut tx=state.db.begin().await?;
     let report = sqlx::query_as::<_, PollutionReport>(
         r#"INSERT INTO pollution_reports (user_id, report_type, description, severity, latitude, longitude, photo_url)
            VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -100,7 +103,7 @@ pub async fn submit_pollution_report(
     .bind(req.latitude)
     .bind(req.longitude)
     .bind(&req.photo_url)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await?;
 
     // Award points for civic action
@@ -109,8 +112,10 @@ pub async fn submit_pollution_report(
     )
     .bind(user_id)
     .bind(report.id)
-    .execute(&state.db).await?;
+    .execute(&mut *tx).await?;
 
+    super::delivery::enqueue(&mut tx,user_id,report.id,"civic",json!({"complaint":report})).await?;
+    tx.commit().await?;
     // Log to Brain Mythos
     state.brain.log_event("pollution_reported", Some(&auth.0.sub), json!({
         "type": req.report_type,
@@ -119,7 +124,7 @@ pub async fn submit_pollution_report(
         "lon": req.longitude,
     })).await;
 
-    Ok(Json(ApiResponse::with_message(report, "+25 Green Points for civic reporting!")))
+    Ok(Json(ApiResponse::with_message(report, "Complaint stored; municipal handoff status is available in Deliveries")))
 }
 
 // ── T33 — Green Zone Finder ───────────────────────────────────────────────────
@@ -278,7 +283,7 @@ pub async fn create_sos(
     State(state): State<AppState>,
     auth: AuthUser,
     Json(req): Json<DisasterSosRequest>,
-) -> AppResult<Json<ApiResponse<SosRequest>>> {
+) -> AppResult<Json<ApiResponse<serde_json::Value>>> {
     let user_id = Uuid::parse_str(&auth.0.sub)
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
@@ -286,6 +291,7 @@ pub async fn create_sos(
     if req.people_count == 0 || req.battery_percent.is_some_and(|b| !(0..=100).contains(&b)) {
         return Err(AppError::BadRequest("Invalid SOS people count or battery level".into()));
     }
+    let mut tx=state.db.begin().await?;
     let needs_json = serde_json::to_value(&req.needs).unwrap();
     let sos = sqlx::query_as::<_, SosRequest>(
         r#"INSERT INTO sos_requests (user_id, disaster_type, description, needs, people_count, latitude, longitude, battery_percent, street_address)
@@ -299,10 +305,12 @@ pub async fn create_sos(
     .bind(req.people_count as i32)
     .bind(req.latitude)
     .bind(req.longitude)
-    .bind(req.battery_percent).bind(req.street_address)
-    .fetch_one(&state.db)
+    .bind(req.battery_percent).bind(&req.street_address)
+    .fetch_one(&mut *tx)
     .await?;
 
+    let delivery_id=super::delivery::enqueue(&mut tx,user_id,sos.id,"sos",json!({"sos":sos,"battery_percent":req.battery_percent,"street_address":req.street_address})).await?;
+    tx.commit().await?;
     state.brain.log_event("sos_created", Some(&auth.0.sub), json!({
         "sos_id": sos.id,
         "disaster_type": req.disaster_type,
@@ -312,7 +320,9 @@ pub async fn create_sos(
         "priority": "critical"
     })).await;
 
-    Ok(Json(ApiResponse::with_message(sos, "SOS stored in Grevidea. Emergency services and contacts have not been notified.")))
+    let mut result=serde_json::to_value(sos).map_err(|_|AppError::Internal("Unable to encode SOS".into()))?;
+    result["delivery_id"]=json!(delivery_id);result["delivery_status"]=json!("queued");
+    Ok(Json(ApiResponse::with_message(result,"SOS saved and queued; inspect the provider receipt for delivery confirmation")))
 }
 
 pub async fn get_nearby_sos(

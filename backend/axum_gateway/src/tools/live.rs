@@ -47,13 +47,31 @@ pub async fn geocode(State(state): State<AppState>, _auth: AuthUser, Query(q): Q
     Ok(Json(ApiResponse::ok(result?)))
 }
 #[derive(Deserialize)]
-pub struct Route { pub origin_lat: f64, pub origin_lon: f64, pub destination_lat: f64, pub destination_lon: f64 }
+pub struct Route { pub profile:Option<String>, pub origin_lat: f64, pub origin_lon: f64, pub destination_lat: f64, pub destination_lon: f64 }
 pub async fn route(State(state): State<AppState>, _auth: AuthUser, Json(r): Json<Route>) -> AppResult<Json<ApiResponse<Value>>> {
     validate_coordinates(r.origin_lat,r.origin_lon)?; validate_coordinates(r.destination_lat,r.destination_lon)?;
-    let url = format!("https://router.project-osrm.org/route/v1/driving/{},{};{},{}",r.origin_lon,r.origin_lat,r.destination_lon,r.destination_lat);
+    let profile=r.profile.as_deref().unwrap_or("driving");
+    let base=match profile {
+      "driving"=>std::env::var("OSRM_ROUTER_BASE").unwrap_or("https://router.project-osrm.org/route/v1/driving".into()),
+      "foot"=>std::env::var("WALK_ROUTER_BASE").unwrap_or("https://routing.openstreetmap.de/routed-foot/route/v1/foot".into()),
+      _=>return Err(AppError::BadRequest("Routing profile must be driving or foot".into()))
+    };
+    let url = format!("{}/{},{};{},{}",base.trim_end_matches('/'),r.origin_lon,r.origin_lat,r.destination_lon,r.destination_lat);
+    // Public pedestrian demo has a global one-request-per-second limit.
+    let gate=if profile=="foot" {let mut last=nominatim_gate().lock().await;if let Some(instant)=*last {tokio::time::sleep(std::time::Duration::from_secs(1).saturating_sub(instant.elapsed())).await;}*last=Some(std::time::Instant::now());Some(last)}else{None};
     let mut data = fetch(&state,&url,&[("overview","full".into()),("geometries","geojson".into()),("alternatives","true".into())]).await?;
+    drop(gate);
     if data["code"] != "Ok" { return Err(AppError::NotFound("No road route found".into())); }
     data["attribution"] = json!("© OpenStreetMap contributors; OSRM road routing. Transit comparisons are estimates, not railway routes.");
+    data["profile"]=json!(profile);
+    if profile=="foot" {data["attribution"]=json!("© OpenStreetMap contributors; FOSSGIS/OSRM pedestrian routing");return Ok(Json(ApiResponse::ok(data)));}
+    if let Ok(scores)=super::air_stations::fetch_scores(&state,&data["routes"],r.origin_lat,r.origin_lon).await {
+        let cleanest=scores.iter().filter_map(|s|Some((s["route_index"].as_u64()?,s["pm2_5_distance_integral"].as_f64()?))).min_by(|a,b|a.1.total_cmp(&b.1)).map(|s|s.0);
+        data["air_quality_scores"]=json!(scores);
+        data["cleanest_route_index"]=json!(cleanest);
+        data["air_quality_status"]=json!("Fresh station PM2.5, nearest within 2 km, distance-weighted; route ranking requires at least 80% coverage. Spatial estimate, not a health guarantee.");
+        return Ok(Json(ApiResponse::ok(data)));
+    }
     let scoring = async {
     let mut scored = Vec::new();
     for (index, r) in data["routes"].as_array().unwrap_or(&vec![]).iter().take(3).enumerate() {
@@ -171,15 +189,18 @@ pub async fn claim_habit(State(state):State<AppState>, auth:AuthUser, Json(req):
     Ok(Json(ApiResponse::ok(json!({"claimed":true,"points_earned":points}))))
 }
 #[derive(Deserialize)]
-pub struct Redemption { pub reward_id:String }
+pub struct Redemption { pub reward_id:String, pub delivery_address:Option<String>, pub phone:Option<String> }
 pub async fn redeem_reward(State(state):State<AppState>, auth:AuthUser, Json(req):Json<Redemption>) -> AppResult<Json<ApiResponse<Value>>> {
+    if req.delivery_address.as_ref().is_some_and(|v|v.len()>2000) || req.phone.as_ref().is_some_and(|v|!super::delivery::valid_phone(v)){return Err(AppError::BadRequest("Invalid delivery address or phone".into()));}
+    if req.reward_id=="eco_merchandise" && !req.delivery_address.as_ref().is_some_and(|v|!v.trim().is_empty()){return Err(AppError::BadRequest("Merchandise requires a delivery address".into()));}
     let cost=match req.reward_id.as_str(){"plant_tree"=>100,"eco_merchandise"=>400,"donate_ngo"=>250,_=>return Err(AppError::BadRequest("Unknown reward".into()))};
     let user=uid(&auth)?;let mut tx=state.db.begin().await?;
     sqlx::query("SELECT id FROM users WHERE id=$1 FOR UPDATE").bind(user).fetch_one(&mut *tx).await?;
     let balance:i64=sqlx::query_scalar("SELECT COALESCE(SUM(delta),0)::bigint FROM green_points_ledger WHERE user_id=$1").bind(user).fetch_one(&mut *tx).await?;
     if balance<i64::from(cost){return Err(AppError::BadRequest("Not enough Green Points".into()));}
-    let id:Uuid=sqlx::query_scalar("INSERT INTO reward_redemptions(user_id,reward_id,cost) VALUES($1,$2,$3) RETURNING id").bind(user).bind(req.reward_id).bind(cost).fetch_one(&mut *tx).await?;
+    let id:Uuid=sqlx::query_scalar("INSERT INTO reward_redemptions(user_id,reward_id,cost) VALUES($1,$2,$3) RETURNING id").bind(user).bind(&req.reward_id).bind(cost).fetch_one(&mut *tx).await?;
     sqlx::query("INSERT INTO green_points_ledger(user_id,delta,reason,reference_id) VALUES($1,$2,'Reward redemption',$3)").bind(user).bind(-cost).bind(id).execute(&mut *tx).await?;
+    let delivery_id=super::delivery::enqueue(&mut tx,user,id,"reward",json!({"reward_id":req.reward_id,"cost":cost,"delivery_address":req.delivery_address,"phone":req.phone})).await?;
     tx.commit().await?;
-    Ok(Json(ApiResponse::ok(json!({"id":id,"balance":balance-i64::from(cost),"status":"pending_fulfillment"}))))
+    Ok(Json(ApiResponse::ok(json!({"id":id,"delivery_id":delivery_id,"balance":balance-i64::from(cost),"status":"pending_fulfillment"}))))
 }

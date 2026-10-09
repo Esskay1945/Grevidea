@@ -59,6 +59,7 @@ pub struct AuthResponse {
 
 #[derive(Debug, Deserialize)]
 pub struct CarbonCalcRequest {
+    pub occurred_at: Option<DateTime<Utc>>,
     pub client_id: Option<String>,
     pub mode: String,        // "car" | "bus" | "train" | "cycle" | "walk" | "flight" | "motorbike"
     pub distance_km: f64,

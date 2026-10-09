@@ -32,6 +32,21 @@ jobs:
       DATABASE_URL: postgres://grevidea_test:disposable_test_password@localhost:5432/grevidea_test
       JWT_SECRET: ephemeral-ci-secret-only-for-disposable-data
       BRAIN_URL: http://127.0.0.1:8000
+      ALLOW_LOCAL_TEST_PROVIDERS: 'true'
+      SOS_RELAY_URL: http://127.0.0.1:8999/relay
+      MUNICIPAL_RELAY_URL: http://127.0.0.1:8999/relay
+      FULFILLMENT_RELAY_URL: http://127.0.0.1:8999/relay
+      SOS_RELAY_TOKEN: local-test-provider
+      MUNICIPAL_RELAY_TOKEN: local-test-provider
+      FULFILLMENT_RELAY_TOKEN: local-test-provider
+      DELIVERY_CALLBACK_SECRET: local-test-callback
+      HAZARD_FEED_URL: http://127.0.0.1:8999/hazards
+      HAZARD_FEED_NAME: Local acceptance fixture
+      AQI_STATION_FEED_URL: http://127.0.0.1:8999/stations
+      OSRM_ROUTER_BASE: http://127.0.0.1:8999/route
+      WALK_ROUTER_BASE: http://127.0.0.1:8999/route
+      FLOOD_API_URL: http://127.0.0.1:8999/flood
+      OVERPASS_URL: http://127.0.0.1:8999/overpass
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -46,9 +61,12 @@ jobs:
           done
       - run: cargo build --target x86_64-unknown-linux-gnu
         working-directory: backend/axum_gateway
+      - run: pip install websockets
       - run: |
+          python backend/tests/provider_fixture.py > /tmp/provider.log 2>&1 &
           backend/axum_gateway/target/x86_64-unknown-linux-gnu/debug/grevidea-gateway > /tmp/gateway.log 2>&1 &
           python backend/tests/gateway_acceptance.py
+          python backend/tests/completion_acceptance.py
       - if: failure()
         run: cat /tmp/gateway.log 2>/dev/null || true
   flutter:

@@ -1,3 +1,5 @@
+> Historical audit for PR #2. The follow-up implementation and activation requirements are in [integration-completion.md](integration-completion.md). FAIL/BLOCKED rows below describe the earlier commit, not the follow-up’s tested behavior.
+
 # GreenPulse / Grevidea ecosystem audit
 
 Audit date: 2026-10-09 (Asia/Kolkata). Scope: Flutter, Axum :3000, FastAPI GCI :8000. This is a repair PR, not a certification that all 58 features work in production.

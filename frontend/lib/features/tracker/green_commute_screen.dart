@@ -27,6 +27,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
   int? _cleanestRoute;
   int _shortestRoute = 0;
   bool _isSearching = false;
+  String _airQualitySource = 'Air-quality source unavailable';
 
   final Map<String, ll.LatLng> _destinationCoords = {
     'BKC, Mumbai': const ll.LatLng(19.0657, 72.8687),
@@ -108,6 +109,8 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
       if (result == null || (result['routes'] as List).isEmpty)
         throw StateError('Road routing unavailable.');
       _routeVariants = result['routes'] as List;
+      _airQualitySource = result['air_quality_status'] as String? ??
+          'Air-quality source unavailable';
       _cleanestRoute = (result['cleanest_route_index'] as num?)?.toInt();
       _shortestRoute = List.generate(_routeVariants.length, (i) => i).reduce(
           (a, b) => (_routeVariants[a]['distance'] as num) <=
@@ -590,7 +593,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                       style: TextStyle(fontSize: 10))),
                               TextButton(
                                   onPressed: () => _selectRoute(true),
-                                  child: const Text('Cleaner model estimate',
+                                  child: const Text('Lower exposure estimate',
                                       style: TextStyle(fontSize: 10))),
                             ],
                           ),
@@ -611,6 +614,8 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
               ),
               const SizedBox(height: 16),
 
+              Text(_airQualitySource, style: const TextStyle(fontSize: 11)),
+              const SizedBox(height: 8),
               Text('Compare estimated emissions',
                   style: TextStyle(
                       fontSize: 14,

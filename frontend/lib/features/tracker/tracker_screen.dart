@@ -17,6 +17,23 @@ class TrackerScreen extends StatefulWidget {
 }
 
 class _TrackerScreenState extends State<TrackerScreen> {
+  @override
+  void initState() {
+    super.initState();
+    widget.appState.addListener(_updated);
+    widget.appState.refreshSharedHistory();
+  }
+
+  void _updated() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.appState.removeListener(_updated);
+    super.dispose();
+  }
+
   int _selectedPeriod = 0; // 0: Day, 1: Week, 2: Month, 3: Year
   DateTime _currentDate = DateTime.now();
 
@@ -84,37 +101,45 @@ class _TrackerScreenState extends State<TrackerScreen> {
   double get _wasteBaseDaily => 0.8;
 
   int get _periodDays => [1, 7, 30, 365][_selectedPeriod];
-  double get _todayEmissions {
+  Map<String, double> get _categoryTotals {
     final day =
         DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
     final from = day.subtract(Duration(days: _periodDays - 1));
     final until = day.add(const Duration(days: 1));
-    final deltas = widget.appState.recentActivities
-        .where(
-            (a) => !a.timestamp.isBefore(from) && a.timestamp.isBefore(until))
-        .fold(0.0, (sum, a) => sum + a.co2Kg);
-    return ((_transportBaseDaily +
-                    _energyBaseDaily +
-                    _foodBaseDaily +
-                    _wasteBaseDaily) *
-                _periodDays +
-            deltas)
-        .clamp(0.0, double.infinity);
+    final totals = <String, double>{
+      'Transport': _transportBaseDaily * _periodDays,
+      'Energy': _energyBaseDaily * _periodDays,
+      'Food': _foodBaseDaily * _periodDays,
+      'Waste': _wasteBaseDaily * _periodDays
+    };
+    for (final activity in widget.appState.recentActivities) {
+      if (!activity.timestamp.isBefore(from) &&
+          activity.timestamp.isBefore(until) &&
+          totals.containsKey(activity.category))
+        totals[activity.category] = totals[activity.category]! + activity.co2Kg;
+    }
+    return totals.map((key, value) =>
+        MapEntry(key, value.clamp(0.0, double.infinity).toDouble()));
   }
 
-  List<Map<String, dynamic>> _computeCategories() {
-    final t = _transportBaseDaily * _periodDays;
-    final e = _energyBaseDaily * _periodDays;
-    final f = _foodBaseDaily * _periodDays;
-    final w = _wasteBaseDaily * _periodDays;
-    final total = t + e + f + w;
+  double get _todayEmissions =>
+      _categoryTotals.values.fold(0.0, (a, b) => a + b);
 
-    final shares = [t, e, f, w].map((v) => v / total * 100).toList();
+  List<Map<String, dynamic>> _computeCategories() {
+    final totals = _categoryTotals;
+    final t = totals['Transport']!;
+    final e = totals['Energy']!;
+    final f = totals['Food']!;
+    final w = totals['Waste']!;
+    final total = t + e + f + w;
+    final denominator = total > 0 ? total : 1.0;
+
+    final shares = [t, e, f, w].map((v) => v / denominator * 100).toList();
     final percents = shares.map((v) => v.floor()).toList();
     final order = List.generate(4, (i) => i)
       ..sort((a, b) =>
           (shares[b] - percents[b]).compareTo(shares[a] - percents[a]));
-    final remaining = 100 - percents.fold(0, (a, b) => a + b);
+    final remaining = (total > 0 ? 100 : 0) - percents.fold(0, (a, b) => a + b);
     for (var i = 0; i < remaining; i++) {
       percents[order[i]]++;
     }
@@ -122,7 +147,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
       {
         'name': 'Transport',
         'co2': '${t.toStringAsFixed(1)} kg',
-        'pct': (t / total).clamp(0.0, 1.0),
+        'pct': (t / denominator).clamp(0.0, 1.0),
         'pctText': '${percents[0]}%',
         'color': AppColors.sapphire,
         'icon': Icons.directions_car_rounded,
@@ -130,7 +155,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
       {
         'name': 'Energy',
         'co2': '${e.toStringAsFixed(1)} kg',
-        'pct': (e / total).clamp(0.0, 1.0),
+        'pct': (e / denominator).clamp(0.0, 1.0),
         'pctText': '${percents[1]}%',
         'color': AppColors.amber,
         'icon': Icons.bolt_rounded,
@@ -138,7 +163,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
       {
         'name': 'Food',
         'co2': '${f.toStringAsFixed(1)} kg',
-        'pct': (f / total).clamp(0.0, 1.0),
+        'pct': (f / denominator).clamp(0.0, 1.0),
         'pctText': '${percents[2]}%',
         'color': AppColors.emerald,
         'icon': Icons.restaurant_rounded,
@@ -146,7 +171,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
       {
         'name': 'Waste',
         'co2': '${w.toStringAsFixed(1)} kg',
-        'pct': (w / total).clamp(0.0, 1.0),
+        'pct': (w / denominator).clamp(0.0, 1.0),
         'pctText': '${percents[3]}%',
         'color': Colors.teal,
         'icon': Icons.recycling_rounded,
@@ -157,19 +182,24 @@ class _TrackerScreenState extends State<TrackerScreen> {
   List<double> _computeTrendPoints() {
     final now =
         DateTime(_currentDate.year, _currentDate.month, _currentDate.day);
-    final base = _transportBaseDaily +
-        _energyBaseDaily +
-        _foodBaseDaily +
-        _wasteBaseDaily;
     return List.generate(7, (i) {
       final day = now.subtract(Duration(days: 6 - i));
-      final delta = widget.appState.recentActivities
-          .where((a) =>
-              a.timestamp.year == day.year &&
-              a.timestamp.month == day.month &&
-              a.timestamp.day == day.day)
-          .fold(0.0, (sum, a) => sum + a.co2Kg);
-      return (base + delta).clamp(0.0, double.infinity);
+      final totals = <String, double>{
+        'Transport': _transportBaseDaily,
+        'Energy': _energyBaseDaily,
+        'Food': _foodBaseDaily,
+        'Waste': _wasteBaseDaily
+      };
+      for (final a in widget.appState.recentActivities) {
+        if (a.timestamp.year == day.year &&
+            a.timestamp.month == day.month &&
+            a.timestamp.day == day.day &&
+            totals.containsKey(a.category)) {
+          totals[a.category] = totals[a.category]! + a.co2Kg;
+        }
+      }
+      return totals.values
+          .fold(0.0, (sum, value) => sum + value.clamp(0.0, double.infinity));
     });
   }
 
@@ -402,7 +432,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(child: Text(
+                Expanded(
+                    child: Text(
                   'Your Live Location & Movement',
                   style: TextStyle(
                       fontSize: 15,
@@ -414,7 +445,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     const Icon(Icons.sensors_rounded,
                         size: 14, color: AppColors.emerald),
                     const SizedBox(width: 4),
-                    Text(widget.appState.locationService.lastKnownPosition == null ? 'GPS unavailable' : 'Location active',
+                    Text(
+                        widget.appState.locationService.lastKnownPosition ==
+                                null
+                            ? 'GPS unavailable'
+                            : 'Location active',
                         style: TextStyle(
                             fontSize: 11,
                             color: AppColors.emerald,
