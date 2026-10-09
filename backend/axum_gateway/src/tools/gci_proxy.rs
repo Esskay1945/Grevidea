@@ -32,7 +32,7 @@ pub async fn climate_gpt(
     let brain_req = BrainChatRequest {
         message: req.message,
         user_id: auth.0.sub.clone(),
-        context: Some(json!({ "feature": "climate_gpt", "verified_rag": true })),
+        context: Some(json!({ "feature": "climate_gpt", "retrieval_requested": true })),
         mode: req.mode.or(Some("direct".to_string())),
     };
 
@@ -68,7 +68,7 @@ pub async fn detect_misinformation(
     let brain_req = BrainChatRequest {
         message: format!(
             "FACT_CHECK_REQUEST: Analyze this climate claim and determine if it is true, false, or misleading. \
-             Cite scientific sources. Claim: \"{}\"",
+             Use retrieved scientific sources only. Return JSON with verdict (true/false/misleading/unverified), confidence (0-1), explanation, and sources (URLs). If verification is unavailable use unverified and confidence 0. Claim: \"{}\"",
             req.claim
         ),
         user_id: auth.0.sub.clone(),
@@ -78,23 +78,13 @@ pub async fn detect_misinformation(
 
     let resp = state.brain.reason(brain_req).await?;
 
-    let response_lower = resp.response.to_lowercase();
-    let verdict = if response_lower.contains("false") || response_lower.contains("myth") {
-        "false"
-    } else if response_lower.contains("misleading") || response_lower.contains("partially") {
-        "misleading"
-    } else if response_lower.contains("true") || response_lower.contains("accurate") {
-        "true"
-    } else {
-        "unverified"
-    };
+    let parsed: Value=serde_json::from_str(resp.response.trim().trim_start_matches("```json").trim_end_matches("```").trim()).unwrap_or(json!({}));
+    let raw_verdict=parsed["verdict"].as_str().unwrap_or("unverified");
+    let sources=resp.memory_refs;
+    let verdict=if sources.is_empty() || !["true","false","misleading"].contains(&raw_verdict) {"unverified"} else {raw_verdict};
+    let confidence=if verdict=="unverified" {0.0} else {parsed["confidence"].as_f64().unwrap_or(0.0).clamp(0.0,1.0)};
+    Ok(Json(ApiResponse::ok(MisinfResult {verdict:verdict.into(),confidence,explanation:parsed["explanation"].as_str().unwrap_or(&resp.response).to_string(),sources})))
 
-    Ok(Json(ApiResponse::ok(MisinfResult {
-        verdict: verdict.to_string(),
-        confidence: 0.85,
-        explanation: resp.response,
-        sources: resp.memory_refs,
-    })))
 }
 
 // ── T03 — JITAI Nudge Engine ─────────────────────────────────────────────────

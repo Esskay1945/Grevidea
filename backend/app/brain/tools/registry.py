@@ -141,6 +141,7 @@ class ToolRegistry:
                             inspect.isclass(attr)
                             and issubclass(attr, BaseTool)
                             and attr is not BaseTool
+                            and attr.__module__ == module.__name__
                         ):
                             tool_instance = attr()
                             if tool_instance.name:

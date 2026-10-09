@@ -102,6 +102,17 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         // ── Health ───────────────────────────────────────────────────
+        .route("/api/v1/location/search", get(tools::live::geocode))
+        .route("/api/v1/location/address", get(tools::live::reverse_geocode))
+        .route("/api/v1/location/route", post(tools::live::route))
+        .route("/api/v1/habits/claim", post(tools::live::claim_habit))
+        .route("/api/v1/rewards/redeem", post(tools::live::redeem_reward))
+        .route("/api/v1/weather", get(tools::live::weather))
+        .route("/api/v1/shelters", get(tools::live::shelters))
+        .route("/api/v1/mutual-aid", get(tools::live::nearby_aid).post(tools::live::create_aid))
+        .route("/api/v1/mutual-aid/:id/coordinate", post(tools::live::coordinate_aid))
+        .route("/api/v1/carpool/nearby", get(tools::live::nearby_carpools))
+        .route("/api/v1/carpool/:id/book", post(tools::live::book_carpool))
         .route("/health", get(health_check))
         .route("/", get(root_info))
 
@@ -219,9 +230,11 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn health_check() -> Json<serde_json::Value> {
+async fn health_check(axum::extract::State(state): axum::extract::State<AppState>) -> Json<serde_json::Value> {
+    let connected = tokio::time::timeout(std::time::Duration::from_millis(500), sqlx::query("SELECT 1").execute(&state.db)).await.is_ok_and(|r|r.is_ok());
     Json(json!({
-        "status": "healthy",
+        "status": if connected {"healthy"} else {"degraded"},
+        "database_connected": connected,
         "service": "grevidea-gateway",
         "version": "0.1.0",
         "timestamp": chrono::Utc::now().to_rfc3339(),

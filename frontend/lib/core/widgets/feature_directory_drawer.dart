@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../features/profile/ecosystem_catalog_screen.dart';
+import '../../features/community/nearby_board_screen.dart';
 import '../theme/app_colors.dart';
 import '../../state/app_state.dart';
 import '../../features/tracker/green_commute_screen.dart';
@@ -41,7 +43,8 @@ class FeatureDirectoryDrawer extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
                 color: AppColors.royalForest,
-                border: Border(bottom: BorderSide(color: AppColors.goldBorder, width: 1)),
+                border: Border(
+                    bottom: BorderSide(color: AppColors.goldBorder, width: 1)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,11 +54,13 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.champagneGold.withValues(alpha: 0.15),
+                          color:
+                              AppColors.champagneGold.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: AppColors.champagneGold),
                         ),
-                        child: const Icon(Icons.energy_savings_leaf_rounded, color: AppColors.champagneGold, size: 24),
+                        child: const Icon(Icons.energy_savings_leaf_rounded,
+                            color: AppColors.champagneGold, size: 24),
                       ),
                       const SizedBox(width: 12),
                       Column(
@@ -83,7 +88,8 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                   const SizedBox(height: 14),
                   // User Status Pill
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(8),
@@ -93,15 +99,22 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                       children: [
                         Text(
                           'Rank #7 • ${appState.userName}',
-                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600),
                         ),
                         Row(
                           children: [
-                            const Icon(Icons.eco_rounded, color: AppColors.emerald, size: 14),
+                            const Icon(Icons.eco_rounded,
+                                color: AppColors.emerald, size: 14),
                             const SizedBox(width: 4),
                             Text(
                               '${appState.greenPoints} pts',
-                              style: const TextStyle(color: AppColors.champagneGold, fontSize: 12, fontWeight: FontWeight.w700),
+                              style: const TextStyle(
+                                  color: AppColors.champagneGold,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700),
                             ),
                           ],
                         ),
@@ -115,92 +128,139 @@ class FeatureDirectoryDrawer extends StatelessWidget {
             // Complete Quick Actions and Feature List
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 children: [
                   _buildSectionHeader('QUICK ACTIONS'),
                   _buildNavTile(
                     context: context,
                     icon: Icons.add_circle_outline_rounded,
                     title: 'Log Daily Activity',
-                    subtitle: 'Record your travel, plant-based meals, or home energy',
+                    subtitle:
+                        'Record your travel, plant-based meals, or home energy',
                     color: AppColors.champagneGold,
-                    onTap: () => _navigateTo(context, LogActivityScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, LogActivityScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.qr_code_scanner_rounded,
                     title: 'Scan Product (EcoLens)',
-                    subtitle: 'Scan barcodes to see packaging and sustainability ratings',
+                    subtitle:
+                        'Scan barcodes to see packaging and sustainability ratings',
                     color: AppColors.champagneGold,
-                    onTap: () => _navigateTo(context, ScanProductScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, ScanProductScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.delete_sweep_rounded,
                     title: 'Report Pollution & Waste',
-                    subtitle: 'Snap a photo and report trash dumping or smoke to the city',
+                    subtitle:
+                        'Snap a photo and report trash dumping or smoke to the city',
                     color: AppColors.coral,
-                    onTap: () => _navigateTo(context, ReportWasteScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, ReportWasteScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.psychology_rounded,
                     title: 'Ask Climate Assistant',
-                    subtitle: 'Get instant, friendly answers to any sustainability question',
+                    subtitle:
+                        'Get instant, friendly answers to any sustainability question',
                     color: AppColors.emerald,
-                    onTap: () => _navigateTo(context, ClimateGptScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, ClimateGptScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.map_rounded,
                     title: 'City Air Quality Map',
-                    subtitle: 'Check live AQI and smog levels across your neighborhood',
+                    subtitle:
+                        'Check live AQI and smog levels across your neighborhood',
                     color: AppColors.emerald,
-                    onTap: () => _navigateTo(context, AqiMapScreen(appState: appState)),
+                    onTap: () =>
+                        _navigateTo(context, AqiMapScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.flag_rounded,
                     title: 'Eco Challenges',
-                    subtitle: 'Join weekly challenges and build green habits with friends',
+                    subtitle:
+                        'Join weekly challenges and build green habits with friends',
                     color: AppColors.amber,
-                    onTap: () => _navigateTo(context, ChallengesScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, ChallengesScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.storefront_rounded,
                     title: 'Rewards Shop',
-                    subtitle: 'Redeem your earned green points for local sustainable rewards',
+                    subtitle:
+                        'Redeem your earned green points for local sustainable rewards',
                     color: AppColors.champagneGold,
-                    onTap: () => _navigateTo(context, RewardsShopScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, RewardsShopScreen(appState: appState)),
                   ),
-
                   _buildSectionHeader('TRAVEL & WEATHER'),
                   _buildNavTile(
                     context: context,
                     icon: Icons.alt_route_rounded,
                     title: 'Clean Air Commute',
-                    subtitle: 'Find the least polluted travel routes: Metro, Bus, or EV',
+                    subtitle:
+                        'Find the least polluted travel routes: Metro, Bus, or EV',
                     color: AppColors.emerald,
-                    onTap: () => _navigateTo(context, GreenCommuteScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, GreenCommuteScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.warning_amber_rounded,
                     title: 'Weather & Disaster Alerts',
-                    subtitle: 'Severe storm warnings, flood advisories, and emergency help',
+                    subtitle:
+                        'Severe storm warnings, flood advisories, and emergency help',
                     color: AppColors.coral,
-                    onTap: () => _navigateTo(context, DisasterAlertsScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, DisasterAlertsScreen(appState: appState)),
                   ),
-
+                  _buildNavTile(
+                      context: context,
+                      icon: Icons.directions_car,
+                      title: 'Nearby Carpooling',
+                      subtitle: 'Real rides and available seats within 5 km',
+                      color: AppColors.emerald,
+                      onTap: () => _navigateTo(
+                          context,
+                          NearbyBoardScreen(
+                              appState: appState, carpools: true))),
+                  _buildNavTile(
+                      context: context,
+                      icon: Icons.volunteer_activism,
+                      title: 'Community Mutual Aid',
+                      subtitle:
+                          'Water, power, shelter and medical requests nearby',
+                      color: AppColors.emerald,
+                      onTap: () => _navigateTo(
+                          context, NearbyBoardScreen(appState: appState))),
+                  _buildNavTile(
+                      context: context,
+                      icon: Icons.apps_rounded,
+                      title: 'All 58 Ecosystem Features',
+                      subtitle:
+                          'Climate, travel, shopping, city, community and account',
+                      color: AppColors.emerald,
+                      onTap: () => _navigateTo(
+                          context, EcosystemCatalogScreen(appState: appState))),
                   _buildSectionHeader('LEARNING & ACHIEVEMENTS'),
                   _buildNavTile(
                     context: context,
                     icon: Icons.school_rounded,
                     title: 'Daily Learning Cards',
-                    subtitle: 'Quick 2-minute green facts, tips, and mini quizzes',
+                    subtitle:
+                        'Quick 2-minute green facts, tips, and mini quizzes',
                     color: AppColors.champagneGold,
-                    onTap: () => _navigateTo(context, LearningScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, LearningScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
@@ -208,25 +268,29 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                     title: 'Achievements & Badges',
                     subtitle: 'See your trophies and unlocked eco milestones',
                     color: AppColors.champagneGold,
-                    onTap: () => _navigateTo(context, AchievementsScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, AchievementsScreen(appState: appState)),
                   ),
                   _buildNavTile(
                     context: context,
                     icon: Icons.leaderboard_rounded,
                     title: 'Community Leaderboard',
-                    subtitle: 'See who is leading the green impact in your city',
+                    subtitle:
+                        'See who is leading the green impact in your city',
                     color: AppColors.amber,
-                    onTap: () => _navigateTo(context, LeaderboardScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, LeaderboardScreen(appState: appState)),
                   ),
-
                   _buildSectionHeader('ACCOUNT & PREFERENCES'),
                   _buildNavTile(
                     context: context,
                     icon: Icons.settings_rounded,
                     title: 'Settings',
-                    subtitle: 'Notification preferences, units, and account details',
+                    subtitle:
+                        'Notification preferences, units, and account details',
                     color: AppColors.champagneGold,
-                    onTap: () => _navigateTo(context, SettingsScreen(appState: appState)),
+                    onTap: () => _navigateTo(
+                        context, SettingsScreen(appState: appState)),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -237,17 +301,27 @@ class FeatureDirectoryDrawer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt,
-                border: Border(top: BorderSide(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder)),
+                color: isDark
+                    ? AppColors.darkSurfaceAlt
+                    : AppColors.lightSurfaceAlt,
+                border: Border(
+                    top: BorderSide(
+                        color: isDark
+                            ? AppColors.darkCardBorder
+                            : AppColors.lightCardBorder)),
               ),
               child: Row(
                 children: const [
-                  Icon(Icons.info_outline_rounded, size: 14, color: AppColors.champagneGold),
+                  Icon(Icons.info_outline_rounded,
+                      size: 14, color: AppColors.champagneGold),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'All features and quick actions are in this menu. Main tabs (Home, Tracker, Community, Ranks) stay at the bottom.',
-                      style: TextStyle(fontSize: 10, color: AppColors.lightTextSecondary, height: 1.3),
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.lightTextSecondary,
+                          height: 1.3),
                     ),
                   ),
                 ],
@@ -283,7 +357,8 @@ class FeatureDirectoryDrawer extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -301,37 +376,44 @@ class FeatureDirectoryDrawer extends StatelessWidget {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(icon, color: color, size: 22),
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: textColor,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 11,
-            height: 1.3,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-          ),
-        ),
-        trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.lightTextSecondary),
-        onTap: onTap,
-      ),
+      child: Material(
+          type: MaterialType.transparency,
+          borderRadius: BorderRadius.circular(14),
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 22),
+            ),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+            subtitle: Text(
+              subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.3,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded,
+                size: 18, color: AppColors.lightTextSecondary),
+            onTap: onTap,
+          )),
     );
   }
 }

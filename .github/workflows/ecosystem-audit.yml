@@ -1,0 +1,66 @@
+name: Ecosystem regression audit
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  brain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fastapi httpx pydantic-settings apscheduler pytest pytest-asyncio psutil numpy scikit-learn pypdf
+      - run: PYTHONPATH=. pytest -q tests
+        working-directory: backend
+  gateway:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: grevidea_test
+          POSTGRES_PASSWORD: disposable_test_password
+          POSTGRES_DB: grevidea_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U grevidea_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://grevidea_test:disposable_test_password@localhost:5432/grevidea_test
+      JWT_SECRET: ephemeral-ci-secret-only-for-disposable-data
+      BRAIN_URL: http://127.0.0.1:8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend/axum_gateway
+      - run: cargo test --target x86_64-unknown-linux-gnu
+        working-directory: backend/axum_gateway
+      - run: |
+          for migration in backend/axum_gateway/migrations/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
+      - run: cargo build --target x86_64-unknown-linux-gnu
+        working-directory: backend/axum_gateway
+      - run: |
+          backend/axum_gateway/target/x86_64-unknown-linux-gnu/debug/grevidea-gateway > /tmp/gateway.log 2>&1 &
+          python backend/tests/gateway_acceptance.py
+      - if: failure()
+        run: cat /tmp/gateway.log 2>/dev/null || true
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+        working-directory: frontend
+      - run: flutter test
+        working-directory: frontend
+      - run: flutter build web --release
+        working-directory: frontend

@@ -29,13 +29,15 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentTabIndex = 0;
+  final Set<int> _visitedTabs = {0};
   List<Map<String, dynamic>> _dailyTasks = [];
 
   final List<Map<String, dynamic>> _taskPool = [
     {
       'id': 'bus_commute',
       'title': '🚌 Public Transit Commute',
-      'description': 'Take Metro, local train, or BEST/TMT bus instead of private car.',
+      'description':
+          'Take Metro, local train, or BEST/TMT bus instead of private car.',
       'category': 'Transport',
       'points': 60,
       'co2_saved': 2.1,
@@ -44,7 +46,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'green_plate',
       'title': '🥗 100% Plant-Powered Meal',
-      'description': 'Enjoy a plant-based, locally sourced vegetarian lunch or dinner.',
+      'description':
+          'Enjoy a plant-based, locally sourced vegetarian lunch or dinner.',
       'category': 'Food',
       'points': 50,
       'co2_saved': 1.8,
@@ -53,7 +56,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'solar_shift',
       'title': '☀️ Peak Load Curtailment',
-      'description': 'Turn off air conditioning & geysers during peak hours (12 PM - 3 PM).',
+      'description':
+          'Turn off air conditioning & geysers during peak hours (12 PM - 3 PM).',
       'category': 'Energy',
       'points': 45,
       'co2_saved': 1.2,
@@ -62,7 +66,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'zero_plastic',
       'title': '♻️ Zero Single-Use Plastic',
-      'description': 'Carry reusable cotton cloth bag and refill bottle for all errands.',
+      'description':
+          'Carry reusable cotton cloth bag and refill bottle for all errands.',
       'category': 'Waste',
       'points': 40,
       'co2_saved': 0.8,
@@ -71,7 +76,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'cycle_walk',
       'title': '🚲 Active 3km Pedal or Walk',
-      'description': 'Walk or cycle for neighborhood errands instead of auto or motorbike.',
+      'description':
+          'Walk or cycle for neighborhood errands instead of auto or motorbike.',
       'category': 'Transport',
       'points': 75,
       'co2_saved': 1.5,
@@ -80,7 +86,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'civic_report',
       'title': '📢 Civic Pollution Watch',
-      'description': 'Report 1 garbage dumping or sewage issue directly to TMC in Grevidea.',
+      'description':
+          'Report 1 garbage dumping or sewage issue directly to TMC in Grevidea.',
       'category': 'Civic',
       'points': 80,
       'co2_saved': 1.0,
@@ -89,7 +96,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'natural_light',
       'title': '💡 Daylight Only Until Sunset',
-      'description': 'Maximize cross-ventilation and natural daylight before turning on lamps.',
+      'description':
+          'Maximize cross-ventilation and natural daylight before turning on lamps.',
       'category': 'Energy',
       'points': 35,
       'co2_saved': 0.6,
@@ -98,7 +106,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {
       'id': 'waste_segregation',
       'title': '🗑️ Strict 2-Bin Waste Segregation',
-      'description': 'Segregate dry recyclables and wet organic waste before collection.',
+      'description':
+          'Segregate dry recyclables and wet organic waste before collection.',
       'category': 'Waste',
       'points': 40,
       'co2_saved': 0.9,
@@ -110,12 +119,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _loadDailyTasks();
+    widget.appState.addListener(_checkTransit);
   }
 
   void _loadDailyTasks() {
     final pool = List<Map<String, dynamic>>.from(_taskPool);
-    pool.shuffle();
-    final selected = pool.take(3).map((t) => {...t, 'completed': false}).toList();
+    final today = DateTime.now();
+    final shift =
+        DateTime(today.year, today.month, today.day).millisecondsSinceEpoch ~/
+            Duration.millisecondsPerDay %
+            pool.length;
+    final rotated = [...pool.skip(shift), ...pool.take(shift)];
+    final selected = rotated
+        .take(3)
+        .map((t) => {
+              ...t,
+              'completed': widget.appState.isTaskClaimed(t['id'] as String)
+            })
+        .toList();
     setState(() {
       _dailyTasks = selected;
     });
@@ -124,7 +145,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _completeTask(int index) {
     if (index >= _dailyTasks.length) return;
     final task = _dailyTasks[index];
-    if (task['completed'] == true) return;
+    if (task['completed'] == true ||
+        !widget.appState.claimTask(task['id'] as String)) return;
 
     setState(() {
       _dailyTasks[index]['completed'] = true;
@@ -144,7 +166,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: AppColors.royalForest,
-        content: Text('✓ Completed: ${task['title']}! +$pts Green Points & -$co2 kg CO₂', style: const TextStyle(color: AppColors.champagneGold)),
+        content: Text(
+            '✓ Completed: ${task['title']}! +$pts Green Points & -$co2 kg CO₂',
+            style: const TextStyle(color: AppColors.champagneGold)),
       ),
     );
   }
@@ -159,103 +183,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
       // 5:00 PM to 11:59 PM is Good evening
       return 'Good evening';
     } else {
-      return 'Good night';
+      return 'Good evening';
     }
+  }
+
+  bool _transitPrompted = false;
+  void _checkTransit() {
+    if (_currentTabIndex != widget.appState.mainTab) setState(() => _currentTabIndex = widget.appState.mainTab);
+    if (!_transitPrompted &&
+        (widget.appState.locationService.highSpeed ||
+            widget.appState.pendingTrip != null)) {
+      _transitPrompted = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showInTransitPrompt(25);
+      });
+    }
+    if (!widget.appState.locationService.highSpeed &&
+        widget.appState.pendingTrip == null) _transitPrompted = false;
   }
 
   void _showInTransitPrompt(double speedKmH) {
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: AppColors.coral.withValues(alpha: 0.15), shape: BoxShape.circle),
-                    child: const Icon(Icons.speed_rounded, color: AppColors.coral, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('In-Transit Detected (${speedKmH.toStringAsFixed(0)} km/h)', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const Text('You are moving faster than 25 km/h. Which vehicle are you using?', style: TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              _buildVehicleOption(ctx, 'Metro / Local Train', 'Zero direct emissions • 85% lower carbon', Icons.directions_subway_rounded, AppColors.emerald, -1.8, 35),
-              _buildVehicleOption(ctx, 'Electric / TMT City Bus', 'High occupancy transit • 60% lower carbon', Icons.directions_bus_rounded, AppColors.sapphire, -1.2, 25),
-              _buildVehicleOption(ctx, 'EV Cab / Shared Auto', 'Electric powertrain • 45% lower carbon', Icons.electric_rickshaw_rounded, AppColors.amber, -0.8, 20),
-              _buildVehicleOption(ctx, 'Personal Petrol Car', 'Single occupancy • Fossil fuel combustion', Icons.directions_car_rounded, AppColors.coral, 2.4, 0),
-              _buildVehicleOption(ctx, 'Motorbike / Scooter', '2-wheeler commute • Moderate fuel usage', Icons.two_wheeler_rounded, Colors.orange, 1.1, 5),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
+        context: context,
+        builder: (ctx) => SafeArea(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const ListTile(
+                  title: Text('Which transport are you using?'),
+                  subtitle: Text(
+                      'GPS detects speed, but cannot reliably identify a car, bus or metro. Choose when safe.')),
+              for (final mode in ['metro', 'bus', 'ev_car', 'car'])
+                ListTile(
+                    title: Text(mode.replaceAll('_', ' ')),
+                    onTap: () {
+                      widget.appState.selectTransitMode(mode);
+                      Navigator.pop(ctx);
+                    }),
+            ])));
   }
 
-  Widget _buildVehicleOption(BuildContext ctx, String mode, String sub, IconData icon, Color color, double co2Kg, int pts) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: color),
-        title: Text(mode, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        subtitle: Text(sub, style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
-        trailing: Text(
-          co2Kg < 0 ? '${co2Kg.abs()} kg saved' : '+$co2Kg kg CO₂',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: co2Kg < 0 ? AppColors.emerald : AppColors.coral),
-        ),
-        onTap: () {
-          Navigator.pop(ctx);
-          widget.appState.logActivity(
-            title: '$mode Commute',
-            category: 'Transport',
-            subtitle: 'Speed detected trip • ${co2Kg < 0 ? "Saved ${co2Kg.abs()} kg CO2" : "Emitted $co2Kg kg CO2"}',
-            co2Kg: co2Kg,
-            icon: icon,
-            pointsEarned: pts,
-          );
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: AppColors.royalForest,
-              content: Text(
-                co2Kg < 0
-                    ? '✓ Logged $mode! Saved ${co2Kg.abs()} kg CO₂ & earned +$pts Green Points.'
-                    : '✓ Logged $mode commute. CO₂ emissions updated in your ledger.',
-                style: const TextStyle(color: AppColors.champagneGold),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+  @override
+  void dispose() {
+    widget.appState.removeListener(_checkTransit);
+    super.dispose();
   }
 
   void _openQuickActionWheel() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.darkSurface
+          : AppColors.lightSurface,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.all(24.0),
@@ -266,45 +245,86 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
-                  Text('Quick Eco Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.champagneGold)),
-                  Icon(Icons.energy_savings_leaf_rounded, color: AppColors.emerald),
+                  Text('Quick Eco Actions',
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.champagneGold)),
+                  Icon(Icons.energy_savings_leaf_rounded,
+                      color: AppColors.emerald),
                 ],
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: AppColors.royalForest, child: Icon(Icons.add_circle_outline_rounded, color: AppColors.champagneGold)),
-                title: const Text('Log Daily Commute / Diet', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Record metro, plant meals, or solar savings'),
+                leading: const CircleAvatar(
+                    backgroundColor: AppColors.royalForest,
+                    child: Icon(Icons.add_circle_outline_rounded,
+                        color: AppColors.champagneGold)),
+                title: const Text('Log Daily Commute / Diet',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle:
+                    const Text('Record metro, plant meals, or solar savings'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => LogActivityScreen(appState: widget.appState)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              LogActivityScreen(appState: widget.appState)));
                 },
               ),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: AppColors.royalForest, child: Icon(Icons.qr_code_scanner_rounded, color: AppColors.champagneGold)),
-                title: const Text('Scan Product (EcoLens)', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Barcode scan for packaging & lifecycle carbon'),
+                leading: const CircleAvatar(
+                    backgroundColor: AppColors.royalForest,
+                    child: Icon(Icons.qr_code_scanner_rounded,
+                        color: AppColors.champagneGold)),
+                title: const Text('Scan Product (EcoLens)',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle:
+                    const Text('Barcode scan for packaging & lifecycle carbon'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ScanProductScreen(appState: widget.appState)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              ScanProductScreen(appState: widget.appState)));
                 },
               ),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: AppColors.royalForest, child: Icon(Icons.delete_sweep_rounded, color: AppColors.coral)),
-                title: const Text('Report Waste Hotspot', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Geotagged citizen report directly to TMC'),
+                leading: const CircleAvatar(
+                    backgroundColor: AppColors.royalForest,
+                    child: Icon(Icons.delete_sweep_rounded,
+                        color: AppColors.coral)),
+                title: const Text('Report Waste Hotspot',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle:
+                    const Text('Geotagged citizen report directly to TMC'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ReportWasteScreen(appState: widget.appState)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              ReportWasteScreen(appState: widget.appState)));
                 },
               ),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: AppColors.royalForest, child: Icon(Icons.psychology_rounded, color: AppColors.emerald)),
-                title: const Text('Ask ClimateGPT', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Instant answers & local pollution guidance'),
+                leading: const CircleAvatar(
+                    backgroundColor: AppColors.royalForest,
+                    child: Icon(Icons.psychology_rounded,
+                        color: AppColors.emerald)),
+                title: const Text('Ask ClimateGPT',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle:
+                    const Text('Instant answers & local pollution guidance'),
                 onTap: () {
                   Navigator.pop(ctx);
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => ClimateGptScreen(appState: widget.appState)));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              ClimateGptScreen(appState: widget.appState)));
                 },
               ),
             ],
@@ -319,6 +339,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
 
+    _visitedTabs.add(_currentTabIndex);
     final List<Widget> pages = [
       _buildHomeContent(isDark),
       TrackerScreen(appState: widget.appState),
@@ -355,10 +376,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               colors: [AppColors.royalForest, Color(0xFF0F4733)],
             ),
           ),
-          child: const Icon(Icons.energy_savings_leaf_rounded, color: AppColors.champagneGold, size: 28),
+          child: const Icon(Icons.energy_savings_leaf_rounded,
+              color: AppColors.champagneGold, size: 28),
         ),
       ),
-      body: pages[_currentTabIndex],
+      body: IndexedStack(index: _currentTabIndex, children: List.generate(pages.length, (i) => _visitedTabs.contains(i) ? pages[i] : const SizedBox.shrink())),
     );
   }
 
@@ -389,7 +411,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return InkWell(
-      onTap: () => setState(() => _currentTabIndex = index),
+      onTap: () => widget.appState.setMainTab(index),
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -401,7 +423,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               size: 22,
               color: isSelected
                   ? AppColors.champagneGold
-                  : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                  : (isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary),
             ),
             const SizedBox(height: 2),
             Text(
@@ -411,7 +435,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                 color: isSelected
                     ? AppColors.champagneGold
-                    : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                    : (isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary),
               ),
             ),
           ],
@@ -423,7 +449,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // ── Home / Dashboard Screen 01 Content ──────────────────────────────────
   Widget _buildHomeContent(bool isDark) {
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor =
+        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
 
     return ResponsiveWrapper(
       child: SingleChildScrollView(
@@ -455,7 +482,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         "Here is your green summary for today.",
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -467,102 +496,130 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
 
             // Environmental Score Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.champagneGold, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.royalForest.withValues(alpha: 0.35),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Your Eco Score',
-                          style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              '${widget.appState.score}',
-                              style: const TextStyle(
-                                fontSize: 42,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.champagneGold,
-                                letterSpacing: -1,
-                              ),
-                            ),
-                            const Text(
-                              ' /100',
-                              style: TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Great!',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.emerald),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          "You're doing better than 78% of people this week!",
-                          style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8)),
-                        ),
-                        const SizedBox(height: 10),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() => _currentTabIndex = 1);
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
+            GestureDetector(
+              onTap: () => widget.appState.setMainTab(1),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(24),
+                  border:
+                      Border.all(color: AppColors.champagneGold, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.royalForest.withValues(alpha: 0.35),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Your Eco Score',
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
                               Text(
-                                'View Full Details in Tracker',
-                                style: TextStyle(color: AppColors.champagneGold, fontSize: 12, fontWeight: FontWeight.bold),
+                                '${widget.appState.score}',
+                                style: const TextStyle(
+                                  fontSize: 42,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.champagneGold,
+                                  letterSpacing: -1,
+                                ),
                               ),
-                              SizedBox(width: 4),
-                              Icon(Icons.arrow_forward_rounded, color: AppColors.champagneGold, size: 14),
+                              const Text(
+                                ' /100',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Great!',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.emerald),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            "Score estimated from your baseline and logged habits.",
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white.withValues(alpha: 0.8)),
+                          ),
+                          const SizedBox(height: 10),
+                          GestureDetector(
+                            onTap: () {
+                              widget.appState.setMainTab(1);
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Flexible(child: Text(
+                                  'View Full Details in Tracker',
+                                  style: TextStyle(
+                                      color: AppColors.champagneGold,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold),
+                                )),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_forward_rounded,
+                                    color: AppColors.champagneGold, size: 14),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Radial Leaf Progress Meter
-                  Container(
-                    width: 82,
-                    height: 82,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.deepForest,
-                      border: Border.all(color: AppColors.emerald, width: 4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.emerald.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                        ),
-                      ],
+                    const SizedBox(width: 12),
+                    // Radial Leaf Progress Meter
+                    Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.deepForest,
+                        border: Border.all(color: AppColors.deepForest, width: 4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.emerald.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Stack(alignment: Alignment.center, children: [
+                        SizedBox(
+                            width: 82,
+                            height: 82,
+                            child: CircularProgressIndicator(
+                                value: widget.appState.score / 100,
+                                strokeWidth: 4,
+                                color: AppColors.emerald,
+                                backgroundColor: AppColors.deepForest)),
+                        const Icon(Icons.energy_savings_leaf_rounded,
+                            color: AppColors.emerald, size: 40),
+                      ]),
                     ),
-                    child: const Center(
-                      child: Icon(Icons.energy_savings_leaf_rounded, color: AppColors.emerald, size: 40),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 22),
@@ -573,11 +630,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.bolt_rounded, color: AppColors.champagneGold, size: 20),
+                    const Icon(Icons.bolt_rounded,
+                        color: AppColors.champagneGold, size: 20),
                     const SizedBox(width: 6),
                     Text(
                       "Today's Easy Tasks",
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor),
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: textColor),
                     ),
                   ],
                 ),
@@ -588,12 +649,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SnackBar(
                         backgroundColor: AppColors.royalForest,
                         duration: Duration(milliseconds: 1400),
-                        content: Text('🔀 New daily tasks assigned!', style: TextStyle(color: AppColors.champagneGold)),
+                        content: Text('Today’s tasks refreshed.',
+                            style: TextStyle(color: AppColors.champagneGold)),
                       ),
                     );
                   },
-                  icon: const Icon(Icons.shuffle_rounded, size: 14, color: AppColors.champagneGold),
-                  label: const Text('New Tasks', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.champagneGold)),
+                  icon: const Icon(Icons.shuffle_rounded,
+                      size: 14, color: AppColors.champagneGold),
+                  label: const Text('Refresh',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.champagneGold)),
                 ),
               ],
             ),
@@ -607,14 +674,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDone
-                        ? (isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt)
-                        : (isDark ? AppColors.darkSurface : AppColors.lightSurface),
+                        ? (isDark
+                            ? AppColors.darkSurfaceAlt
+                            : AppColors.lightSurfaceAlt)
+                        : (isDark
+                            ? AppColors.darkSurface
+                            : AppColors.lightSurface),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDone ? AppColors.emerald : AppColors.champagneGold.withValues(alpha: 0.35),
+                      color: isDone
+                          ? AppColors.emerald
+                          : AppColors.champagneGold.withValues(alpha: 0.35),
                       width: isDone ? 1.2 : 0.8,
                     ),
                   ),
@@ -628,11 +702,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               : AppColors.royalForest.withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          task['icon'] as IconData? ?? Icons.eco_rounded,
-                          color: isDone ? AppColors.emerald : AppColors.champagneGold,
-                          size: 20,
-                        ),
+                        child: Checkbox(value: isDone || task['checked'] == true, onChanged: isDone ? null : (value) => setState(() => task['checked'] = value == true), activeColor: AppColors.emerald, checkColor: AppColors.deepForest),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -644,8 +714,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
-                                decoration: isDone ? TextDecoration.lineThrough : null,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.lightTextPrimary,
+                                decoration:
+                                    isDone ? TextDecoration.lineThrough : null,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -653,22 +726,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               task['description'] as String,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary),
+                              style: const TextStyle(
+                                  fontSize: 10,
+                                  color: AppColors.lightTextSecondary),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: isDone ? null : () => _completeTask(i),
+                        onPressed: isDone || task['checked'] != true ? null : () => _completeTask(i),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isDone ? Colors.transparent : AppColors.royalForest,
+                          backgroundColor: isDone
+                              ? Colors.transparent
+                              : AppColors.royalForest,
                           elevation: isDone ? 0 : 2,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
                           visualDensity: VisualDensity.compact,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: isDone ? const BorderSide(color: AppColors.emerald) : BorderSide.none,
+                            side: isDone
+                                ? const BorderSide(color: AppColors.emerald)
+                                : BorderSide.none,
                           ),
                         ),
                         child: Text(
@@ -676,7 +756,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: isDone ? AppColors.emerald : AppColors.champagneGold,
+                            color: isDone
+                                ? AppColors.emerald
+                                : AppColors.champagneGold,
                           ),
                         ),
                       ),
@@ -692,16 +774,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatMiniCard(String label, String val, String sub, IconData icon, Color color, Color cardBg, bool isDark) {
+  Widget _buildStatMiniCard(String label, String val, String sub, IconData icon,
+      Color color, Color cardBg, bool isDark) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+          border: Border.all(
+              color: isDark
+                  ? AppColors.darkCardBorder
+                  : AppColors.lightCardBorder),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4),
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02), blurRadius: 4),
           ],
         ),
         child: Column(
@@ -712,26 +799,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text(val, maxLines: 1, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900)),
+              child: Text(val,
+                  maxLines: 1,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w900)),
             ),
             const SizedBox(height: 2),
-            Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 8.5, color: AppColors.lightTextSecondary)),
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    fontSize: 8.5, color: AppColors.lightTextSecondary)),
             const SizedBox(height: 2),
-            Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 8, color: color, fontWeight: FontWeight.bold)),
+            Text(sub,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontSize: 8, color: color, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuickActionChip(String label, IconData icon, VoidCallback onTap, bool isDark) {
+  Widget _buildQuickActionChip(
+      String label, IconData icon, VoidCallback onTap, bool isDark) {
     return Container(
       margin: const EdgeInsets.only(right: 8),
       child: ActionChip(
         avatar: Icon(icon, color: AppColors.champagneGold, size: 16),
-        label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        side: BorderSide(color: AppColors.champagneGold.withValues(alpha: 0.35)),
+        label: Text(label,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+        backgroundColor:
+            isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        side:
+            BorderSide(color: AppColors.champagneGold.withValues(alpha: 0.35)),
         onPressed: onTap,
       ),
     );
@@ -749,14 +851,18 @@ class _MiniLegend extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 2.0),
       child: Row(
         children: [
-          Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 4),
           Expanded(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 9.0, color: AppColors.lightTextSecondary),
+              style: const TextStyle(
+                  fontSize: 9.0, color: AppColors.lightTextSecondary),
             ),
           ),
         ],

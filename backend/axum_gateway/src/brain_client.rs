@@ -68,6 +68,8 @@ impl BrainClient {
             .send()
             .await
             .map_err(|e| AppError::BrainUnavailable(e.to_string()))?
+            .error_for_status()
+            .map_err(|_| AppError::BrainUnavailable("Climate Assistant is unavailable".into()))?
             .json::<BrainChatResponse>()
             .await
             .map_err(|e| AppError::BrainUnavailable(format!("Parse error: {e}")))
@@ -82,14 +84,13 @@ impl BrainClient {
             severity: "info".to_string(),
             user_id: user_id.map(|s| s.to_string()),
         };
-        if let Err(e) = self.http
-            .post(format!("{}/brain/event", self.base_url))
-            .json(&req)
-            .send()
-            .await
-        {
-            warn!("Brain event log failed (non-critical): {e}");
-        }
+        let client=self.http.clone();
+        let url=format!("{}/brain/event",self.base_url);
+        tokio::spawn(async move {
+            if client.post(url).json(&req).send().await.and_then(|r|r.error_for_status()).is_err() {
+                warn!("Brain event was not recorded");
+            }
+        });
     }
 
     /// Get the Brain system status

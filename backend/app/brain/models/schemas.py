@@ -149,6 +149,8 @@ class ChatRequest(BaseModel):
     """Request body for the /brain/chat endpoint."""
     message: str
     session_id: Optional[str] = None
+    user_id: Optional[str] = None
+    context: Optional[dict[str, Any]] = None
 
 
 class ChatResponse(BaseModel):
@@ -156,6 +158,7 @@ class ChatResponse(BaseModel):
     response: str
     session_id: str
     tools_used: list[str] = Field(default_factory=list)
+    memory_refs: list[str] = Field(default_factory=list)
     memories_recalled: int = 0
     mode: str = Field(default="direct", description="direct or socratic")
 

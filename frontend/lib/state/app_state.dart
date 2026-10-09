@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/models/plant_record.dart';
@@ -6,6 +7,7 @@ import '../core/network/api_service.dart';
 import '../core/services/location_service.dart';
 
 class UserBaselineProfile {
+  Map<String, double> commuteDistances;
   String cityWard;
   String primaryCommute;
   double dailyCommuteKm;
@@ -16,6 +18,7 @@ class UserBaselineProfile {
   String primaryGoal;
 
   UserBaselineProfile({
+    Map<String, double>? commuteDistances,
     this.cityWard = 'Thane West, Maharashtra',
     this.primaryCommute = 'Metro',
     this.dailyCommuteKm = 18.5,
@@ -24,29 +27,35 @@ class UserBaselineProfile {
     this.dwellingType = 'Apartment',
     this.hasRooftopSolar = false,
     this.primaryGoal = 'Reduce Carbon & Earn Rewards',
-  });
+  }) : commuteDistances = commuteDistances ?? {};
 
   Map<String, dynamic> toJson() => {
-    'cityWard': cityWard,
-    'primaryCommute': primaryCommute,
-    'dailyCommuteKm': dailyCommuteKm,
-    'dietaryPreference': dietaryPreference,
-    'monthlyElectricityKwh': monthlyElectricityKwh,
-    'dwellingType': dwellingType,
-    'hasRooftopSolar': hasRooftopSolar,
-    'primaryGoal': primaryGoal,
-  };
+        'commuteDistances': commuteDistances,
+        'cityWard': cityWard,
+        'primaryCommute': primaryCommute,
+        'dailyCommuteKm': dailyCommuteKm,
+        'dietaryPreference': dietaryPreference,
+        'monthlyElectricityKwh': monthlyElectricityKwh,
+        'dwellingType': dwellingType,
+        'hasRooftopSolar': hasRooftopSolar,
+        'primaryGoal': primaryGoal,
+      };
 
-  factory UserBaselineProfile.fromJson(Map<String, dynamic> json) => UserBaselineProfile(
-    cityWard: json['cityWard'] as String? ?? 'Thane West, Maharashtra',
-    primaryCommute: json['primaryCommute'] as String? ?? 'Metro',
-    dailyCommuteKm: (json['dailyCommuteKm'] as num?)?.toDouble() ?? 18.5,
-    dietaryPreference: json['dietaryPreference'] as String? ?? 'Vegetarian',
-    monthlyElectricityKwh: (json['monthlyElectricityKwh'] as num?)?.toDouble() ?? 160.0,
-    dwellingType: json['dwellingType'] as String? ?? 'Apartment',
-    hasRooftopSolar: json['hasRooftopSolar'] as bool? ?? false,
-    primaryGoal: json['primaryGoal'] as String? ?? 'Reduce Carbon & Earn Rewards',
-  );
+  factory UserBaselineProfile.fromJson(Map<String, dynamic> json) =>
+      UserBaselineProfile(
+        commuteDistances: (json['commuteDistances'] as Map?)
+            ?.map((k, v) => MapEntry(k.toString(), (v as num).toDouble())),
+        cityWard: json['cityWard'] as String? ?? 'Thane West, Maharashtra',
+        primaryCommute: json['primaryCommute'] as String? ?? 'Metro',
+        dailyCommuteKm: (json['dailyCommuteKm'] as num?)?.toDouble() ?? 18.5,
+        dietaryPreference: json['dietaryPreference'] as String? ?? 'Vegetarian',
+        monthlyElectricityKwh:
+            (json['monthlyElectricityKwh'] as num?)?.toDouble() ?? 160.0,
+        dwellingType: json['dwellingType'] as String? ?? 'Apartment',
+        hasRooftopSolar: json['hasRooftopSolar'] as bool? ?? false,
+        primaryGoal:
+            json['primaryGoal'] as String? ?? 'Reduce Carbon & Earn Rewards',
+      );
 }
 
 class ActivityLogItem {
@@ -67,13 +76,13 @@ class ActivityLogItem {
   });
 
   Map<String, dynamic> toJson() => {
-    'title': title,
-    'category': category,
-    'subtitle': subtitle,
-    'co2Kg': co2Kg,
-    'iconCode': icon.codePoint,
-    'timestamp': timestamp.toIso8601String(),
-  };
+        'title': title,
+        'category': category,
+        'subtitle': subtitle,
+        'co2Kg': co2Kg,
+        'iconCode': icon.codePoint,
+        'timestamp': timestamp.toIso8601String(),
+      };
 
   static IconData _categoryToIcon(String category) {
     switch (category.toLowerCase()) {
@@ -90,28 +99,141 @@ class ActivityLogItem {
     }
   }
 
-  factory ActivityLogItem.fromJson(Map<String, dynamic> json) => ActivityLogItem(
-    title: json['title'] as String? ?? 'Activity',
-    category: json['category'] as String? ?? 'General',
-    subtitle: json['subtitle'] as String? ?? '',
-    co2Kg: (json['co2Kg'] as num?)?.toDouble() ?? 0.0,
-    icon: _categoryToIcon(json['category'] as String? ?? 'General'),
-    timestamp: DateTime.tryParse(json['timestamp']?.toString() ?? '') ?? DateTime.now(),
-  );
+  factory ActivityLogItem.fromJson(Map<String, dynamic> json) =>
+      ActivityLogItem(
+        title: json['title'] as String? ?? 'Activity',
+        category: json['category'] as String? ?? 'General',
+        subtitle: json['subtitle'] as String? ?? '',
+        co2Kg: (json['co2Kg'] as num?)?.toDouble() ?? 0.0,
+        icon: _categoryToIcon(json['category'] as String? ?? 'General'),
+        timestamp: DateTime.tryParse(json['timestamp']?.toString() ?? '') ??
+            DateTime.now(),
+      );
 }
 
-class AppState extends ChangeNotifier {
+class AppState extends ChangeNotifier with WidgetsBindingObserver {
   final ApiService _api = ApiService();
   ApiService get api => _api;
 
   final LocationService _locationService = LocationService();
   LocationService get locationService => _locationService;
 
+  int _mainTab = 0;
+  int get mainTab => _mainTab;
+  void setMainTab(int index) {
+    if (index >= 0 && index < 4) {
+      _mainTab = index;
+      notifyListeners();
+    }
+  }
+
   SharedPreferences? _prefs;
+  Timer? _syncTimer;
+  bool _syncing = false;
+  String get _outboxKey => 'grevidea_outbox_$_userEmail';
+  Future<void> _enqueue(String path, Map<String, dynamic> data) async {
+    _prefs ??= await SharedPreferences.getInstance();
+    final entries = _prefs!.getStringList(_outboxKey) ?? [];
+    entries.add(jsonEncode({'path': path, 'data': data}));
+    await _prefs!.setStringList(_outboxKey, entries);
+    unawaited(syncPendingLedger());
+  }
+
+  Future<void> syncPendingLedger() async {
+    if (_syncing || !_isAuthenticated || _prefs == null) return;
+    _syncing = true;
+    final owner = _userEmail;
+    final key = _outboxKey;
+    try {
+      while (_userEmail == owner) {
+        final entries = _prefs!.getStringList(key) ?? [];
+        if (entries.isEmpty) break;
+        final entry = jsonDecode(entries.first) as Map<String, dynamic>;
+        final response = await _api.request(entry['path'] as String,
+            data: Map<String, dynamic>.from(entry['data']));
+        if (response == null || _userEmail != owner) break;
+        final latest = _prefs!.getStringList(key) ?? [];
+        if (latest.isNotEmpty && latest.first == entries.first) {
+          latest.removeAt(0);
+          await _prefs!.setStringList(key, latest);
+        }
+      }
+      if (_userEmail == owner) {
+        final balance = await _api.request('/api/v1/points');
+        if (balance?['total_points'] is num &&
+            (_prefs!.getStringList(key) ?? []).isEmpty)
+          setVerifiedPoints((balance['total_points'] as num).toInt());
+      }
+    } finally {
+      _syncing = false;
+    }
+  }
 
   AppState() {
     recalculateMetrics();
+    WidgetsBinding.instance.addObserver(this);
     _initBackend();
+    _locationService.addListener(_locationChanged);
+    _tripSubscription = _locationService.completedTrips.listen((trip) {
+      if (trip.mode == 'unknown_transit') {
+        if (_selectedTransitMode != null) {
+          recordTrip(trip, _selectedTransitMode!);
+          _selectedTransitMode = null;
+          return;
+        }
+        _pendingTrip = trip;
+        notifyListeners();
+        return;
+      }
+      recordTrip(trip, trip.mode);
+    });
+  }
+
+  StreamSubscription<TravelTrip>? _tripSubscription;
+  TravelTrip? _pendingTrip;
+  String? _selectedTransitMode;
+  void selectTransitMode(String mode) {
+    if (_pendingTrip != null) {
+      recordTrip(_pendingTrip!, mode);
+    } else {
+      _selectedTransitMode = mode;
+    }
+  }
+
+  TravelTrip? get pendingTrip => _pendingTrip;
+  void _locationChanged() => notifyListeners();
+  Future<void> recordTrip(TravelTrip trip, String mode) async {
+    final calculation =
+        await _api.calculateCarbon(mode: mode, distanceKm: trip.distanceKm);
+    final emitted = (calculation['co2_kg'] as num?)?.toDouble() ?? 0;
+    final saved =
+        (trip.distanceKm * .192 - emitted).clamp(0.0, double.infinity);
+    await logActivity(
+        title: '$mode trip',
+        category: 'Transport',
+        subtitle:
+            '${trip.distanceKm.toStringAsFixed(2)} km · emitted ${emitted.toStringAsFixed(2)} kg · saved ${saved.toStringAsFixed(2)} kg',
+        co2Kg: emitted - trip.distanceKm * .192,
+        icon: Icons.directions_transit,
+        pointsEarned: (calculation['green_points_earned'] as num?)?.toInt() ??
+            (saved * 100).toInt());
+    await _enqueue('/api/v1/carbon/log', {
+      'mode': mode,
+      'distance_km': trip.distanceKm,
+      'client_id': 'trip-${DateTime.now().microsecondsSinceEpoch}'
+    });
+    _pendingTrip = null;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _themeTimer?.cancel();
+    _syncTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _tripSubscription?.cancel();
+    _locationService.removeListener(_locationChanged);
+    super.dispose();
   }
 
   /// Initialize persistent storage and restore saved user state
@@ -127,10 +249,16 @@ class AppState extends ChangeNotifier {
         _themeMode = ThemeMode.light;
       }
 
+      _autoTheme = savedTheme == null || savedTheme == 'system';
+      _updateAutomaticTheme();
+      _themeTimer ??= Timer.periodic(
+          const Duration(minutes: 1), (_) => _updateAutomaticTheme());
       // Check current user session
       final currentEmail = _prefs?.getString('grevidea_current_user_email');
       if (currentEmail != null && currentEmail.isNotEmpty) {
         _loadUserFromDb(currentEmail);
+        if (_userPassword.isNotEmpty)
+          await _api.login(_userEmail, _userPassword);
       } else {
         // Default clean state for first launch before login
         _isAuthenticated = false;
@@ -138,8 +266,11 @@ class AppState extends ChangeNotifier {
         _plants.clear();
       }
 
+      _syncTimer ??= Timer.periodic(
+          const Duration(minutes: 1), (_) => syncPendingLedger());
+      unawaited(syncPendingLedger());
       // Acquire live GPS coordinates
-      await _locationService.getCurrentLocation();
+      await _locationService.startSilentTracking();
     } catch (e) {
       debugPrint('Error initializing AppState persistence: $e');
     }
@@ -149,7 +280,6 @@ class AppState extends ChangeNotifier {
   void _initBackend() async {
     final reachable = await _api.checkHealth();
     if (reachable) {
-      await _api.autoLogin();
       final aqiData = await _api.fetchAqi(city: 'Thane');
       if (aqiData['aqi'] != null) {
         _currentAqi = aqiData['aqi'] is int
@@ -162,19 +292,53 @@ class AppState extends ChangeNotifier {
   }
 
   // ── Theme State ──────────────────────────────────────────────────
-  ThemeMode _themeMode = ThemeMode.light;
+  Timer? _themeTimer;
+  bool _autoTheme = true;
+  @override
+  void didChangePlatformBrightness() => _updateAutomaticTheme();
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _updateAutomaticTheme();
+  }
+
+  void _updateAutomaticTheme() {
+    if (!_autoTheme) return;
+    final hour = DateTime.now().hour;
+    final dark = hour < 6 ||
+        hour >= 18 ||
+        WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+            Brightness.dark;
+    final mode = dark ? ThemeMode.dark : ThemeMode.light;
+    if (_themeMode != mode) {
+      _themeMode = mode;
+      notifyListeners();
+    }
+  }
+
+  ThemeMode _themeMode = (DateTime.now().hour < 6 || DateTime.now().hour >= 18)
+      ? ThemeMode.dark
+      : ThemeMode.light;
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
 
   void toggleTheme() {
+    _autoTheme = false;
     _themeMode = isDarkMode ? ThemeMode.light : ThemeMode.dark;
     _prefs?.setString('grevidea_theme_mode', isDarkMode ? 'dark' : 'light');
     notifyListeners();
   }
 
   void setTheme(ThemeMode mode) {
+    _autoTheme = mode == ThemeMode.system;
     _themeMode = mode;
-    _prefs?.setString('grevidea_theme_mode', mode == ThemeMode.dark ? 'dark' : 'light');
+    _updateAutomaticTheme();
+    _prefs?.setString(
+        'grevidea_theme_mode',
+        mode == ThemeMode.system
+            ? 'system'
+            : mode == ThemeMode.dark
+                ? 'dark'
+                : 'light');
     notifyListeners();
   }
 
@@ -202,6 +366,7 @@ class AppState extends ChangeNotifier {
   }
 
   void updateBaseline({
+    Map<String, double>? commuteDistances,
     required String cityWard,
     required String primaryCommute,
     required double dailyCommuteKm,
@@ -212,6 +377,7 @@ class AppState extends ChangeNotifier {
     required String primaryGoal,
   }) {
     _baseline = UserBaselineProfile(
+      commuteDistances: commuteDistances,
       cityWard: cityWard,
       primaryCommute: primaryCommute,
       dailyCommuteKm: dailyCommuteKm,
@@ -251,9 +417,9 @@ class AppState extends ChangeNotifier {
   double _treesEquivalent = 0.0;
   double get treesEquivalent => _treesEquivalent;
 
-  int _currentAqi = 54;
+  int _currentAqi = 0;
   int get currentAqi => _currentAqi;
-  String _aqiCategory = 'Moderate';
+  String _aqiCategory = 'Unavailable';
   String get aqiCategory => _aqiCategory;
 
   bool _challengeAccepted = false;
@@ -292,8 +458,9 @@ class AppState extends ChangeNotifier {
     int baseScore = 50;
 
     if (_baseline.hasRooftopSolar) baseScore += 10;
-    if (_baseline.dietaryPreference.toLowerCase().contains('veg') ||
-        _baseline.dietaryPreference.toLowerCase().contains('plant')) {
+    if (!_baseline.dietaryPreference.toLowerCase().contains('non-veg') &&
+        (_baseline.dietaryPreference.toLowerCase().contains('veg') ||
+            _baseline.dietaryPreference.toLowerCase().contains('plant'))) {
       baseScore += 8;
     }
 
@@ -304,15 +471,19 @@ class AppState extends ChangeNotifier {
         commuteLower.contains('bicycle') ||
         commuteLower.contains('walk')) {
       baseScore += 10;
-    } else if (commuteLower.contains('petrol') || commuteLower.contains('diesel') || commuteLower.contains('car')) {
+    } else if (commuteLower.contains('petrol') ||
+        commuteLower.contains('diesel') ||
+        commuteLower.contains('car')) {
       baseScore -= 6;
     }
 
     // Stewardship activities bonus (+3 per activity logged today)
-    final todayActivitiesCount = _recentActivities.where((a) =>
-        a.timestamp.year == now.year &&
-        a.timestamp.month == now.month &&
-        a.timestamp.day == now.day).length;
+    final todayActivitiesCount = _recentActivities
+        .where((a) =>
+            a.timestamp.year == now.year &&
+            a.timestamp.month == now.month &&
+            a.timestamp.day == now.day)
+        .length;
     baseScore += (todayActivitiesCount * 3).clamp(0, 18);
 
     _score = baseScore.clamp(20, 99);
@@ -320,7 +491,8 @@ class AppState extends ChangeNotifier {
 
   // ── Recent Activity Logs (Populated on real usage, persisted to DB) ──
   final List<ActivityLogItem> _recentActivities = [];
-  List<ActivityLogItem> get recentActivities => List.unmodifiable(_recentActivities);
+  List<ActivityLogItem> get recentActivities =>
+      List.unmodifiable(_recentActivities);
 
   // ── Plant Growth Tracker Records (Completely empty [] for new users) ──
   final List<PlantGrowthRecord> _plants = [];
@@ -365,6 +537,25 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  String _taskKey(String id) =>
+      'claim_${userEmail}_${DateTime.now().toIso8601String().substring(0, 10)}_$id';
+  final Set<String> _sessionClaims = {};
+  bool isTaskClaimed(String id) =>
+      _sessionClaims.contains(_taskKey(id)) ||
+      (_prefs?.getBool(_taskKey(id)) ?? false);
+  bool claimTask(String id) {
+    if (isTaskClaimed(id)) return false;
+    _sessionClaims.add(_taskKey(id));
+    _prefs?.setBool(_taskKey(id), true);
+    final day = DateTime.now()
+        .toUtc()
+        .add(const Duration(hours: 5, minutes: 30))
+        .toIso8601String()
+        .substring(0, 10);
+    _enqueue('/api/v1/habits/claim', {'habit_id': id, 'day': day});
+    return true;
+  }
+
   // ── Backend API Actions ──────────────────────────────────────────
   Future<void> logActivity({
     required String title,
@@ -390,26 +581,26 @@ class AppState extends ChangeNotifier {
     _saveCurrentUserToDb();
     notifyListeners();
 
-    // Sync with Axum backend
-    try {
-      await _api.logCarbonTrip(
-        mode: category.toLowerCase(),
-        distanceKm: 5.0,
-        co2Kg: co2Kg,
-        pointsEarned: pointsEarned,
-      );
-    } catch (_) {}
+    // Habit estimates stay local; trip endpoints require a real mode and distance.
+    // Do not invent a five-kilometre trip for unrelated food/energy/waste actions.
   }
 
   void acceptChallenge({int bonusPoints = 50}) {
+    if (_challengeAccepted) return;
     _challengeAccepted = true;
     _greenPoints += bonusPoints;
     _saveCurrentUserToDb();
     notifyListeners();
   }
 
+  void setVerifiedPoints(int points) {
+    _greenPoints = points < 0 ? 0 : points;
+    _saveCurrentUserToDb();
+    notifyListeners();
+  }
+
   bool redeemReward({required int cost, required String rewardName}) {
-    if (_greenPoints >= cost) {
+    if (cost > 0 && _greenPoints >= cost) {
       _greenPoints -= cost;
       _saveCurrentUserToDb();
       notifyListeners();
@@ -466,12 +657,14 @@ class AppState extends ChangeNotifier {
       _userEmail = email.trim();
       _userName = user['displayName'] as String? ?? 'User';
       _userPassword = user['password'] as String? ?? '';
-      _hasCompletedOnboarding = user['hasCompletedOnboarding'] as bool? ?? false;
+      _hasCompletedOnboarding =
+          user['hasCompletedOnboarding'] as bool? ?? false;
       _greenPoints = user['greenPoints'] as int? ?? 0;
       _score = user['score'] as int? ?? 50;
 
       if (user['baseline'] != null) {
-        _baseline = UserBaselineProfile.fromJson(Map<String, dynamic>.from(user['baseline']));
+        _baseline = UserBaselineProfile.fromJson(
+            Map<String, dynamic>.from(user['baseline']));
       } else {
         _baseline = UserBaselineProfile();
       }
@@ -480,7 +673,8 @@ class AppState extends ChangeNotifier {
       if (user['plants'] != null && user['plants'] is List) {
         for (final p in user['plants']) {
           if (p is Map) {
-            _plants.add(PlantGrowthRecord.fromJson(Map<String, dynamic>.from(p)));
+            _plants
+                .add(PlantGrowthRecord.fromJson(Map<String, dynamic>.from(p)));
           }
         }
       }
@@ -489,7 +683,8 @@ class AppState extends ChangeNotifier {
       if (user['activities'] != null && user['activities'] is List) {
         for (final a in user['activities']) {
           if (a is Map) {
-            _recentActivities.add(ActivityLogItem.fromJson(Map<String, dynamic>.from(a)));
+            _recentActivities
+                .add(ActivityLogItem.fromJson(Map<String, dynamic>.from(a)));
           }
         }
       }
@@ -519,7 +714,9 @@ class AppState extends ChangeNotifier {
 
     // Preserve existing password if not currently set in memory
     String passToSave = _userPassword;
-    if (passToSave.isEmpty && db[emailKey] != null && db[emailKey]['password'] != null) {
+    if (passToSave.isEmpty &&
+        db[emailKey] != null &&
+        db[emailKey]['password'] != null) {
       passToSave = db[emailKey]['password'] as String;
     }
 
@@ -546,7 +743,7 @@ class AppState extends ChangeNotifier {
     final cleanEmail = email.trim();
     final db = _getUsersDb();
     final emailKey = cleanEmail.toLowerCase();
-    
+
     // Validate credentials if user exists and password is provided (skip for google oauth)
     if (db.containsKey(emailKey)) {
       final existingUser = db[emailKey];
@@ -585,7 +782,8 @@ class AppState extends ChangeNotifier {
     return true;
   }
 
-  bool signup({required String name, required String email, required String password}) {
+  bool signup(
+      {required String name, required String email, required String password}) {
     final cleanEmail = email.trim();
     final emailKey = cleanEmail.toLowerCase();
     final db = _getUsersDb();
@@ -607,7 +805,8 @@ class AppState extends ChangeNotifier {
 
     // Brand new user: empty zero-state
     _userEmail = cleanEmail;
-    _userName = name.trim().isNotEmpty ? name.trim() : cleanEmail.split('@').first;
+    _userName =
+        name.trim().isNotEmpty ? name.trim() : cleanEmail.split('@').first;
     _userPassword = password;
     _hasCompletedOnboarding = false;
     _greenPoints = 0;
@@ -619,7 +818,8 @@ class AppState extends ChangeNotifier {
     _saveCurrentUserToDb();
 
     // Async sync with Axum
-    _api.register(email: _userEmail, password: password, displayName: _userName);
+    _api.register(
+        email: _userEmail, password: password, displayName: _userName);
 
     notifyListeners();
     return true;
@@ -632,7 +832,8 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool changePassword({required String currentPassword, required String newPassword}) {
+  bool changePassword(
+      {required String currentPassword, required String newPassword}) {
     notifyListeners();
     return true;
   }

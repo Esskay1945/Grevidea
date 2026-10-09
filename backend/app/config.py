@@ -19,6 +19,7 @@ from pydantic_settings import BaseSettings
 class LLMProvider(str, Enum):
     """Supported LLM providers in fallback order."""
     OLLAMA = "ollama"
+    GEMINI = "gemini"
     GROQ = "groq"
     MISTRAL = "mistral"
 
@@ -61,7 +62,7 @@ class Settings(BaseSettings):
 
     # Tier 2.5: Google Gemini (Vision & Fast Reasoning)
     gemini_api_key: Optional[str] = None
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-3.8-flash"
     gemini_enabled: bool = True
 
     # Tier 3: Mistral (final fallback)
@@ -73,6 +74,7 @@ class Settings(BaseSettings):
     tavily_api_key: Optional[str] = None
     openalex_api_key: Optional[str] = None
     database_url: Optional[str] = None
+    research_pdf_dir: Optional[str] = None
 
     # LLM parameters
     llm_temperature: float = 0.1
