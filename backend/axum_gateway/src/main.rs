@@ -154,6 +154,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/api/v1/aqi/route",          post(tools::civic::score_route_aqi))
         .route("/api/v1/green-zones",        get(tools::civic::find_green_zones))
         .route("/api/v1/reports",            get(tools::civic::get_pollution_reports).post(tools::civic::submit_pollution_report))
+        .route("/api/v1/civic/email",        post(tools::civic::send_civic_email))
         .route("/api/v1/rti/draft",          post(tools::civic::draft_rti))
         .route("/api/v1/sos",                post(tools::civic::create_sos))
         .route("/api/v1/sos/nearby",         get(tools::civic::get_nearby_sos))

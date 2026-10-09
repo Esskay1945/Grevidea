@@ -131,6 +131,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  static int _activityCounter = 0;
   SharedPreferences? _prefs;
   Timer? _syncTimer;
   bool _syncing = false;
@@ -676,7 +677,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     bool syncToServer = true,
     DateTime? timestamp,
   }) async {
-    clientId ??= 'activity-${DateTime.now().microsecondsSinceEpoch}';
+    clientId ??= 'activity-${DateTime.now().microsecondsSinceEpoch}-${++_activityCounter}';
     if (_recentActivities.any((a) => a.clientId == clientId)) return;
     final occurredAt = timestamp ?? DateTime.now();
     _recentActivities.insert(

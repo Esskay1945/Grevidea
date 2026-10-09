@@ -57,9 +57,17 @@ class GCICore:
         # 1. Open Mythos (Memory)
         self.mythos = OpenMythos(self._settings)
 
-        if self._settings.research_pdf_dir:
+        pdf_dir = self._settings.research_pdf_dir
+        if not pdf_dir:
+            candidate = Path(__file__).resolve().parents[3] / "grevidea" / "Research Papers"
+            if candidate.is_dir():
+                pdf_dir = str(candidate)
+        if pdf_dir:
             from app.brain.research_corpus import ingest_papers
-            ingest_papers(self.mythos, self._settings.research_pdf_dir)
+            try:
+                ingest_papers(self.mythos, pdf_dir)
+            except Exception as e:
+                logger.warning(f"Could not ingest research papers from {pdf_dir}: {e}")
 
         # 2. Tool Registry
         self.tools = ToolRegistry()

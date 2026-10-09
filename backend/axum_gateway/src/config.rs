@@ -11,6 +11,14 @@ pub struct Config {
     pub openaq_api_key: Option<String>,
     pub fcm_server_key: Option<String>,
     pub openweather_api_key: String,
+    // SMTP for direct civic email dispatch
+    pub smtp_host: Option<String>,
+    pub smtp_port: u16,
+    pub smtp_username: Option<String>,
+    pub smtp_password: Option<String>,
+    pub smtp_from_email: String,
+    pub smtp_from_name: String,
+    pub civic_grievance_email: String,
 }
 
 impl Config {
@@ -31,6 +39,13 @@ impl Config {
             openaq_api_key: env::var("OPENAQ_API_KEY").ok(),
             fcm_server_key: env::var("FCM_SERVER_KEY").ok(),
             openweather_api_key: env::var("OPENWEATHER_API_KEY").unwrap_or_default(),
+            smtp_host: env::var("SMTP_HOST").ok(),
+            smtp_port: env::var("SMTP_PORT").ok().and_then(|p| p.parse().ok()).unwrap_or(587),
+            smtp_username: env::var("SMTP_USERNAME").ok(),
+            smtp_password: env::var("SMTP_PASSWORD").ok(),
+            smtp_from_email: env::var("SMTP_FROM_EMAIL").unwrap_or_else(|_| "noreply@grevidea.app".to_string()),
+            smtp_from_name: env::var("SMTP_FROM_NAME").unwrap_or_else(|_| "Grevidea Civic Platform".to_string()),
+            civic_grievance_email: env::var("CIVIC_GRIEVANCE_EMAIL").unwrap_or_else(|_| "mc@thanecity.gov.in".to_string()),
         }
     }
 }

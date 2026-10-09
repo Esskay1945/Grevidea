@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -135,11 +136,476 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           officerDesignation: 'Ward Sanitary Inspector & Field Supervisor',
           resolutionSla:
               '24 - 48 Hours (Maha. Right to Public Services Act 2015)',
-          escalationContact: 'TMC SWM Toll Free 1800-222-108',
+          escalationContact: '022-25331590 / 022-25331211 • mc@thanecity.gov.in',
           icon: Icons.delete_sweep_rounded,
         );
     }
   }
+
+  // ── Official Civic Contact Helplines & Municipal Commissioner Email ────────
+  static const String civicHelpline1 = '022-25331590';
+  static const String civicHelpline2 = '022-25331211';
+  static const String disasterHelpline = '1800222108';
+  static const String municipalCommissionerEmail = 'mc@thanecity.gov.in';
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final clean = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri(scheme: 'tel', path: clean);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.royalForest,
+              content: Text('Helpline number: $phoneNumber (Dialer could not open automatically)'),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.royalForest,
+            content: Text('Helpline number: $phoneNumber'),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showCallAuthorityDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.lightTextSecondary.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: const [
+                  Icon(Icons.phone_in_talk_rounded, color: AppColors.emerald, size: 22),
+                  SizedBox(width: 8),
+                  Text(
+                    'Call Municipal Authority',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Direct phone helpline connection to civic grievance desks & disaster control.',
+                style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
+              ),
+              const SizedBox(height: 16),
+              _buildPhoneTile(
+                title: 'General Civic Grievance #1',
+                phone: civicHelpline1,
+                subtitle: 'Thane Municipal Corporation Grievance Redressal Cell',
+                icon: Icons.support_agent_rounded,
+                color: AppColors.emerald,
+              ),
+              const SizedBox(height: 8),
+              _buildPhoneTile(
+                title: 'General Civic Grievance #2',
+                phone: civicHelpline2,
+                subtitle: 'TMC Civic Control & Inspection Helpline',
+                icon: Icons.phone_callback_rounded,
+                color: AppColors.sapphire,
+              ),
+              const SizedBox(height: 8),
+              _buildPhoneTile(
+                title: 'Regional Disaster Management Cell',
+                phone: disasterHelpline,
+                subtitle: 'TMC 24x7 Emergency & Disaster Operations (Toll-Free)',
+                icon: Icons.emergency_rounded,
+                color: AppColors.coral,
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhoneTile({
+    required String title,
+    required String phone,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        leading: CircleAvatar(
+          backgroundColor: color.withValues(alpha: 0.2),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(phone, style: TextStyle(fontWeight: FontWeight.w800, color: color, fontSize: 13)),
+            Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+          ],
+        ),
+        trailing: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.pop(context);
+            _makePhoneCall(phone);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          icon: const Icon(Icons.call_rounded, size: 14),
+          label: const Text('Call', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        ),
+      ),
+    );
+  }
+
+  void _showSendDirectEmailDialog({String? complaintId, String? wasteType}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final wType = wasteType ?? _selectedWasteType ?? 'Civic Environmental Issue';
+    final locationText = _locationController.text;
+    final nameCtrl = TextEditingController(text: widget.appState.userName);
+    final phoneCtrl = TextEditingController();
+    final subjectCtrl = TextEditingController(
+      text: '[Civic Grievance] $wType at $locationText',
+    );
+    final messageCtrl = TextEditingController(
+      text: _descriptionController.text.trim().isNotEmpty
+          ? _descriptionController.text.trim()
+          : 'Reporting $wType at $locationText requiring urgent municipal inspection and clearance.',
+    );
+    bool isSendingEmail = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) => SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.lightTextSecondary.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.royalForest,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.mark_email_read_rounded,
+                            color: AppColors.champagneGold, size: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Direct Email to Municipal Commissioner',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              'Dispatched directly from app • Not redirected to Gmail',
+                              style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: AppColors.emerald,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.royalForest.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.emerald.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.verified_user_rounded, color: AppColors.emerald, size: 16),
+                        SizedBox(width: 6),
+                        Text('Official Recipient: ',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text(municipalCommissionerEmail,
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.champagneGold)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('Subject',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: subjectCtrl,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Your Name',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            TextField(
+                              controller: nameCtrl,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Phone Number',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            TextField(
+                              controller: phoneCtrl,
+                              keyboardType: TextInputType.phone,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: 'Optional',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  const Text('Grievance Message',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  TextField(
+                    controller: messageCtrl,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: isSendingEmail
+                          ? null
+                          : () async {
+                              if (subjectCtrl.text.trim().isEmpty ||
+                                  messageCtrl.text.trim().isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Subject and message are required')),
+                                );
+                                return;
+                              }
+                              setModalState(() => isSendingEmail = true);
+                              try {
+                                final pos =
+                                    await widget.appState.locationService.getCurrentLocation();
+                                String? photo;
+                                if (_imagePath != null) {
+                                  final bytes = await XFile(_imagePath!).readAsBytes();
+                                  if (bytes.length <= 1000000) {
+                                    photo = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+                                  }
+                                }
+                                final resp = await widget.appState.api.sendCivicEmail(
+                                  subject: subjectCtrl.text.trim(),
+                                  message: messageCtrl.text.trim(),
+                                  complaintId: complaintId,
+                                  wasteType: wType,
+                                  location: locationText,
+                                  latitude: pos?.latitude,
+                                  longitude: pos?.longitude,
+                                  imageUrl: photo,
+                                  reporterName: nameCtrl.text.trim(),
+                                  reporterPhone: phoneCtrl.text.trim(),
+                                  recipientEmail: municipalCommissionerEmail,
+                                );
+                                if (ctx.mounted) {
+                                  Navigator.pop(ctx);
+                                  showDialog(
+                                    context: context,
+                                    builder: (dCtx) => AlertDialog(
+                                      title: Row(
+                                        children: const [
+                                          Icon(Icons.check_circle_rounded,
+                                              color: AppColors.emerald, size: 26),
+                                          SizedBox(width: 8),
+                                          Text('Email Dispatched!'),
+                                        ],
+                                      ),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Your grievance has been dispatched directly from the Grevidea app to:',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            municipalCommissionerEmail,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.champagneGold,
+                                                fontSize: 13),
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.emerald.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              'Dispatch ID: ${resp['dispatch_id'] ?? 'TMC-ESC-OK'}\nStatus: ${resp['status'] ?? 'Delivered'} (+15 Green Points awarded)',
+                                              style: const TextStyle(
+                                                  fontSize: 11, fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () => Navigator.pop(dCtx),
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: AppColors.royalForest),
+                                          child: const Text('OK',
+                                              style: TextStyle(color: AppColors.champagneGold)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                setModalState(() => isSendingEmail = false);
+                                if (ctx.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Email dispatch: $e')),
+                                  );
+                                }
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.royalForest,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: isSendingEmail
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  color: AppColors.champagneGold, strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(Icons.send_rounded,
+                                    color: AppColors.champagneGold, size: 18),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Send Email Directly from App',
+                                  style: TextStyle(
+                                      color: AppColors.champagneGold,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
   @override
   void initState() {
@@ -422,15 +888,53 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             ],
           ),
           actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                _tabController.animateTo(1); // Switch to tracking tab
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.royalForest),
-              child: const Text('Track Dispatch Status',
-                  style: TextStyle(color: AppColors.champagneGold)),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _showCallAuthorityDialog();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.emerald, width: 1.2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.phone_rounded, color: AppColors.emerald, size: 14),
+                  label: const Text('Call Authority',
+                      style: TextStyle(color: AppColors.emerald, fontSize: 11.5, fontWeight: FontWeight.bold)),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _showSendDirectEmailDialog(
+                      complaintId: ticketNo,
+                      wasteType: wasteType,
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.champagneGold, width: 1.2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.email_rounded, color: AppColors.champagneGold, size: 14),
+                  label: const Text('Direct Email',
+                      style: TextStyle(color: AppColors.champagneGold, fontSize: 11.5, fontWeight: FontWeight.bold)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _tabController.animateTo(1); // Switch to tracking tab
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.royalForest,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text('Track Status',
+                      style: TextStyle(color: AppColors.champagneGold, fontSize: 11.5, fontWeight: FontWeight.bold)),
+                ),
+              ],
             ),
           ],
         ),
@@ -518,6 +1022,140 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               color: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.lightTextSecondary),
+        ),
+        const SizedBox(height: 18),
+
+        // ── Direct Authority Escalation Hub (Call or Send Email) ─────────────
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: AppColors.champagneGold.withValues(alpha: 0.4),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.champagneGold.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.contact_phone_rounded,
+                        color: AppColors.champagneGold, size: 18),
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'DIRECT AUTHORITY ESCALATION',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.champagneGold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.sapphire.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'TWO OPTIONS',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.sapphire,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Choose how you want to reach out: call the official grievance helpline directly, or send an official email to the Municipal Commissioner directly from the app (no Gmail redirect).',
+                style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  // Option 1: Call Authority
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _showCallAuthorityDialog,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppColors.emerald, width: 1.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.phone_rounded, color: AppColors.emerald, size: 18),
+                      label: const Text(
+                        'Call Authority',
+                        style: TextStyle(
+                          color: AppColors.emerald,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Option 2: Send Direct Email
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showSendDirectEmailDialog(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.royalForest,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.email_rounded, color: AppColors.champagneGold, size: 18),
+                      label: const Text(
+                        'Send Email',
+                        style: TextStyle(
+                          color: AppColors.champagneGold,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 4,
+                children: const [
+                  Text('📞 022-25331590 / 022-25331211',
+                      style: TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
+                  Text('✉️ mc@thanecity.gov.in',
+                      style: TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
+                  Text('🚨 Regional Helpline: 1800222108',
+                      style: TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
+                ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 18),
 
@@ -1025,6 +1663,38 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                           fontSize: 10.5,
                           fontWeight: FontWeight.bold,
                           color: AppColors.amber),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      onPressed: _showCallAuthorityDialog,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(Icons.phone_rounded, size: 13, color: AppColors.emerald),
+                      label: const Text('Call Authority',
+                          style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton.icon(
+                      onPressed: () => _showSendDirectEmailDialog(
+                        complaintId: ticket.ticketNumber,
+                        wasteType: ticket.wasteType,
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(Icons.email_rounded, size: 13, color: AppColors.champagneGold),
+                      label: const Text('Direct Email',
+                          style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),

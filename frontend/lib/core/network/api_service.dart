@@ -373,6 +373,40 @@ class ApiService {
     return [];
   }
 
+  /// Dispatches an official civic grievance email directly from the app (no Gmail redirect)
+  Future<Map<String, dynamic>> sendCivicEmail({
+    required String subject,
+    required String message,
+    String? complaintId,
+    String? wasteType,
+    String? location,
+    double? latitude,
+    double? longitude,
+    String? imageUrl,
+    String? reporterName,
+    String? reporterPhone,
+    String? recipientEmail,
+  }) async {
+    final res = await _post('/api/v1/civic/email', {
+      'subject': subject,
+      'message': message,
+      'complaint_id': complaintId,
+      'waste_type': wasteType,
+      'location': location,
+      'latitude': latitude,
+      'longitude': longitude,
+      'photo_url': imageUrl,
+      'reporter_name': reporterName,
+      'reporter_phone': reporterPhone,
+      'recipient_email': recipientEmail ?? 'mc@thanecity.gov.in',
+    });
+    if (res == null) {
+      throw StateError(
+          'Email not dispatched. Check your connection or sign-in state.');
+    }
+    return Map<String, dynamic>.from(res);
+  }
+
   Future<List<Map<String, dynamic>>> getDailyChallenges() async {
     final res = await _get('/api/v1/challenges');
     if (res != null && res is List) {

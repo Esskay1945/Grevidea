@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:battery_plus/battery_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
 import '../../core/theme/app_colors.dart';
@@ -17,9 +18,38 @@ class DisasterAlertsScreen extends StatefulWidget {
 
 class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
   bool _isLoadingFeed = false;
+  static const String disasterHelpline = '1800222108';
 
   final List<Map<String, dynamic>> _authoritativeShelters = [];
   final List<Map<String, dynamic>> _liveAlerts = [];
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final clean = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri(scheme: 'tel', path: clean);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.coral,
+              content: Text('Disaster Helpline: $phoneNumber'),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.coral,
+            content: Text('Disaster Helpline: $phoneNumber'),
+          ),
+        );
+      }
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -208,7 +238,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                       'Ward: ${widget.appState.baseline.cityWard} (Device Sensor Live)',
                       style: const TextStyle(fontSize: 11)),
                   const SizedBox(height: 2),
-                  const Text('Emergency Helpline: 1077 (TMC Disaster Cell)',
+                  const Text('Regional Disaster Helpline: 1800222108 (24x7 Operations)',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 11,
@@ -219,6 +249,19 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
           ],
         ),
         actions: [
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _makePhoneCall(disasterHelpline);
+            },
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.coral, width: 1.2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            icon: const Icon(Icons.phone_rounded, color: AppColors.coral, size: 14),
+            label: const Text('Call 1800-222-108',
+                style: TextStyle(color: AppColors.coral, fontSize: 11.5, fontWeight: FontWeight.bold)),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
@@ -517,6 +560,12 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         appState: widget.appState,
         extraActions: [
           IconButton(
+            icon: const Icon(Icons.phone_in_talk_rounded,
+                color: AppColors.coral),
+            tooltip: 'Call Regional Disaster Helpline (1800222108)',
+            onPressed: () => _makePhoneCall(disasterHelpline),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh_rounded,
                 color: AppColors.champagneGold),
             tooltip: 'Refresh Live Hazards',
@@ -560,6 +609,66 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          // 🚨 Regional Disaster Management Cell 24x7 Helpline Banner
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.coral.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.coral.withValues(alpha: 0.35)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.coral.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.emergency_rounded,
+                      color: AppColors.coral, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Regional Disaster Helpline',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.coral),
+                      ),
+                      Text(
+                        'Toll-Free 24x7: 1800-222-108',
+                        style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.lightTextSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _makePhoneCall(disasterHelpline),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.coral,
+                    foregroundColor: Colors.white,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.call_rounded, size: 14),
+                  label: const Text('Call',
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
           Text(
             'Live risk summary for ${widget.appState.baseline.cityWard}',
             style: TextStyle(
