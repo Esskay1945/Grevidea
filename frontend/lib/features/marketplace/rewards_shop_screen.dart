@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -18,14 +19,14 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  final List<Map<String, dynamic>> _rewards = [
+  List<Map<String, dynamic>> get _rewards => [
     {
       'id': 'plant_tree',
       'title': 'Plant a Tree',
       'cost': 100,
       'subtitle': 'Sapling redemption · fulfillment pending',
       'icon': Icons.park_rounded,
-      'color': AppColors.emerald,
+      'color': AppColors.leafOf(context),
       'requires_photo': true,
     },
     {
@@ -69,46 +70,61 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
     if (_redeeming) return;
     final address = TextEditingController(), phone = TextEditingController();
     final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-                title: Text(item['title']),
-                content: SingleChildScrollView(
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(
-                      'Redeem for ${item['cost']} Green Points? Confirmation depends on the fulfillment provider.'),
-                  if (item['id'] == 'eco_merchandise') ...[
-                    TextField(
-                        controller: address,
-                        decoration: const InputDecoration(
-                            labelText: 'Delivery address')),
-                    TextField(
-                        controller: phone,
-                        keyboardType: TextInputType.phone,
-                        decoration: const InputDecoration(
-                            labelText: 'Phone with country code (optional)'))
-                  ]
-                ])),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancel')),
-                  FilledButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Redeem'))
-                ]));
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(item['title']),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Redeem for ${item['cost']} Green Points? Confirmation depends on the fulfillment provider.',
+              ),
+              if (item['id'] == 'eco_merchandise') ...[
+                TextField(
+                  controller: address,
+                  decoration: const InputDecoration(
+                    labelText: 'Delivery address',
+                  ),
+                ),
+                TextField(
+                  controller: phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone with country code (optional)',
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Redeem'),
+          ),
+        ],
+      ),
+    );
     if (confirmed != true) {
       address.dispose();
       phone.dispose();
       return;
     }
     _redeeming = true;
-    final result =
-        await widget.appState.api.request('/api/v1/rewards/redeem', data: {
-      'reward_id': item['id'],
-      if (address.text.trim().isNotEmpty)
-        'delivery_address': address.text.trim(),
-      if (phone.text.trim().isNotEmpty) 'phone': phone.text.trim()
-    });
+    final result = await widget.appState.api.request(
+      '/api/v1/rewards/redeem',
+      data: {
+        'reward_id': item['id'],
+        if (address.text.trim().isNotEmpty)
+          'delivery_address': address.text.trim(),
+        if (phone.text.trim().isNotEmpty) 'phone': phone.text.trim(),
+      },
+    );
     address.dispose();
     phone.dispose();
     _redeeming = false;
@@ -117,10 +133,15 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
       widget.appState.setVerifiedPoints((result['balance'] as num).toInt());
       setState(() {});
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(result == null
-            ? 'Reward not redeemed. Check your connection, sign-in and verified point balance.'
-            : 'Redemption recorded: ${result['id']}. Fulfillment pending.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result == null
+              ? 'Reward not redeemed. Check your connection, sign-in and verified point balance.'
+              : 'Redemption recorded: ${result['id']}. Fulfillment pending.',
+        ),
+      ),
+    );
   }
 
   void _showPlantTreeDialog() {
@@ -132,49 +153,69 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
             : AppColors.lightSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
-          children: const [
-            Icon(Icons.camera_alt_rounded, color: AppColors.emerald, size: 24),
+          children: [
+            Icon(
+              Icons.camera_alt_rounded,
+              color: AppColors.leafOf(context),
+              size: 24,
+            ),
             SizedBox(width: 8),
-            Text('Plant a Tree Verification',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            Text(
+              'Plant a Tree Verification',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
               'Record a sapling for your personal journal. Photo verification requires a partner integration.',
               style: TextStyle(fontSize: 12),
             ),
             SizedBox(height: 12),
-            Text('• No points awarded until verification',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                    color: AppColors.emerald)),
-            Text('• Growth check-ins require verified evidence',
-                style: TextStyle(fontSize: 11, color: AppColors.champagneGold)),
+            Text(
+              '• No points awarded until verification',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+                color: AppColors.leafOf(context),
+              ),
+            ),
+            Text(
+              '• Growth check-ins require verified evidence',
+              style: TextStyle(
+                fontSize: 11,
+                color: AppColors.accentOf(context),
+              ),
+            ),
             SizedBox(height: 8),
             Text(
               'Self-reported records do not establish tree survival or carbon credits.',
               style: TextStyle(
-                  fontSize: 11,
-                  color: AppColors.coral,
-                  fontWeight: FontWeight.w600),
+                fontSize: 11,
+                color: AppColors.coral,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.royalForest,
-                foregroundColor: AppColors.champagneGold),
+              backgroundColor: AppColors.royalForest,
+              foregroundColor: AppColors.champagneGold,
+            ),
             icon: const Icon(Icons.camera_rounded, size: 16),
-            label: const Text('Record Sapling',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            label: const Text(
+              'Record Sapling',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
             onPressed: () {
               Navigator.pop(ctx);
               final newPlant = PlantGrowthRecord(
@@ -199,8 +240,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                 const SnackBar(
                   backgroundColor: AppColors.royalForest,
                   content: Text(
-                      'Sapling record saved. Photo verification and points are pending.',
-                      style: TextStyle(color: AppColors.champagneGold)),
+                    'Sapling record saved. Photo verification and points are pending.',
+                    style: TextStyle(color: AppColors.champagneGold),
+                  ),
                 ),
               );
             },
@@ -211,9 +253,13 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
   }
 
   void _verifyMonthlyCheckIn(int index) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
         content: Text(
-            'Tree survival requires verified photo evidence. A verification provider is not configured; no points were awarded.')));
+          'Tree survival requires verified photo evidence. A verification provider is not configured; no points were awarded.',
+        ),
+      ),
+    );
   }
 
   void _simulateMissedCheckInDeduction(int index) {
@@ -233,8 +279,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
       SnackBar(
         backgroundColor: AppColors.coral,
         content: Text(
-            '⚠️ Monthly verification missed! Revoked -$pointsToDeduct Green Points.',
-            style: const TextStyle(color: Colors.white)),
+          '⚠️ Monthly verification missed! Revoked -$pointsToDeduct Green Points.',
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
@@ -244,8 +291,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -266,8 +314,9 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
               color: AppColors.royalForest,
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
-                  color: AppColors.champagneGold.withValues(alpha: 0.6),
-                  width: 1.5),
+                color: AppColors.champagneGold.withValues(alpha: 0.6),
+                width: 1.5,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.royalForest.withValues(alpha: 0.25),
@@ -282,21 +331,27 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Your Green Points Balance',
-                        style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    const Text(
+                      'Your Green Points Balance',
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       '${widget.appState.greenPoints}',
                       style: const TextStyle(
-                          fontSize: 34,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.champagneGold),
+                        fontSize: 34,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.champagneGold,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                        '≈ ${widget.appState.treesEquivalent.toStringAsFixed(1)} Trees Carbon Absorption',
-                        style: const TextStyle(
-                            color: Colors.white60, fontSize: 10)),
+                      '≈ ${widget.appState.treesEquivalent.toStringAsFixed(1)} Trees Carbon Absorption',
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 10,
+                      ),
+                    ),
                   ],
                 ),
                 Container(
@@ -305,10 +360,14 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                     color: AppColors.deepForest,
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: AppColors.champagneGold.withValues(alpha: 0.5)),
+                      color: AppColors.champagneGold.withValues(alpha: 0.5),
+                    ),
                   ),
-                  child: const Icon(Icons.storefront_rounded,
-                      color: AppColors.champagneGold, size: 26),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    color: AppColors.champagneGold,
+                    size: 26,
+                  ),
                 ),
               ],
             ),
@@ -329,12 +388,14 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                 color: AppColors.royalForest,
                 borderRadius: BorderRadius.circular(16),
               ),
-              labelColor: AppColors.champagneGold,
+              labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary,
-              labelStyle:
-                  const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  : AppColors.mutedOf(context),
+              labelStyle: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
               tabs: const [
                 Tab(text: 'Rewards Store'),
                 Tab(text: 'Plant Tracker'),
@@ -351,14 +412,18 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                 ListView(
                   padding: const EdgeInsets.all(20),
                   children: [
-                    Text('Verified Eco Redemptions',
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: textColor)),
+                    Text(
+                      'Verified Eco Redemptions',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: textColor,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     ..._rewards.map(
-                        (r) => _buildRewardTile(r, cardBg, textColor, isDark)),
+                      (r) => _buildRewardTile(r, cardBg, textColor, isDark),
+                    ),
                   ],
                 ),
 
@@ -369,39 +434,52 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('My Planted Trees (${_plants.length})',
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                color: textColor)),
+                        Text(
+                          'My Planted Trees (${_plants.length})',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: textColor,
+                          ),
+                        ),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.royalForest,
-                              foregroundColor: AppColors.champagneGold),
+                            backgroundColor: AppColors.royalForest,
+                            foregroundColor: AppColors.champagneGold,
+                          ),
                           icon: const Icon(Icons.add_a_photo_rounded, size: 14),
-                          label: const Text('Add Plant',
-                              style: TextStyle(fontSize: 11)),
+                          label: const Text(
+                            'Add Plant',
+                            style: TextStyle(fontSize: 11),
+                          ),
                           onPressed: _showPlantTreeDialog,
                         ),
                       ],
                     ),
                     const SizedBox(height: 10),
                     if (_plants.isEmpty)
-                      const Center(
+                       Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
                           child: Text(
-                              'No trees planted yet.\nRecord a sapling to track its growth.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  color: AppColors.lightTextSecondary)),
+                            'No trees planted yet.\nRecord a sapling to track its growth.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppColors.mutedOf(context),
+                            ),
+                          ),
                         ),
                       )
                     else
                       ...List.generate(_plants.length, (idx) {
                         final p = _plants[idx];
                         return _buildPlantCard(
-                            p, idx, cardBg, textColor, isDark);
+                          p,
+                          idx,
+                          cardBg,
+                          textColor,
+                          isDark,
+                        );
                       }),
                   ],
                 ),
@@ -417,7 +495,11 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
   }
 
   Widget _buildRewardTile(
-      Map<String, dynamic> r, Color cardBg, Color textColor, bool isDark) {
+    Map<String, dynamic> r,
+    Color cardBg,
+    Color textColor,
+    bool isDark,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -425,8 +507,8 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color:
-                isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+          color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder,
+        ),
       ),
       child: Row(
         children: [
@@ -436,23 +518,33 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
               color: (r['color'] as Color).withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(r['icon'] as IconData,
-                color: r['color'] as Color, size: 24),
+            child: Icon(
+              r['icon'] as IconData,
+              color: r['color'] as Color,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(r['title'] as String,
-                    style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: textColor)),
+                Text(
+                  r['title'] as String,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(r['subtitle'] as String,
-                    style: const TextStyle(
-                        fontSize: 11, color: AppColors.lightTextSecondary)),
+                Text(
+                  r['subtitle'] as String,
+                  style:  TextStyle(
+                    fontSize: 11,
+                    color: AppColors.mutedOf(context),
+                  ),
+                ),
               ],
             ),
           ),
@@ -461,21 +553,28 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
               backgroundColor: AppColors.royalForest,
               foregroundColor: AppColors.champagneGold,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             onPressed: () => _handleRewardTap(r),
-            child: Text('${r['cost']} pts',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            child: Text(
+              '${r['cost']} pts',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPlantCard(PlantGrowthRecord p, int index, Color cardBg,
-      Color textColor, bool isDark) {
+  Widget _buildPlantCard(
+    PlantGrowthRecord p,
+    int index,
+    Color cardBg,
+    Color textColor,
+    bool isDark,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -483,9 +582,12 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: p.isForfeited
-                ? AppColors.coral
-                : (p.isMonthVerified ? AppColors.emerald : AppColors.amber)),
+          color: p.isForfeited
+              ? AppColors.coral
+              : (p.isMonthVerified
+                    ? AppColors.leafOf(context)
+                    : AppColors.amber),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -495,29 +597,41 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: (p.isForfeited ? AppColors.coral : AppColors.emerald)
-                      .withValues(alpha: 0.15),
+                  color:
+                      (p.isForfeited
+                              ? AppColors.coral
+                              : AppColors.leafOf(context))
+                          .withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                    p.isForfeited ? Icons.cancel_rounded : Icons.park_rounded,
-                    color: p.isForfeited ? AppColors.coral : AppColors.emerald,
-                    size: 22),
+                  p.isForfeited ? Icons.cancel_rounded : Icons.park_rounded,
+                  color: p.isForfeited
+                      ? AppColors.coral
+                      : AppColors.leafOf(context),
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(p.species,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13.5,
-                            color: textColor)),
-                    Text('Location: ${p.location}',
-                        style: const TextStyle(
-                            fontSize: 10.5,
-                            color: AppColors.lightTextSecondary)),
+                    Text(
+                      p.species,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: textColor,
+                      ),
+                    ),
+                    Text(
+                      'Location: ${p.location}',
+                      style:  TextStyle(
+                        fontSize: 10.5,
+                        color: AppColors.mutedOf(context),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -534,11 +648,12 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                       ? 'Points Revoked'
                       : '${p.pointsEarned} pts earned',
                   style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.bold,
-                      color: p.isForfeited
-                          ? AppColors.coral
-                          : AppColors.champagneGold),
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.bold,
+                    color: p.isForfeited
+                        ? AppColors.coral
+                        : AppColors.accentOf(context),
+                  ),
                 ),
               ),
             ],
@@ -549,11 +664,18 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildMonthDot('Month 1', p.isMonthVerified, AppColors.emerald),
-              _buildMonthDot('Month 2', p.isMonthVerified,
-                  p.isForfeited ? AppColors.coral : AppColors.amber),
-              _buildMonthDot('Month 3', false, AppColors.lightTextSecondary),
-              _buildMonthDot('Month 4', false, AppColors.lightTextSecondary),
+              _buildMonthDot(
+                'Month 1',
+                p.isMonthVerified,
+                AppColors.leafOf(context),
+              ),
+              _buildMonthDot(
+                'Month 2',
+                p.isMonthVerified,
+                p.isForfeited ? AppColors.coral : AppColors.amber,
+              ),
+              _buildMonthDot('Month 3', false, AppColors.mutedOf(context)),
+              _buildMonthDot('Month 4', false, AppColors.mutedOf(context)),
             ],
           ),
           const SizedBox(height: 14),
@@ -568,19 +690,27 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
                         backgroundColor: AppColors.royalForest,
                         foregroundColor: AppColors.champagneGold,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       icon: const Icon(Icons.camera_alt_rounded, size: 14),
-                      label: const Text('Check verification status',
-                          style: TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.bold)),
+                      label: const Text(
+                        'Check verification status',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       onPressed: () => _verifyMonthlyCheckIn(index),
                     ),
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded,
-                        color: AppColors.coral, size: 20),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.coral,
+                      size: 20,
+                    ),
                     tooltip: 'Archive sapling record',
                     onPressed: () => _simulateMissedCheckInDeduction(index),
                   ),
@@ -588,22 +718,30 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
               )
             else
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.emerald.withValues(alpha: 0.1),
+                  color: AppColors.leafOf(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
-                  children: const [
-                    Icon(Icons.check_circle_rounded,
-                        color: AppColors.emerald, size: 16),
+                  children: [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.leafOf(context),
+                      size: 16,
+                    ),
                     SizedBox(width: 6),
-                    Text('Month 2 growth verified! Next check-in in 28 days.',
-                        style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.emerald,
-                            fontWeight: FontWeight.bold)),
+                    Text(
+                      'Month 2 growth verified! Next check-in in 28 days.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.leafOf(context),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -611,14 +749,17 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                  color: AppColors.coral.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10)),
+                color: AppColors.coral.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: const Text(
-                  'Monthly verification was missed. All points for this plant were forfeited.',
-                  style: TextStyle(
-                      fontSize: 10.5,
-                      color: AppColors.coral,
-                      fontWeight: FontWeight.bold)),
+                'Monthly verification was missed. All points for this plant were forfeited.',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: AppColors.coral,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
         ],
       ),
@@ -638,9 +779,13 @@ class _RewardsShopScreenState extends State<RewardsShopScreen>
           ),
         ),
         const SizedBox(height: 4),
-        Text(label,
-            style: const TextStyle(
-                fontSize: 9.5, color: AppColors.lightTextSecondary)),
+        Text(
+          label,
+          style:  TextStyle(
+            fontSize: 9.5,
+            color: AppColors.mutedOf(context),
+          ),
+        ),
       ],
     );
   }

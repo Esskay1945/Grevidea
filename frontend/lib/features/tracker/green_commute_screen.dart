@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -46,9 +47,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
   ];
 
   ll.LatLng get _originCoord => ll.LatLng(
-        widget.appState.locationService.currentLatitude,
-        widget.appState.locationService.currentLongitude,
-      );
+    widget.appState.locationService.currentLatitude,
+    widget.appState.locationService.currentLongitude,
+  );
 
   ll.LatLng get _destCoord => _destination ?? _originCoord;
 
@@ -57,7 +58,8 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
     super.initState();
     _mapController = MapController();
     _originController = TextEditingController(
-        text: '${widget.appState.baseline.cityWard} (Live GPS)');
+      text: '${widget.appState.baseline.cityWard} (Live GPS)',
+    );
     _destController = TextEditingController(text: 'BKC, Mumbai');
   }
 
@@ -69,9 +71,13 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
   }
 
   void _swapRoute() {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content:
-            Text('Origin follows your live GPS. Choose a new destination.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Origin follows your live GPS. Choose a new destination.',
+        ),
+      ),
+    );
   }
 
   Future<void> _recalculateRoute(String dest, {ll.LatLng? tapped}) async {
@@ -85,42 +91,54 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
       _cleanestRoute = null;
     });
     try {
-      final position = await widget.appState.locationService
-          .getCurrentLocation(forceRefresh: true);
+      final position = await widget.appState.locationService.getCurrentLocation(
+        forceRefresh: true,
+      );
       if (position == null)
         throw StateError(
-            'Enable location in device settings; no live origin available.');
+          'Enable location in device settings; no live origin available.',
+        );
       var target = tapped;
       if (target == null) {
         final results = await widget.appState.api.request(
-            '/api/v1/location/search?q=${Uri.encodeQueryComponent(dest)}');
+          '/api/v1/location/search?q=${Uri.encodeQueryComponent(dest)}',
+        );
         if (results is! List || results.isEmpty)
           throw StateError('Destination search unavailable or no match found.');
-        target = ll.LatLng(double.parse(results.first['lat']),
-            double.parse(results.first['lon']));
+        target = ll.LatLng(
+          double.parse(results.first['lat']),
+          double.parse(results.first['lon']),
+        );
       }
-      final result =
-          await widget.appState.api.request('/api/v1/location/route', data: {
-        'origin_lat': position.latitude,
-        'origin_lon': position.longitude,
-        'destination_lat': target.latitude,
-        'destination_lon': target.longitude
-      });
+      final result = await widget.appState.api.request(
+        '/api/v1/location/route',
+        data: {
+          'origin_lat': position.latitude,
+          'origin_lon': position.longitude,
+          'destination_lat': target.latitude,
+          'destination_lon': target.longitude,
+        },
+      );
       if (result == null || (result['routes'] as List).isEmpty)
         throw StateError('Road routing unavailable.');
       _routeVariants = result['routes'] as List;
-      _airQualitySource = result['air_quality_status'] as String? ??
+      _airQualitySource =
+          result['air_quality_status'] as String? ??
           'Air-quality source unavailable';
       _cleanestRoute = (result['cleanest_route_index'] as num?)?.toInt();
       _shortestRoute = List.generate(_routeVariants.length, (i) => i).reduce(
-          (a, b) => (_routeVariants[a]['distance'] as num) <=
-                  (_routeVariants[b]['distance'] as num)
-              ? a
-              : b);
+        (a, b) =>
+            (_routeVariants[a]['distance'] as num) <=
+                (_routeVariants[b]['distance'] as num)
+            ? a
+            : b,
+      );
       final route = _routeVariants[_shortestRoute];
       final points = (route['geometry']['coordinates'] as List)
-          .map((p) =>
-              ll.LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble()))
+          .map(
+            (p) =>
+                ll.LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble()),
+          )
           .toList();
       if (!mounted) return;
       setState(() {
@@ -129,9 +147,12 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
         _routeDistanceKm = (route['distance'] as num).toDouble() / 1000;
       });
       _mapController.move(
-          ll.LatLng((position.latitude + target.latitude) / 2,
-              (position.longitude + target.longitude) / 2),
-          11.5);
+        ll.LatLng(
+          (position.latitude + target.latitude) / 2,
+          (position.longitude + target.longitude) / 2,
+        ),
+        11.5,
+      );
     } catch (error) {
       if (mounted)
         ScaffoldMessenger.of(context)
@@ -145,16 +166,21 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
     if (_routeVariants.isEmpty) return;
     final index = cleaner ? _cleanestRoute : _shortestRoute;
     if (index == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Route air-quality estimates are unavailable.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Route air-quality estimates are unavailable.'),
+        ),
+      );
       return;
     }
     final route = _routeVariants[index];
     setState(() {
       _routeDistanceKm = (route['distance'] as num).toDouble() / 1000;
       _routePoints = (route['geometry']['coordinates'] as List)
-          .map((p) =>
-              ll.LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble()))
+          .map(
+            (p) =>
+                ll.LatLng((p[1] as num).toDouble(), (p[0] as num).toDouble()),
+          )
           .toList();
     });
   }
@@ -173,7 +199,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
         'fare_tag': 'Estimate using OSRM road distance; not a rail itinerary',
         'fare_type': 'Estimated',
         'icon': Icons.directions_subway_rounded,
-        'color': AppColors.emerald,
+        'color': AppColors.leafOf(context),
         'points': ((carCo2 - (d * 0.015)) * 25).round().clamp(10, 80),
         'isBest': true,
       },
@@ -221,8 +247,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
 
   void _logCommute() {
     if (_routePoints.isEmpty || _routeDistanceKm <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Find a real route first.")));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Find a real route first.")));
       return;
     }
     final modes = _computeModes();
@@ -232,8 +259,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
 
     const apiModes = ['metro', 'bus', 'ev_car', 'car'];
     widget.appState.recordTrip(
-        TravelTrip(_routeDistanceKm, apiModes[_selectedModeIndex]),
-        apiModes[_selectedModeIndex]);
+      TravelTrip(_routeDistanceKm, apiModes[_selectedModeIndex]),
+      apiModes[_selectedModeIndex],
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -253,8 +281,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.inkOf(context);
 
     final modes = _computeModes();
 
@@ -280,38 +309,46 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                   color: cardBg,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: isDark
-                          ? AppColors.darkCardBorder
-                          : AppColors.lightCardBorder),
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder,
+                  ),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.my_location_rounded,
-                            color: AppColors.emerald, size: 20),
+                        Icon(
+                          Icons.my_location_rounded,
+                          color: AppColors.leafOf(context),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextField(
                             controller: _originController,
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: textColor),
-                            decoration: const InputDecoration(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                            decoration:  InputDecoration(
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                               border: InputBorder.none,
                               labelText: 'FROM (Live Origin)',
                               labelStyle: TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.lightTextSecondary),
+                                fontSize: 10,
+                                color: AppColors.mutedOf(context),
+                              ),
                             ),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.swap_vert_rounded,
-                              color: AppColors.champagneGold),
+                          icon: Icon(
+                            Icons.swap_vert_rounded,
+                            color: AppColors.accentOf(context),
+                          ),
                           onPressed: _swapRoute,
                         ),
                       ],
@@ -319,25 +356,30 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                     const Divider(height: 16),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_rounded,
-                            color: AppColors.coral, size: 20),
+                        const Icon(
+                          Icons.location_on_rounded,
+                          color: AppColors.coral,
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextField(
                             controller: _destController,
                             style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: textColor),
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
                             onSubmitted: _recalculateRoute,
-                            decoration: const InputDecoration(
+                            decoration:  InputDecoration(
                               isDense: true,
                               contentPadding: EdgeInsets.symmetric(vertical: 4),
                               border: InputBorder.none,
                               labelText: 'TO (Destination)',
                               labelStyle: TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.lightTextSecondary),
+                                fontSize: 10,
+                                color: AppColors.mutedOf(context),
+                              ),
                             ),
                           ),
                         ),
@@ -373,8 +415,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                      color: AppColors.emerald.withValues(alpha: 0.4),
-                      width: 1.5),
+                    color: AppColors.leafOf(context).withValues(alpha: 0.4),
+                    width: 1.5,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.08),
@@ -396,15 +439,16 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                           ),
                           initialZoom: 11.5,
                           onTap: (_, point) => _recalculateRoute(
-                              "Selected map destination",
-                              tapped: point),
+                            "Selected map destination",
+                            tapped: point,
+                          ),
                           interactionOptions: const InteractionOptions(
-                              flags: InteractiveFlag.all),
+                            flags: InteractiveFlag.all,
+                          ),
                         ),
                         children: [
                           TileLayer(
-                            urlTemplate:
-                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                             userAgentPackageName: 'com.grevidea.app',
                           ),
                           PolylineLayer(
@@ -412,7 +456,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               Polyline(
                                 points: _routePoints,
                                 strokeWidth: 4.5,
-                                color: AppColors.emerald,
+                                color: AppColors.leafOf(context),
                               ),
                             ],
                           ),
@@ -427,18 +471,23 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                     color: AppColors.royalForest,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                        color: AppColors.champagneGold,
-                                        width: 2.5),
+                                      color: AppColors.champagneGold,
+                                      width: 2.5,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
-                                          color: AppColors.emerald
-                                              .withValues(alpha: 0.5),
-                                          blurRadius: 8,
-                                          spreadRadius: 2),
+                                        color: AppColors.leafOf(context)
+                                            .withValues(alpha: 0.5),
+                                        blurRadius: 8,
+                                        spreadRadius: 2,
+                                      ),
                                     ],
                                   ),
-                                  child: const Icon(Icons.my_location_rounded,
-                                      color: AppColors.champagneGold, size: 18),
+                                  child: const Icon(
+                                    Icons.my_location_rounded,
+                                    color: AppColors.champagneGold,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
                               Marker(
@@ -450,14 +499,21 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                     color: AppColors.coral,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                        color: Colors.white, width: 2),
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
                                     boxShadow: const [
                                       BoxShadow(
-                                          color: Colors.black26, blurRadius: 6),
+                                        color: Colors.black26,
+                                        blurRadius: 6,
+                                      ),
                                     ],
                                   ),
-                                  child: const Icon(Icons.location_on_rounded,
-                                      color: Colors.white, size: 20),
+                                  child: const Icon(
+                                    Icons.location_on_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
                             ],
@@ -470,7 +526,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         left: 14,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.72),
                             borderRadius: BorderRadius.circular(10),
@@ -478,15 +536,19 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.alt_route_rounded,
-                                  size: 14, color: AppColors.champagneGold),
+                              Icon(
+                                Icons.alt_route_rounded,
+                                size: 14,
+                                color: AppColors.accentOf(context),
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 '${_routeDistanceKm.toStringAsFixed(1)} km Corridor',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  color: AppColors.inkOf(context),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
@@ -502,8 +564,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               onTap: () {
                                 final currentZoom = _mapController.camera.zoom;
                                 _mapController.move(
-                                    _mapController.camera.center,
-                                    currentZoom + 1);
+                                  _mapController.camera.center,
+                                  currentZoom + 1,
+                                );
                               },
                               child: Container(
                                 width: 32,
@@ -513,11 +576,16 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                   boxShadow: const [
                                     BoxShadow(
-                                        color: Colors.black26, blurRadius: 4)
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                    ),
                                   ],
                                 ),
-                                child: const Icon(Icons.add,
-                                    size: 18, color: Colors.black87),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 18,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -525,8 +593,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                               onTap: () {
                                 final currentZoom = _mapController.camera.zoom;
                                 _mapController.move(
-                                    _mapController.camera.center,
-                                    currentZoom - 1);
+                                  _mapController.camera.center,
+                                  currentZoom - 1,
+                                );
                               },
                               child: Container(
                                 width: 32,
@@ -536,11 +605,16 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                   boxShadow: const [
                                     BoxShadow(
-                                        color: Colors.black26, blurRadius: 4)
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                    ),
                                   ],
                                 ),
-                                child: const Icon(Icons.remove,
-                                    size: 18, color: Colors.black87),
+                                child: const Icon(
+                                  Icons.remove,
+                                  size: 18,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -556,11 +630,16 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                   boxShadow: const [
                                     BoxShadow(
-                                        color: Colors.black26, blurRadius: 4)
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                    ),
                                   ],
                                 ),
-                                child: const Icon(Icons.gps_fixed_rounded,
-                                    size: 16, color: AppColors.champagneGold),
+                                child: const Icon(
+                                  Icons.gps_fixed_rounded,
+                                  size: 16,
+                                  color: AppColors.champagneGold,
+                                ),
                               ),
                             ),
                           ],
@@ -573,28 +652,38 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         right: 14,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? AppColors.darkSurface.withValues(alpha: 0.92)
-                                : AppColors.lightSurface
-                                    .withValues(alpha: 0.95),
+                                : AppColors.lightSurface.withValues(
+                                    alpha: 0.95,
+                                  ),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                                color:
-                                    AppColors.emerald.withValues(alpha: 0.4)),
+                              color: AppColors.leafOf(context)
+                                  .withValues(alpha: 0.4),
+                            ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               TextButton(
-                                  onPressed: () => _selectRoute(false),
-                                  child: const Text('Shortest road route',
-                                      style: TextStyle(fontSize: 10))),
+                                onPressed: () => _selectRoute(false),
+                                child: const Text(
+                                  'Shortest road route',
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                              ),
                               TextButton(
-                                  onPressed: () => _selectRoute(true),
-                                  child: const Text('Lower exposure estimate',
-                                      style: TextStyle(fontSize: 10))),
+                                onPressed: () => _selectRoute(true),
+                                child: const Text(
+                                  'Lower exposure estimate',
+                                  style: TextStyle(fontSize: 10),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -604,8 +693,9 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                           color: Colors.black.withValues(alpha: 0.35),
                           child: const Center(
                             child: CircularProgressIndicator(
-                                color: AppColors.champagneGold,
-                                strokeWidth: 2.5),
+                              color: AppColors.champagneGold,
+                              strokeWidth: 2.5,
+                            ),
                           ),
                         ),
                     ],
@@ -616,11 +706,14 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
 
               Text(_airQualitySource, style: const TextStyle(fontSize: 11)),
               const SizedBox(height: 8),
-              Text('Compare estimated emissions',
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: textColor)),
+              Text(
+                'Compare estimated emissions',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
+              ),
               const SizedBox(height: 8),
 
               // Modes List
@@ -640,10 +733,10 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: isSel
-                            ? AppColors.champagneGold
+                            ? AppColors.accentOf(context)
                             : (isDark
-                                ? AppColors.darkCardBorder
-                                : AppColors.lightCardBorder),
+                                  ? AppColors.darkCardBorder
+                                  : AppColors.lightCardBorder),
                         width: isSel ? 2 : 1,
                       ),
                     ),
@@ -655,12 +748,16 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: (m['color'] as Color)
-                                    .withValues(alpha: 0.15),
+                                color: (m['color'] as Color).withValues(
+                                  alpha: 0.15,
+                                ),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(m['icon'] as IconData,
-                                  color: m['color'] as Color, size: 22),
+                              child: Icon(
+                                m['icon'] as IconData,
+                                color: m['color'] as Color,
+                                size: 22,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -669,25 +766,35 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(m['mode'] as String,
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: textColor)),
+                                      Text(
+                                        m['mode'] as String,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: textColor,
+                                        ),
+                                      ),
                                       if (m['isBest'] == true) ...[
                                         const SizedBox(width: 6),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 6, vertical: 2),
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
-                                              color: AppColors.emerald,
-                                              borderRadius:
-                                                  BorderRadius.circular(6)),
-                                          child: const Text('LOWEST CARBON',
-                                              style: TextStyle(
-                                                  fontSize: 8,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold)),
+                                            color: AppColors.leafOf(context),
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'LOWEST CARBON',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              color: AppColors.inkOf(context),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ],
@@ -701,7 +808,7 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: isSaved
-                                          ? AppColors.emerald
+                                          ? AppColors.leafOf(context)
                                           : AppColors.coral,
                                     ),
                                   ),
@@ -714,29 +821,33 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                                 Text(
                                   m['fare'] as String,
                                   style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                      color: textColor),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: textColor,
+                                  ),
                                 ),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 5, vertical: 2),
+                                    horizontal: 5,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: m['fare_type'] == 'Estimated'
-                                        ? AppColors.emerald
-                                            .withValues(alpha: 0.2)
-                                        : AppColors.lightTextSecondary
-                                            .withValues(alpha: 0.15),
+                                        ? AppColors.leafOf(context)
+                                              .withValues(alpha: 0.2)
+                                        : AppColors.mutedOf(context)
+                                              .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     m['fare_type'] as String,
                                     style: TextStyle(
-                                        fontSize: 8.5,
-                                        fontWeight: FontWeight.bold,
-                                        color: m['fare_type'] == 'Estimated'
-                                            ? AppColors.emerald
-                                            : AppColors.lightTextSecondary),
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: m['fare_type'] == 'Estimated'
+                                          ? AppColors.leafOf(context)
+                                          : AppColors.mutedOf(context),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -746,10 +857,11 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                         const SizedBox(height: 6),
                         Text(
                           'Source: ${m['fare_tag']}',
-                          style: const TextStyle(
-                              fontSize: 9,
-                              color: AppColors.lightTextSecondary,
-                              fontStyle: FontStyle.italic),
+                          style:  TextStyle(
+                            fontSize: 9,
+                            color: AppColors.mutedOf(context),
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ],
                     ),
@@ -767,12 +879,14 @@ class _GreenCommuteScreenState extends State<GreenCommuteScreen> {
                     backgroundColor: AppColors.royalForest,
                     foregroundColor: AppColors.champagneGold,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   onPressed: _logCommute,
-                  child: const Text('Log This Commute in Ledger',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  child: const Text(
+                    'Log This Commute in Ledger',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

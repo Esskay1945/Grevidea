@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/responsive_wrapper.dart';
@@ -27,10 +28,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return Dialog(
-          backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          backgroundColor: isDark
+              ? AppColors.darkSurface
+              : AppColors.lightSurface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: const BorderSide(color: AppColors.champagneGold, width: 1),
+            side: BorderSide(color: AppColors.accentOf(context), width: 1),
           ),
           child: Padding(
             padding: const EdgeInsets.all(22.0),
@@ -45,7 +48,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       const Text(
                         'Change Password',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       IconButton(
                         icon: const Icon(Icons.close_rounded, size: 20),
@@ -57,26 +63,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   TextFormField(
                     controller: oldPassController,
                     obscureText: true,
-                    validator: (v) => (v == null || v.isEmpty) ? 'Current password is required' : null,
-                    decoration: const InputDecoration(labelText: 'Current Password'),
+                    validator: (v) => (v == null || v.isEmpty)
+                        ? 'Current password is required'
+                        : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Current Password',
+                    ),
                   ),
                   const SizedBox(height: 14),
                   TextFormField(
                     controller: newPassController,
                     obscureText: true,
                     validator: Validators.validatePassword,
-                    decoration: const InputDecoration(labelText: 'New Password (Min 8 Chars)'),
+                    decoration: const InputDecoration(
+                      labelText: 'New Password (Min 8 Chars)',
+                    ),
                   ),
                   const SizedBox(height: 14),
                   TextFormField(
                     controller: confirmPassController,
                     obscureText: true,
                     validator: (v) {
-                      if (v == null || v.isEmpty) return 'Please confirm new password';
-                      if (v != newPassController.text) return 'Passwords do not match';
+                      if (v == null || v.isEmpty)
+                        return 'Please confirm new password';
+                      if (v != newPassController.text)
+                        return 'Passwords do not match';
                       return null;
                     },
-                    decoration: const InputDecoration(labelText: 'Confirm New Password'),
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm New Password',
+                    ),
                   ),
                   const SizedBox(height: 22),
                   SizedBox(
@@ -94,7 +110,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               backgroundColor: AppColors.royalForest,
                               content: Text(
                                 '✓ Password updated successfully',
-                                style: TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  color: AppColors.champagneGold,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           );
@@ -122,7 +141,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile & Settings'),
         actions: [
           IconButton(
-            icon: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: AppColors.champagneGold),
+            icon: Icon(
+              isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: AppColors.accentOf(context),
+            ),
             onPressed: () {
               widget.appState.toggleTheme();
               setState(() {});
@@ -152,10 +174,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: 60,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.champagneGold, width: 2),
+                        border: Border.all(
+                          color: AppColors.champagneGold,
+                          width: 2,
+                        ),
                         color: AppColors.deepForest,
                       ),
-                      child: const Icon(Icons.person_rounded, color: AppColors.champagneGold, size: 36),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.champagneGold,
+                        size: 36,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -164,23 +193,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(
                             widget.appState.userName,
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             widget.appState.userEmail,
-                            style: const TextStyle(fontSize: 13, color: Colors.white70),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.white70,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.champagneGold.withOpacity(0.18),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
                               'Verified Eco Champion • Level 4',
-                              style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.champagneGold,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -201,7 +244,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       icon: const Icon(Icons.tune_rounded, size: 18),
-                      label: const Text('Update Profile', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      label: const Text(
+                        'Update Profile',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       onPressed: () {
                         // Opens the baseline setup screen pre-filled with the user's initial data!
                         Navigator.of(context).push(
@@ -220,12 +269,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        foregroundColor: AppColors.champagneGold,
-                        side: const BorderSide(color: AppColors.champagneGold, width: 1.2),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        foregroundColor: AppColors.accentOf(context),
+                        side: BorderSide(
+                          color: AppColors.accentOf(context),
+                          width: 1.2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       icon: const Icon(Icons.lock_reset_rounded, size: 18),
-                      label: const Text('Change Password', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      label: const Text(
+                        'Change Password',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       onPressed: _showChangePasswordDialog,
                     ),
                   ),
@@ -237,29 +297,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Baseline Configuration Summary
               Text(
                 'Environmental Baseline Summary',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.inkOf(context),
+                ),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                  color: isDark
+                      ? AppColors.darkSurface
+                      : AppColors.lightSurface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder,
+                  ),
                 ),
                 child: Column(
                   children: [
-                    _ProfileSummaryRow(label: 'Ward & City', value: baseline.cityWard),
+                    _ProfileSummaryRow(
+                      label: 'Ward & City',
+                      value: baseline.cityWard,
+                    ),
                     const Divider(height: 18),
-                    _ProfileSummaryRow(label: 'Primary Commute', value: '${baseline.primaryCommute} (${baseline.dailyCommuteKm} km/day)'),
+                    _ProfileSummaryRow(
+                      label: 'Primary Commute',
+                      value:
+                          '${baseline.primaryCommute} (${baseline.dailyCommuteKm} km/day)',
+                    ),
                     const Divider(height: 18),
-                    _ProfileSummaryRow(label: 'Dietary Preference', value: baseline.dietaryPreference),
+                    _ProfileSummaryRow(
+                      label: 'Dietary Preference',
+                      value: baseline.dietaryPreference,
+                    ),
                     const Divider(height: 18),
-                    _ProfileSummaryRow(label: 'Monthly Electricity', value: '${baseline.monthlyElectricityKwh.round()} kWh'),
+                    _ProfileSummaryRow(
+                      label: 'Monthly Electricity',
+                      value: '${baseline.monthlyElectricityKwh.round()} kWh',
+                    ),
                     const Divider(height: 18),
-                    _ProfileSummaryRow(label: 'Solar Installed', value: baseline.hasRooftopSolar ? 'Yes (Rooftop PV)' : 'No'),
+                    _ProfileSummaryRow(
+                      label: 'Solar Installed',
+                      value: baseline.hasRooftopSolar
+                          ? 'Yes (Rooftop PV)'
+                          : 'No',
+                    ),
                     const Divider(height: 18),
-                    _ProfileSummaryRow(label: 'Primary Goal', value: baseline.primaryGoal),
+                    _ProfileSummaryRow(
+                      label: 'Primary Goal',
+                      value: baseline.primaryGoal,
+                    ),
                   ],
                 ),
               ),
@@ -269,16 +362,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Minted Achievement Badges Showcase
               Text(
                 'Minted Achievement Crests',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.inkOf(context),
+                ),
               ),
               const SizedBox(height: 12),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _BadgeWidget(icon: Icons.park_rounded, name: 'Tree Saver', unlocked: true),
-                  _BadgeWidget(icon: Icons.recycling_rounded, name: 'Recycler', unlocked: true),
-                  _BadgeWidget(icon: Icons.local_fire_department_rounded, name: 'Streak Master', unlocked: true),
-                  _BadgeWidget(icon: Icons.air_rounded, name: 'Air Guardian', unlocked: false),
+                  _BadgeWidget(
+                    icon: Icons.park_rounded,
+                    name: 'Tree Saver',
+                    unlocked: true,
+                  ),
+                  _BadgeWidget(
+                    icon: Icons.recycling_rounded,
+                    name: 'Recycler',
+                    unlocked: true,
+                  ),
+                  _BadgeWidget(
+                    icon: Icons.local_fire_department_rounded,
+                    name: 'Streak Master',
+                    unlocked: true,
+                  ),
+                  _BadgeWidget(
+                    icon: Icons.air_rounded,
+                    name: 'Air Guardian',
+                    unlocked: false,
+                  ),
                 ],
               ),
 
@@ -290,11 +405,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: TextButton.icon(
                   style: TextButton.styleFrom(foregroundColor: AppColors.coral),
                   icon: const Icon(Icons.logout_rounded, size: 18),
-                  label: const Text('Sign Out of Grevidea', style: TextStyle(fontWeight: FontWeight.w700)),
+                  label: const Text(
+                    'Sign Out of Grevidea',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   onPressed: () {
                     widget.appState.logout();
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => LoginScreen(appState: widget.appState)),
+                      MaterialPageRoute(
+                        builder: (_) => LoginScreen(appState: widget.appState),
+                      ),
                       (route) => false,
                     );
                   },
@@ -319,7 +439,13 @@ class _ProfileSummaryRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.lightTextSecondary)),
+        Text(
+          label,
+          style:  TextStyle(
+            fontSize: 13,
+            color: AppColors.mutedOf(context),
+          ),
+        ),
         Flexible(
           child: Text(
             value,
@@ -337,7 +463,11 @@ class _BadgeWidget extends StatelessWidget {
   final String name;
   final bool unlocked;
 
-  const _BadgeWidget({required this.icon, required this.name, required this.unlocked});
+  const _BadgeWidget({
+    required this.icon,
+    required this.name,
+    required this.unlocked,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -348,15 +478,21 @@ class _BadgeWidget extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: unlocked ? AppColors.royalForest : AppColors.lightTextSecondary.withOpacity(0.15),
+            color: unlocked
+                ? AppColors.royalForest
+                : AppColors.mutedOf(context).withOpacity(0.15),
             border: Border.all(
-              color: unlocked ? AppColors.champagneGold : AppColors.lightTextSecondary.withOpacity(0.3),
+              color: unlocked
+                  ? AppColors.accentOf(context)
+                  : AppColors.mutedOf(context).withOpacity(0.3),
               width: 1.5,
             ),
           ),
           child: Icon(
             icon,
-            color: unlocked ? AppColors.champagneGold : AppColors.lightTextSecondary,
+            color: unlocked
+                ? AppColors.accentOf(context)
+                : AppColors.mutedOf(context),
             size: 24,
           ),
         ),
@@ -366,7 +502,9 @@ class _BadgeWidget extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: unlocked ? FontWeight.w700 : FontWeight.w500,
-            color: unlocked ? AppColors.champagneGold : AppColors.lightTextSecondary,
+            color: unlocked
+                ? AppColors.accentOf(context)
+                : AppColors.mutedOf(context),
           ),
         ),
       ],

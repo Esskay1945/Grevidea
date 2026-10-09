@@ -1,7 +1,9 @@
 import 'dart:typed_data';
+
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -52,7 +54,7 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.lightTextSecondary.withValues(alpha: 0.4),
+                    color: AppColors.mutedOf(context).withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -62,10 +64,12 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                 Text(
                   'Scan a product barcode or packaging in real time',
                   style: TextStyle(
-                      fontSize: 11, color: AppColors.lightTextSecondary),
+                    fontSize: 11,
+                    color: AppColors.mutedOf(context),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 ListTile(
@@ -75,63 +79,81 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                       color: AppColors.royalForest,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_rounded,
-                        color: AppColors.champagneGold, size: 22),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.champagneGold,
+                      size: 22,
+                    ),
                   ),
-                  title: const Text('Open Camera to Scan',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  title: const Text(
+                    'Open Camera to Scan',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   subtitle: const Text(
-                      'Point your phone camera at product barcode or label'),
+                    'Point your phone camera at product barcode or label',
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     _captureAndScan(ImageSource.camera);
                   },
                 ),
                 ListTile(
-                    leading: const Icon(Icons.keyboard),
-                    title: const Text('Enter barcode'),
-                    onTap: () async {
-                      Navigator.pop(ctx);
-                      final input = TextEditingController();
-                      final code = await showDialog<String>(
-                          context: context,
-                          builder: (dialog) => AlertDialog(
-                                  title: const Text('Product barcode'),
-                                  content: TextField(
-                                      controller: input,
-                                      keyboardType: TextInputType.number),
-                                  actions: [
-                                    TextButton(
-                                        onPressed: () => Navigator.pop(
-                                            dialog, input.text.trim()),
-                                        child: const Text('Search'))
-                                  ]));
-                      input.dispose();
-                      if (code != null && code.isNotEmpty) {
-                        try {
-                          await _lookup(code);
-                        } catch (error) {
-                          if (mounted)
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(error.toString())));
-                        }
+                  leading: const Icon(Icons.keyboard),
+                  title: const Text('Enter barcode'),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    final input = TextEditingController();
+                    final code = await showDialog<String>(
+                      context: context,
+                      builder: (dialog) => AlertDialog(
+                        title: const Text('Product barcode'),
+                        content: TextField(
+                          controller: input,
+                          keyboardType: TextInputType.number,
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(dialog, input.text.trim()),
+                            child: const Text('Search'),
+                          ),
+                        ],
+                      ),
+                    );
+                    input.dispose();
+                    if (code != null && code.isNotEmpty) {
+                      try {
+                        await _lookup(code);
+                      } catch (error) {
+                        if (mounted)
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(error.toString())),
+                          );
                       }
-                    }),
+                    }
+                  },
+                ),
                 const Divider(height: 12),
                 ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.champagneGold.withValues(alpha: 0.2),
+                      color: AppColors.accentOf(context).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.photo_library_rounded,
-                        color: AppColors.champagneGold, size: 22),
+                    child: Icon(
+                      Icons.photo_library_rounded,
+                      color: AppColors.accentOf(context),
+                      size: 22,
+                    ),
                   ),
-                  title: const Text('Upload Image from Gallery',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  title: const Text(
+                    'Upload Image from Gallery',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   subtitle: const Text(
-                      'Analyze a product photo or barcode screenshot'),
+                    'Analyze a product photo or barcode screenshot',
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     _captureAndScan(ImageSource.gallery);
@@ -152,21 +174,26 @@ class _ScanProductScreenState extends State<ScanProductScreen>
         if (!mounted) return;
         final controller = MobileScannerController();
         var detected = false;
-        barcode = await Navigator.of(context).push<String>(MaterialPageRoute(
+        barcode = await Navigator.of(context).push<String>(
+          MaterialPageRoute(
             builder: (ctx) => Scaffold(
-                appBar: AppBar(title: const Text('Scan barcode')),
-                body: MobileScanner(
-                    controller: controller,
-                    onDetect: (capture) {
-                      final code = capture.barcodes
-                          .map((b) => b.rawValue)
-                          .whereType<String>()
-                          .firstOrNull;
-                      if (!detected && code != null) {
-                        detected = true;
-                        Navigator.pop(ctx, code);
-                      }
-                    }))));
+              appBar: AppBar(title: const Text('Scan barcode')),
+              body: MobileScanner(
+                controller: controller,
+                onDetect: (capture) {
+                  final code = capture.barcodes
+                      .map((b) => b.rawValue)
+                      .whereType<String>()
+                      .firstOrNull;
+                  if (!detected && code != null) {
+                    detected = true;
+                    Navigator.pop(ctx, code);
+                  }
+                },
+              ),
+            ),
+          ),
+        );
         await controller.dispose();
       } else {
         final file = await _picker.pickImage(source: source, imageQuality: 85);
@@ -182,7 +209,8 @@ class _ScanProductScreenState extends State<ScanProductScreen>
       }
       if (barcode == null)
         throw StateError(
-            'No readable barcode found. Try the camera or enter a barcode.');
+          'No readable barcode found. Try the camera or enter a barcode.',
+        );
       await _lookup(barcode);
     } catch (error) {
       if (mounted) {
@@ -209,9 +237,13 @@ class _ScanProductScreenState extends State<ScanProductScreen>
       _isScanned = true;
     });
     if (res['unavailable'] == true)
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
           content: Text(
-              'No verified product found or product service unavailable.')));
+            'No verified product found or product service unavailable.',
+          ),
+        ),
+      );
   }
 
   @override
@@ -225,8 +257,9 @@ class _ScanProductScreenState extends State<ScanProductScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -248,7 +281,7 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                 fontSize: 12,
                 color: isDark
                     ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary,
+                    : AppColors.mutedOf(context),
               ),
             ),
           ),
@@ -264,8 +297,9 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                     color: Colors.black87,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                        color: AppColors.champagneGold.withValues(alpha: 0.5),
-                        width: 1.5),
+                      color: AppColors.champagneGold.withValues(alpha: 0.5),
+                      width: 1.5,
+                    ),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(22),
@@ -290,10 +324,12 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                                 color: Colors.white.withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 12),
-                              const Text(
+                              Text(
                                 'Align barcode within frame',
                                 style: TextStyle(
-                                    color: Colors.white54, fontSize: 12),
+                                  color: AppColors.mutedOf(context),
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -310,10 +346,10 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                                 child: Container(
                                   height: 3,
                                   decoration: BoxDecoration(
-                                    color: AppColors.emerald,
+                                    color: AppColors.leafOf(context),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.emerald
+                                        color: AppColors.leafOf(context)
                                             .withValues(alpha: 0.8),
                                         blurRadius: 10,
                                         spreadRadius: 2,
@@ -330,61 +366,81 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                           top: 24,
                           left: 24,
                           child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                  border: Border(
-                                      top: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3),
-                                      left: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3)))),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                                left: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         Positioned(
                           top: 24,
                           right: 24,
                           child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                  border: Border(
-                                      top: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3),
-                                      right: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3)))),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                                right: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         Positioned(
                           bottom: 24,
                           left: 24,
                           child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                  border: Border(
-                                      bottom: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3),
-                                      left: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3)))),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                                left: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         Positioned(
                           bottom: 24,
                           right: 24,
                           child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                  border: Border(
-                                      bottom: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3),
-                                      right: BorderSide(
-                                          color: AppColors.champagneGold,
-                                          width: 3)))),
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                                right: BorderSide(
+                                  color: AppColors.accentOf(context),
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
 
                         // Status Overlay if analyzing
@@ -396,12 +452,16 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CircularProgressIndicator(
-                                      color: AppColors.champagneGold),
+                                    color: AppColors.champagneGold,
+                                  ),
                                   SizedBox(height: 12),
-                                  Text('Analyzing packaging & barcode...',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold)),
+                                  Text(
+                                    'Analyzing packaging & barcode...',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -420,16 +480,19 @@ class _ScanProductScreenState extends State<ScanProductScreen>
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             decoration: BoxDecoration(
               color: cardBg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
               border: Border.all(
-                  color: isDark
-                      ? AppColors.darkCardBorder
-                      : AppColors.lightCardBorder),
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 16),
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                ),
               ],
             ),
             child: Column(
@@ -447,35 +510,41 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                             _scannedProduct?['product_name'] ??
                                 'Scan a product to begin',
                             style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: textColor),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: textColor,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             _scannedProduct?['brand'] ?? 'Unavailable',
-                            style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.lightTextSecondary),
+                            style:  TextStyle(
+                              fontSize: 12,
+                              color: AppColors.mutedOf(context),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: AppColors.emerald.withValues(alpha: 0.15),
+                        color: AppColors.leafOf(context)
+                            .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         _scannedProduct?['eco_score'] ??
                             'Eco-score unavailable',
-                        style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.emerald),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.leafOf(context),
+                        ),
                       ),
                     ),
                   ],
@@ -487,23 +556,30 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildScanMetric(
-                        'CO₂ Footprint',
-                        _scannedProduct?['co2_footprint'] ?? 'Unavailable',
-                        AppColors.amber),
+                      'CO₂ Footprint',
+                      _scannedProduct?['co2_footprint'] ?? 'Unavailable',
+                      AppColors.amber,
+                    ),
                     _buildScanMetric(
-                        'Recyclable',
-                        _scannedProduct?['recyclable'] ?? 'Unavailable',
-                        AppColors.emerald),
+                      'Recyclable',
+                      _scannedProduct?['recyclable'] ?? 'Unavailable',
+                      AppColors.leafOf(context),
+                    ),
                     _buildScanMetric(
-                        'Eco-Score', 'B+ Good', AppColors.champagneGold),
+                      'Eco-Score',
+                      'B+ Good',
+                      AppColors.accentOf(context),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
                 Text(
                   _scannedProduct?['packaging'] ?? 'Packaging data unavailable',
-                  style: const TextStyle(
-                      fontSize: 11, color: AppColors.lightTextSecondary),
+                  style:  TextStyle(
+                    fontSize: 11,
+                    color: AppColors.mutedOf(context),
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -517,14 +593,19 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                         height: 46,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.camera_alt_rounded, size: 18),
-                          label: const Text('Use Camera',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13)),
+                          label: const Text(
+                            'Use Camera',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.royalForest,
                             foregroundColor: AppColors.champagneGold,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           onPressed: () => _captureAndScan(ImageSource.camera),
                         ),
@@ -535,19 +616,27 @@ class _ScanProductScreenState extends State<ScanProductScreen>
                       child: SizedBox(
                         height: 46,
                         child: OutlinedButton.icon(
-                          icon:
-                              const Icon(Icons.photo_library_rounded, size: 18),
-                          label: const Text('Upload Photo',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13)),
+                          icon: const Icon(
+                            Icons.photo_library_rounded,
+                            size: 18,
+                          ),
+                          label: const Text(
+                            'Upload Photo',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: textColor,
                             side: BorderSide(
-                                color: isDark
-                                    ? AppColors.darkCardBorder
-                                    : AppColors.lightCardBorder),
+                              color: isDark
+                                  ? AppColors.darkCardBorder
+                                  : AppColors.lightCardBorder,
+                            ),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14)),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           onPressed: () => _captureAndScan(ImageSource.gallery),
                         ),
@@ -566,15 +655,23 @@ class _ScanProductScreenState extends State<ScanProductScreen>
   Widget _buildScanMetric(String label, String val, Color color) {
     return Column(
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.lightTextSecondary,
-                fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style:  TextStyle(
+            fontSize: 11,
+            color: AppColors.mutedOf(context),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(val,
-            style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w900, color: color)),
+        Text(
+          val,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            color: color,
+          ),
+        ),
       ],
     );
   }

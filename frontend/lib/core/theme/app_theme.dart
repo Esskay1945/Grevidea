@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
 
@@ -6,11 +7,13 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'Lora',
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.lightCanvas,
       textTheme: ThemeData(useMaterial3: true, brightness: Brightness.light)
           .textTheme
           .apply(
+            fontFamily: 'Lora',
             bodyColor: AppColors.lightTextPrimary,
             displayColor: AppColors.lightTextPrimary,
           ),
@@ -24,9 +27,9 @@ class AppTheme {
         backgroundColor: AppColors.lightSurfaceAlt,
       ),
       colorScheme: const ColorScheme.light(
-        primary: AppColors.champagneGold,
-        onPrimary: AppColors.royalForest,
-        secondary: AppColors.champagneGold,
+        primary: AppColors.royalForest,
+        onPrimary: AppColors.champagneGold,
+        secondary: AppColors.emerald,
         surface: AppColors.lightSurface,
         surfaceContainerLowest: AppColors.lightSurface,
         surfaceContainerLow: AppColors.lightSurface,
@@ -41,8 +44,10 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
         titleTextStyle: TextStyle(
+          fontFamily: 'Lora',
           color: AppColors.lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w700,
@@ -55,7 +60,7 @@ class AppTheme {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            side: const BorderSide(color: AppColors.champagneGold, width: 1),
+            side: const BorderSide(color: AppColors.royalForest, width: 1),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         ),
@@ -83,7 +88,7 @@ class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(
-            color: AppColors.champagneGold,
+            color: AppColors.royalForest,
             width: 1.5,
           ),
         ),
@@ -98,11 +103,13 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'Lora',
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkCanvas,
       textTheme: ThemeData(useMaterial3: true, brightness: Brightness.dark)
           .textTheme
           .apply(
+            fontFamily: 'Lora',
             bodyColor: AppColors.darkTextPrimary,
             displayColor: AppColors.darkTextPrimary,
           ),
@@ -116,8 +123,9 @@ class AppTheme {
         backgroundColor: AppColors.darkSurfaceAlt,
       ),
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.champagneGold,
-        secondary: AppColors.emerald,
+        primary: Color(0xFFF2B47F),
+        onPrimary: AppColors.midnightObsidian,
+        secondary: Color(0xFFC1D29B),
         surface: AppColors.darkSurface,
         surfaceContainerLowest: AppColors.darkSurface,
         surfaceContainerLow: AppColors.darkSurface,
@@ -132,9 +140,11 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: AppColors.champagneGold),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: IconThemeData(color: AppColors.darkTextPrimary),
         titleTextStyle: TextStyle(
-          color: AppColors.champagneGold,
+          fontFamily: 'Lora',
+          color: AppColors.darkTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w700,
         ),
@@ -174,7 +184,7 @@ class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(
-            color: AppColors.champagneGold,
+            color: const Color(0xFFF2B47F),
             width: 1.5,
           ),
         ),

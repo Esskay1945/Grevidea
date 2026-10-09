@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 
 class CurvedNavBar extends StatelessWidget {
@@ -23,7 +24,7 @@ class CurvedNavBar extends StatelessWidget {
       height: 76.0 + safeBottomOffset,
       padding: EdgeInsets.only(bottom: safeBottomOffset),
       decoration: BoxDecoration(
-        color: AppColors.royalForest,
+        color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
         border: const Border(
           top: BorderSide(color: AppColors.goldBorder, width: 1.2),
         ),
@@ -135,7 +136,9 @@ class _NavItem extends StatelessWidget {
             Icon(
               icon,
               size: 24,
-              color: isSelected ? AppColors.champagneGold : Colors.white.withOpacity(0.6),
+              color: isSelected
+                  ? AppColors.accentOf(context)
+                  : AppColors.mutedOf(context).withOpacity(0.6),
             ),
             const SizedBox(height: 4),
             Text(
@@ -143,7 +146,9 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.champagneGold : Colors.white.withOpacity(0.6),
+                color: isSelected
+                    ? AppColors.accentOf(context)
+                    : AppColors.inkOf(context).withOpacity(0.6),
               ),
             ),
           ],

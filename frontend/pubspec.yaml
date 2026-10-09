@@ -32,4 +32,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/forest/
+    - assets/autumn/
     - assets/feature_catalog.json
+  fonts:
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora.ttf
+          weight: 400
+        - asset: assets/fonts/Lora.ttf
+          weight: 700

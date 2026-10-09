@@ -3,6 +3,7 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as ll;
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -50,6 +51,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
       }
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -59,20 +61,24 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
   Future<void> _refreshFeed() async {
     if (_isLoadingFeed) return;
     setState(() => _isLoadingFeed = true);
-    final position = await widget.appState.locationService
-        .getCurrentLocation(forceRefresh: true);
+    final position = await widget.appState.locationService.getCurrentLocation(
+      forceRefresh: true,
+    );
     final data = position == null
         ? null
         : await widget.appState.api.request(
-            '/api/v1/weather?lat=${position.latitude}&lon=${position.longitude}');
+            '/api/v1/weather?lat=${position.latitude}&lon=${position.longitude}',
+          );
     final shelters = position == null
         ? null
         : await widget.appState.api.request(
-            '/api/v1/shelters?lat=${position.latitude}&lon=${position.longitude}&radius_km=5');
+            '/api/v1/shelters?lat=${position.latitude}&lon=${position.longitude}&radius_km=5',
+          );
     final hazards = position == null
         ? null
         : await widget.appState.api.request(
-            '/api/v1/hazards?lat=${position.latitude}&lon=${position.longitude}');
+            '/api/v1/hazards?lat=${position.latitude}&lon=${position.longitude}',
+          );
     if (!mounted) return;
     _authoritativeShelters.clear();
     if (shelters is List)
@@ -86,26 +92,27 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         'severity': 'Unavailable',
         'icon': Icons.cloud_off,
         'color': AppColors.amber,
-        'description':
-            'Enable location in settings and check your connection. No hazard status can be determined.'
+        'description': 'Enable location in settings and check your connection. No hazard status can be determined.',
       });
     } else {
       final current = data['weather']['current'];
       final aqi = data['air_quality']?['current']?['us_aqi'];
       final temperatures =
           (data['weather']['hourly']?['temperature_2m'] as List?) ?? [];
-      final heat = temperatures.length >= 48 &&
+      final heat =
+          temperatures.length >= 48 &&
           temperatures.take(48).every((t) => t is num && t > 42);
       _liveAlerts.add({
-        'title':
-            heat ? '48-hour extreme heat forecast' : 'Local weather forecast',
+        'title': heat
+            ? '48-hour extreme heat forecast'
+            : 'Local weather forecast',
         'source': data['source'],
         'timestamp': current['time'].toString(),
         'severity': heat ? 'Critical' : 'Advisory',
         'icon': Icons.thermostat,
-        'color': heat ? AppColors.coral : AppColors.emerald,
+        'color': heat ? AppColors.coral : AppColors.leafOf(context),
         'description':
-            'Temperature: ${current['temperature_2m']} °C · precipitation: ${current['precipitation']} mm. Forecast model, not an official emergency warning.'
+            'Temperature: ${current['temperature_2m']} °C · precipitation: ${current['precipitation']} mm. Forecast model, not an official emergency warning.',
       });
       _liveAlerts.add({
         'title': aqi is num && aqi > 350
@@ -118,7 +125,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         'color': aqi is num && aqi > 350 ? AppColors.coral : AppColors.amber,
         'description': aqi == null
             ? 'Air quality is unavailable.'
-            : 'US AQI: $aqi. This is model data, not a CPCB station measurement.'
+            : 'US AQI: $aqi. This is model data, not a CPCB station measurement.',
       });
     }
     if (hazards?['alerts'] is List) {
@@ -131,20 +138,19 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
           'timestamp': alert['issued_at'],
           'severity': alert['severity'] ?? 'Warning',
           'icon': Icons.flood,
-          'color': AppColors.coral
+          'color': AppColors.coral,
         });
       }
     }
     if (hazards?['official_status'] != 'available')
       _liveAlerts.add({
         'title': 'Official hazard alerts unavailable',
-        'description':
-            'No official safety status can be determined. Check local authority instructions.',
+        'description': 'No official safety status can be determined. Check local authority instructions.',
         'source': 'Authority feed not available',
         'timestamp': '',
         'severity': 'Unavailable',
         'icon': Icons.warning_amber,
-        'color': AppColors.amber
+        'color': AppColors.amber,
       });
     final river = hazards?['river_forecast']?['daily'];
     if (river?['river_discharge'] is List)
@@ -156,39 +162,49 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         'timestamp': '',
         'severity': 'Model context',
         'icon': Icons.water,
-        'color': AppColors.sapphire
+        'color': AppColors.sapphire,
       });
     setState(() => _isLoadingFeed = false);
   }
 
   Future<void> _sendSos() async {
-    final position = await widget.appState.locationService
-        .getCurrentLocation(forceRefresh: true);
+    final position = await widget.appState.locationService.getCurrentLocation(
+      forceRefresh: true,
+    );
     final address = position == null
         ? null
         : await widget.appState.api.request(
-            '/api/v1/location/address?lat=${position.latitude}&lon=${position.longitude}');
+            '/api/v1/location/address?lat=${position.latitude}&lon=${position.longitude}',
+          );
     int? battery;
     try {
       battery = await Battery().batteryLevel;
     } catch (_) {}
     final result = position == null
         ? null
-        : await widget.appState.api.request('/api/v1/sos', data: {
-            'latitude': position.latitude,
-            'longitude': position.longitude,
-            'disaster_type': 'emergency',
-            'description': 'User requested assistance',
-            'needs': ['rescue'],
-            'people_count': 1,
-            'battery_percent': battery,
-            'street_address': address?['display_name']
-          });
+        : await widget.appState.api.request(
+            '/api/v1/sos',
+            data: {
+              'latitude': position.latitude,
+              'longitude': position.longitude,
+              'disaster_type': 'emergency',
+              'description': 'User requested assistance',
+              'needs': ['rescue'],
+              'people_count': 1,
+              'battery_percent': battery,
+              'street_address': address?['display_name'],
+            },
+          );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(result == null
-            ? 'SOS not saved. Live GPS, sign-in and a connection are required.'
-            : 'SOS saved and queued. Check Deliveries & Contacts for a confirmed provider receipt. If you need immediate help, call your local emergency number.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result == null
+              ? 'SOS not saved. Live GPS, sign-in and a connection are required.'
+              : 'SOS saved and queued. Check Deliveries & Contacts for a confirmed provider receipt. If you need immediate help, call your local emergency number.',
+        ),
+      ),
+    );
   }
 
   void _triggerSos(BuildContext context) {
@@ -204,8 +220,10 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
             Icon(Icons.warning_rounded, color: AppColors.coral, size: 28),
             SizedBox(width: 8),
             Expanded(
-              child: Text('Emergency SOS Beacon',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              child: Text(
+                'Emergency SOS Beacon',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ),
           ],
         ),
@@ -223,26 +241,34 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               decoration: BoxDecoration(
                 color: AppColors.coral.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border:
-                    Border.all(color: AppColors.coral.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.coral.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      '📍 Live GPS: ${widget.appState.locationService.currentLatitude.toStringAsFixed(4)}° N, ${widget.appState.locationService.currentLongitude.toStringAsFixed(4)}° E',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 11)),
+                    '📍 Live GPS: ${widget.appState.locationService.currentLatitude.toStringAsFixed(4)}° N, ${widget.appState.locationService.currentLongitude.toStringAsFixed(4)}° E',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Text(
-                      'Ward: ${widget.appState.baseline.cityWard} (Device Sensor Live)',
-                      style: const TextStyle(fontSize: 11)),
+                    'Ward: ${widget.appState.baseline.cityWard} (Device Sensor Live)',
+                    style: const TextStyle(fontSize: 11),
+                  ),
                   const SizedBox(height: 2),
-                  const Text('Regional Disaster Helpline: 1800222108 (24x7 Operations)',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                          color: AppColors.coral)),
+                  const Text(
+                    'Regional Disaster Helpline: 1800222108 (24x7 Operations)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      color: AppColors.coral,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -256,11 +282,23 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
             },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.coral, width: 1.2),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            icon: const Icon(Icons.phone_rounded, color: AppColors.coral, size: 14),
-            label: const Text('Call 1800-222-108',
-                style: TextStyle(color: AppColors.coral, fontSize: 11.5, fontWeight: FontWeight.bold)),
+            icon: const Icon(
+              Icons.phone_rounded,
+              color: AppColors.coral,
+              size: 14,
+            ),
+            label: const Text(
+              'Call 1800-222-108',
+              style: TextStyle(
+                color: AppColors.coral,
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -272,9 +310,13 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               _sendSos();
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.coral),
-            child: const Text('Save SOS Request',
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Save SOS Request',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -292,7 +334,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: AppColors.coral.withValues(alpha: 0.4), width: 1.5),
+          color: AppColors.coral.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8),
         ],
@@ -305,8 +349,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               options: MapOptions(
                 initialCenter: userCoord,
                 initialZoom: 13.0,
-                interactionOptions:
-                    const InteractionOptions(flags: InteractiveFlag.all),
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.all,
+                ),
               ),
               children: [
                 TileLayer(
@@ -338,16 +383,23 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                           color: AppColors.royalForest,
                           shape: BoxShape.circle,
                           border: Border.all(
-                              color: AppColors.champagneGold, width: 2.5),
+                            color: AppColors.champagneGold,
+                            width: 2.5,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                                color: AppColors.emerald.withValues(alpha: 0.6),
-                                blurRadius: 8,
-                                spreadRadius: 2),
+                              color: AppColors.leafOf(context)
+                                  .withValues(alpha: 0.6),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
                           ],
                         ),
-                        child: const Icon(Icons.my_location_rounded,
-                            color: AppColors.champagneGold, size: 18),
+                        child: const Icon(
+                          Icons.my_location_rounded,
+                          color: AppColors.champagneGold,
+                          size: 18,
+                        ),
                       ),
                     ),
                     // Municipal Shelter Markers
@@ -366,11 +418,14 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: const [
-                                BoxShadow(color: Colors.black38, blurRadius: 6)
+                                BoxShadow(color: Colors.black38, blurRadius: 6),
                               ],
                             ),
-                            child: const Icon(Icons.home_work_rounded,
-                                color: Colors.white, size: 20),
+                            child: const Icon(
+                              Icons.home_work_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                           ),
                         ),
                       );
@@ -384,23 +439,31 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               top: 10,
               left: 12,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.shield_rounded,
-                        size: 14, color: AppColors.champagneGold),
+                  children: [
+                    Icon(
+                      Icons.shield_rounded,
+                      size: 14,
+                      color: AppColors.accentOf(context),
+                    ),
                     SizedBox(width: 6),
-                    Text('Verified municipal shelter feed unavailable',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.bold)),
+                    Text(
+                      'Verified municipal shelter feed unavailable',
+                      style: TextStyle(
+                        color: AppColors.inkOf(context),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -415,8 +478,13 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                   color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text('OpenStreetMap Live Tiles',
-                    style: TextStyle(color: Colors.white70, fontSize: 9)),
+                child: Text(
+                  'OpenStreetMap Live Tiles',
+                  style: TextStyle(
+                    color: AppColors.mutedOf(context),
+                    fontSize: 9,
+                  ),
+                ),
               ),
             ),
           ],
@@ -433,7 +501,8 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
           ? AppColors.darkSurface
           : AppColors.lightSurface,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         return Padding(
@@ -448,18 +517,27 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Safe Shelters & Evacuation Map',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Text(
+                        'Safe Shelters & Evacuation Map',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                       Text(
-                          'Authoritative TMC Civil Defense Registry (${widget.appState.baseline.cityWard})',
-                          style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.lightTextSecondary)),
+                        'Authoritative TMC Civil Defense Registry (${widget.appState.baseline.cityWard})',
+                        style:  TextStyle(
+                          fontSize: 11,
+                          color: AppColors.mutedOf(context),
+                        ),
+                      ),
                     ],
                   ),
-                  const Icon(Icons.shield_rounded,
-                      color: AppColors.emerald, size: 24),
+                  Icon(
+                    Icons.shield_rounded,
+                    color: AppColors.leafOf(context),
+                    size: 24,
+                  ),
                 ],
               ),
               const SizedBox(height: 14),
@@ -471,7 +549,8 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               // Shelters List
               ConstrainedBox(
                 constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.4),
+                  maxHeight: MediaQuery.of(context).size.height * 0.4,
+                ),
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: _authoritativeShelters.length,
@@ -481,37 +560,53 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: CircleAvatar(
-                        backgroundColor:
-                            AppColors.royalForest.withValues(alpha: 0.15),
-                        child: const Icon(Icons.home_work_rounded,
-                            color: AppColors.emerald, size: 20),
+                        backgroundColor: AppColors.royalForest.withValues(
+                          alpha: 0.15,
+                        ),
+                        child: Icon(
+                          Icons.home_work_rounded,
+                          color: AppColors.leafOf(context),
+                          size: 20,
+                        ),
                       ),
-                      title: Text(s['name'] as String,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 12.5)),
+                      title: Text(
+                        s['name'] as String,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.5,
+                        ),
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('${s['location']} • ${s['distance']}',
-                              style: const TextStyle(
-                                  fontSize: 10.5,
-                                  color: AppColors.lightTextSecondary)),
                           Text(
-                              'Cap: ${s['capacity']} • Helpline: ${s['helpline']}',
-                              style: const TextStyle(
-                                  fontSize: 10,
-                                  color: AppColors.champagneGold,
-                                  fontWeight: FontWeight.bold)),
+                            '${s['location']} • ${s['distance']}',
+                            style:  TextStyle(
+                              fontSize: 10.5,
+                              color: AppColors.mutedOf(context),
+                            ),
+                          ),
+                          Text(
+                            'Cap: ${s['capacity']} • Helpline: ${s['helpline']}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.accentOf(context),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.royalForest,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           minimumSize: const Size(60, 32),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pop(ctx);
@@ -519,17 +614,22 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                             SnackBar(
                               backgroundColor: AppColors.royalForest,
                               content: Text(
-                                  'Navigating to ${s['name']} (${s['distance']}). Helpline: ${s['helpline']}',
-                                  style: const TextStyle(
-                                      color: AppColors.champagneGold)),
+                                'Navigating to ${s['name']} (${s['distance']}). Helpline: ${s['helpline']}',
+                                style: const TextStyle(
+                                  color: AppColors.champagneGold,
+                                ),
+                              ),
                             ),
                           );
                         },
-                        child: const Text('Navigate',
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.champagneGold)),
+                        child: const Text(
+                          'Navigate',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.champagneGold,
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -547,8 +647,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.inkOf(context);
 
     return Scaffold(
       backgroundColor: bg,
@@ -560,14 +661,18 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         appState: widget.appState,
         extraActions: [
           IconButton(
-            icon: const Icon(Icons.phone_in_talk_rounded,
-                color: AppColors.coral),
+            icon: const Icon(
+              Icons.phone_in_talk_rounded,
+              color: AppColors.coral,
+            ),
             tooltip: 'Call Regional Disaster Helpline (1800222108)',
             onPressed: () => _makePhoneCall(disasterHelpline),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded,
-                color: AppColors.champagneGold),
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: AppColors.accentOf(context),
+            ),
             tooltip: 'Refresh Live Hazards',
             onPressed: _refreshFeed,
           ),
@@ -583,7 +688,8 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.coral,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -595,9 +701,10 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                     Text(
                       'Broadcast Emergency SOS Beacon',
                       style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -616,7 +723,9 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
             decoration: BoxDecoration(
               color: AppColors.coral.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.coral.withValues(alpha: 0.35)),
+              border: Border.all(
+                color: AppColors.coral.withValues(alpha: 0.35),
+              ),
             ),
             child: Row(
               children: [
@@ -626,27 +735,32 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                     color: AppColors.coral.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.emergency_rounded,
-                      color: AppColors.coral, size: 22),
+                  child: const Icon(
+                    Icons.emergency_rounded,
+                    color: AppColors.coral,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children:  [
                       Text(
                         'Regional Disaster Helpline',
                         style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.coral),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.coral,
+                        ),
                       ),
                       Text(
                         'Toll-Free 24x7: 1800-222-108',
                         style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.lightTextSecondary),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.mutedOf(context),
+                        ),
                       ),
                     ],
                   ),
@@ -656,15 +770,19 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.coral,
                     foregroundColor: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   icon: const Icon(Icons.call_rounded, size: 14),
-                  label: const Text('Call',
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'Call',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -672,10 +790,11 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
           Text(
             'Live risk summary for ${widget.appState.baseline.cityWard}',
             style: TextStyle(
-                fontSize: 13,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextSecondary),
+              fontSize: 13,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.mutedOf(context),
+            ),
           ),
           const SizedBox(height: 12),
 
@@ -686,22 +805,28 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               color: isDark ? const Color(0xFF2A1515) : const Color(0xFFFFF0F0),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                  color: AppColors.coral.withValues(alpha: 0.6), width: 1.5),
+                color: AppColors.coral.withValues(alpha: 0.6),
+                width: 1.5,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: const [
-                    Icon(Icons.warning_amber_rounded,
-                        color: AppColors.coral, size: 24),
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: AppColors.coral,
+                      size: 24,
+                    ),
                     SizedBox(width: 10),
                     Text(
                       'High Flood Risk Warning',
                       style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.coral),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.coral,
+                      ),
                     ),
                   ],
                 ),
@@ -709,18 +834,20 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                 Text(
                   '${widget.appState.baseline.cityWard} (Creek inlet zones)',
                   style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: textColor),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Heavy rainfall predicted in next 24 hours. High tide may cause temporary water-logging near Majiwada bridge. 3 TMC safe shelters are on standby.',
                   style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary),
+                    fontSize: 11.5,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.mutedOf(context),
+                  ),
                 ),
                 const SizedBox(height: 14),
 
@@ -728,13 +855,16 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                 InkWell(
                   onTap: _openSheltersMapModal,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.coral.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                          color: AppColors.coral.withValues(alpha: 0.4)),
+                        color: AppColors.coral.withValues(alpha: 0.4),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -742,13 +872,17 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                         Text(
                           'View Safe Shelters & Evacuation Map',
                           style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.coral),
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.coral,
+                          ),
                         ),
                         SizedBox(width: 6),
-                        Icon(Icons.arrow_forward_rounded,
-                            size: 14, color: AppColors.coral),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: AppColors.coral,
+                        ),
                       ],
                     ),
                   ),
@@ -765,18 +899,20 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               Text(
                 'Live Evacuation & Shelter Grid',
                 style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: textColor),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
               Text(
                 _authoritativeShelters.isEmpty
                     ? 'Shelter feed unavailable'
                     : '${_authoritativeShelters.length} active verified shelters',
                 style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.emerald,
-                    fontWeight: FontWeight.bold),
+                  fontSize: 11,
+                  color: AppColors.leafOf(context),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -791,16 +927,20 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
               Text(
                 'Live Hazards & Advisories',
                 style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: textColor),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
               if (_isLoadingFeed)
-                const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: AppColors.champagneGold)),
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.accentOf(context),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -842,8 +982,8 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
         color: cardBg,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color:
-                isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+          color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -863,27 +1003,37 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title,
-                        style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: textColor)),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text('$source • $timestamp',
-                        style: const TextStyle(
-                            fontSize: 10, color: AppColors.lightTextSecondary)),
+                    Text(
+                      '$source • $timestamp',
+                      style:  TextStyle(
+                        fontSize: 10,
+                        color: AppColors.mutedOf(context),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(desc,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary)),
+          Text(
+            desc,
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.mutedOf(context),
+            ),
+          ),
         ],
       ),
     );

@@ -5,7 +5,7 @@ import 'package:grevidea/core/widgets/forest_backdrop.dart';
 
 void main() {
   testWidgets(
-    'Forest theme preserves control geometry, taps and route navigation',
+    'Autumn theme preserves control geometry, taps and route navigation',
     (tester) async {
       var dark = false;
       var taps = 0;
@@ -56,7 +56,7 @@ void main() {
       final images = tester.widgetList<Image>(find.byType(Image));
       expect(
         (images.single.image as AssetImage).assetName,
-        contains('forest_night'),
+        contains('autumn_night'),
       );
       await tester.tap(find.byKey(buttonKey));
       await tester.pumpAndSettle();

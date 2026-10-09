@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
 
@@ -34,7 +35,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
       backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: AppColors.champagneGold, width: 1),
+        side: BorderSide(color: AppColors.accentOf(context), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -42,14 +43,20 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.mark_email_read_rounded, color: AppColors.emerald, size: 52),
+                  Icon(
+                    Icons.mark_email_read_rounded,
+                    color: AppColors.leafOf(context),
+                    size: 52,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Reset Link Dispatched',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.inkOf(context),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -58,7 +65,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.mutedOf(context),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -82,7 +91,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.inkOf(context),
                           ),
                         ),
                         IconButton(
@@ -96,7 +107,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       'Enter your registered email address to receive an official recovery link.',
                       style: TextStyle(
                         fontSize: 13,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.mutedOf(context),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -104,9 +117,12 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: Validators.validateEmail,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Email Address',
-                        prefixIcon: Icon(Icons.email_outlined, color: AppColors.champagneGold),
+                        prefixIcon: Icon(
+                          Icons.email_outlined,
+                          color: AppColors.accentOf(context),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -26,7 +27,8 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
           ? AppColors.darkSurface
           : AppColors.lightSurface,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -44,32 +46,41 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Log Environmental Activity',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w800)),
+                      const Text(
+                        'Log Environmental Activity',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.pop(ctx)),
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 14),
 
                   // Category Selector
                   Row(
-                    children:
-                        ['Transport', 'Energy', 'Food', 'Waste'].map((cat) {
+                    children: ['Transport', 'Energy', 'Food', 'Waste'].map((
+                      cat,
+                    ) {
                       final isSel = selectedCategory == cat;
                       return Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3),
                           child: ChoiceChip(
-                            label: Text(cat,
-                                style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSel
-                                        ? AppColors.champagneGold
-                                        : null)),
+                            label: Text(
+                              cat,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: isSel
+                                    ? AppColors.accentOf(context)
+                                    : null,
+                              ),
+                            ),
                             selected: isSel,
                             selectedColor: AppColors.royalForest,
                             onSelected: (val) {
@@ -99,18 +110,20 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                     selectedCategory == 'Transport'
                         ? 'Distance: ${amount.toStringAsFixed(1)} km'
                         : (selectedCategory == 'Energy'
-                            ? 'Electricity: ${amount.toStringAsFixed(1)} kWh'
-                            : (selectedCategory == 'Food'
-                                ? 'Meals: ${amount.toInt()} plant-based meals'
-                                : 'Waste Recycled: ${amount.toStringAsFixed(1)} kg')),
+                              ? 'Electricity: ${amount.toStringAsFixed(1)} kWh'
+                              : (selectedCategory == 'Food'
+                                    ? 'Meals: ${amount.toInt()} plant-based meals'
+                                    : 'Waste Recycled: ${amount.toStringAsFixed(1)} kg')),
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   Slider(
                     value: amount,
                     min: 1.0,
                     max: 50.0,
-                    activeColor: AppColors.emerald,
+                    activeColor: AppColors.leafOf(context),
                     inactiveColor: Colors.grey.shade300,
                     onChanged: (val) => setModalState(() => amount = val),
                   ),
@@ -122,26 +135,32 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                       color: AppColors.royalForest.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppColors.emerald.withValues(alpha: 0.3)),
+                        color: AppColors.leafOf(context).withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Estimated Emission:',
-                            style: TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Estimated Emission:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         Text(
                           selectedCategory == 'Transport'
                               ? '${(amount * 0.028).toStringAsFixed(2)} kg CO₂'
                               : (selectedCategory == 'Energy'
-                                  ? '${(amount * 0.82).toStringAsFixed(2)} kg CO₂'
-                                  : (selectedCategory == 'Food'
-                                      ? '${(amount * 0.3).toStringAsFixed(2)} kg CO₂'
-                                      : '-${(amount * 0.5).toStringAsFixed(2)} kg CO₂ Saved')),
-                          style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.emerald),
+                                    ? '${(amount * 0.82).toStringAsFixed(2)} kg CO₂'
+                                    : (selectedCategory == 'Food'
+                                          ? '${(amount * 0.3).toStringAsFixed(2)} kg CO₂'
+                                          : '-${(amount * 0.5).toStringAsFixed(2)} kg CO₂ Saved')),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.leafOf(context),
+                          ),
                         ),
                       ],
                     ),
@@ -155,8 +174,10 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (selectedCategory == 'Transport') {
-                          await widget.appState
-                              .recordTrip(TravelTrip(amount, 'metro'), 'metro');
+                          await widget.appState.recordTrip(
+                            TravelTrip(amount, 'metro'),
+                            'metro',
+                          );
                         } else {
                           await widget.appState.logActivity(
                             title: '$selectedMode Log',
@@ -166,13 +187,13 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                             co2Kg: selectedCategory == 'Waste'
                                 ? -amount * 0.5
                                 : selectedCategory == 'Energy'
-                                    ? amount * 0.82
-                                    : amount * 0.3,
+                                ? amount * 0.82
+                                : amount * 0.3,
                             icon: selectedCategory == 'Transport'
                                 ? Icons.directions_subway_rounded
                                 : (selectedCategory == 'Energy'
-                                    ? Icons.bolt_rounded
-                                    : Icons.eco_rounded),
+                                      ? Icons.bolt_rounded
+                                      : Icons.eco_rounded),
                             pointsEarned: 0,
                           );
                         }
@@ -182,21 +203,25 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                           const SnackBar(
                             backgroundColor: AppColors.royalForest,
                             content: Text(
-                                'Activity saved. Travel points are confirmed after gateway sync.',
-                                style:
-                                    TextStyle(color: AppColors.champagneGold)),
+                              'Activity saved. Travel points are confirmed after gateway sync.',
+                              style: TextStyle(color: AppColors.champagneGold),
+                            ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.royalForest,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                      child: const Text('Confirm & Log Activity',
-                          style: TextStyle(
-                              color: AppColors.champagneGold,
-                              fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Confirm & Log Activity',
+                        style: TextStyle(
+                          color: AppColors.champagneGold,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -213,8 +238,9 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.inkOf(context);
 
     final activities = widget.appState.recentActivities;
 
@@ -238,14 +264,16 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
               label: const Text(
                 '+ Add Activity',
                 style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.royalForest,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 4,
               ),
             ),
@@ -259,13 +287,17 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
           Text(
             'Recent Activities',
             style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w800, color: textColor),
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: textColor,
+            ),
           ),
           const SizedBox(height: 12),
 
           // Activity Cards List (Matching items in Screen 07)
-          ...activities
-              .map((act) => _buildActivityTile(act, cardBg, textColor, isDark)),
+          ...activities.map(
+            (act) => _buildActivityTile(act, cardBg, textColor, isDark),
+          ),
           const SizedBox(height: 80),
         ],
       ),
@@ -273,7 +305,11 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
   }
 
   Widget _buildActivityTile(
-      ActivityLogItem item, Color cardBg, Color textColor, bool isDark) {
+    ActivityLogItem item,
+    Color cardBg,
+    Color textColor,
+    bool isDark,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -281,8 +317,8 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-            color:
-                isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+          color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -299,7 +335,7 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
               color: AppColors.royalForest.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(item.icon, color: AppColors.emerald, size: 22),
+            child: Icon(item.icon, color: AppColors.leafOf(context), size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -309,18 +345,20 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
                 Text(
                   item.title,
                   style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: textColor),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   item.subtitle,
                   style: TextStyle(
-                      fontSize: 11,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary),
+                    fontSize: 11,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.mutedOf(context),
+                  ),
                 ),
               ],
             ),
@@ -333,8 +371,8 @@ class _LogActivityScreenState extends State<LogActivityScreen> {
               fontSize: 13,
               fontWeight: FontWeight.w800,
               color: item.co2Kg < 0
-                  ? AppColors.emerald
-                  : AppColors.lightTextSecondary,
+                  ? AppColors.leafOf(context)
+                  : AppColors.mutedOf(context),
             ),
           ),
         ],
