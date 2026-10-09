@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -27,7 +28,8 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
     final ward = widget.appState.baseline.cityWard;
     _messages.addAll([
       _ChatMessage(
-        text: 'Hi ${widget.appState.userName}! I am ClimateGPT, your hyperlocal environmental intelligence copilot for $ward. Ask me about local air quality, recycling codes, clean transit, or upload photos of waste for instant AI sorting.',
+        text:
+            'Hi ${widget.appState.userName}! I am ClimateGPT, your hyperlocal environmental intelligence copilot for $ward. Ask me about local air quality, recycling codes, clean transit, or upload photos of waste for instant AI sorting.',
         isUser: false,
       ),
     ]);
@@ -51,7 +53,9 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
     if (text.trim().isEmpty && imagePath == null) return;
 
     setState(() {
-      _messages.add(_ChatMessage(text: text.trim(), isUser: true, imageTag: imagePath));
+      _messages.add(
+        _ChatMessage(text: text.trim(), isUser: true, imageTag: imagePath),
+      );
       _textController.clear();
       _isTyping = true;
     });
@@ -88,32 +92,67 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
   void _openUploadSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.darkSurface
+          : AppColors.lightSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Attach Eco Photo for AI Analysis', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text(
+                'Attach Eco Photo for AI Analysis',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: AppColors.royalForest, child: Icon(Icons.camera_alt_rounded, color: AppColors.champagneGold)),
-                title: const Text('Capture with Camera', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Scan product barcode, garbage dump, or sapling'),
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.royalForest,
+                  child: Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.champagneGold,
+                  ),
+                ),
+                title: const Text(
+                  'Capture with Camera',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text(
+                  'Scan product barcode, garbage dump, or sapling',
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _sendMessage('Analyzing packaging lifecycle & recycling guidelines...', imagePath: 'Camera Photo (Captured)');
+                  _sendMessage(
+                    'Analyzing packaging lifecycle & recycling guidelines...',
+                    imagePath: 'Camera Photo (Captured)',
+                  );
                 },
               ),
               ListTile(
-                leading: const CircleAvatar(backgroundColor: AppColors.royalForest, child: Icon(Icons.photo_library_rounded, color: AppColors.champagneGold)),
-                title: const Text('Upload from Gallery', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: const Text('Select existing photo or utility electricity bill'),
+                leading: const CircleAvatar(
+                  backgroundColor: AppColors.royalForest,
+                  child: Icon(
+                    Icons.photo_library_rounded,
+                    color: AppColors.champagneGold,
+                  ),
+                ),
+                title: const Text(
+                  'Upload from Gallery',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text(
+                  'Select existing photo or utility electricity bill',
+                ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _sendMessage('Analyze this electricity bill for rooftop solar savings.', imagePath: 'Gallery Photo (Selected)');
+                  _sendMessage(
+                    'Analyze this electricity bill for rooftop solar savings.',
+                    imagePath: 'Gallery Photo (Selected)',
+                  );
                 },
               ),
             ],
@@ -127,8 +166,12 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
     setState(() => _isListening = true);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.darkSurface
+          : AppColors.lightSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.all(24),
@@ -141,31 +184,47 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                   shape: BoxShape.circle,
                   color: AppColors.coral.withValues(alpha: 0.15),
                 ),
-                child: const Icon(Icons.mic_rounded, color: AppColors.coral, size: 42),
+                child: const Icon(
+                  Icons.mic_rounded,
+                  color: AppColors.coral,
+                  size: 42,
+                ),
               ),
               const SizedBox(height: 16),
-              const Text('Listening...', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              const Text(
+                'Listening...',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
               const SizedBox(height: 6),
               Text(
                 'Speak your climate, waste, or commute question for ${widget.appState.baseline.cityWard}...',
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.lightTextSecondary,
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.royalForest,
                   foregroundColor: AppColors.champagneGold,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
                 onPressed: () {
                   Navigator.pop(ctx);
                   setState(() {
                     _isListening = false;
-                    _textController.text = 'How can I save carbon commuting from Majiwada to BKC?';
+                    _textController.text =
+                        'How can I save carbon commuting from Majiwada to BKC?';
                   });
                 },
-                child: const Text('Use Dictated Query', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Use Dictated Query',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -181,14 +240,17 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     return Scaffold(
       backgroundColor: bg,
       drawer: FeatureDirectoryDrawer(appState: widget.appState),
       appBar: GrevideaAppBar(
         title: 'ClimateGPT',
-        subtitle: 'Hyperlocal AI Copilot (${widget.appState.baseline.cityWard})',
+        subtitle:
+            'Hyperlocal AI Copilot (${widget.appState.baseline.cityWard})',
         showBack: Navigator.of(context).canPop(),
         appState: widget.appState,
       ),
@@ -210,7 +272,9 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                         side: BorderSide(
-                          color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder,
+                          color: isDark
+                              ? AppColors.darkCardBorder
+                              : AppColors.lightCardBorder,
                         ),
                       ),
                       onPressed: () => _sendMessage(chip),
@@ -230,18 +294,24 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
               itemBuilder: (context, index) {
                 final msg = _messages[index];
                 return Align(
-                  alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment: msg.isUser
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.all(14),
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.8,
+                    ),
                     decoration: BoxDecoration(
                       color: msg.isUser ? AppColors.royalForest : cardBg,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: msg.isUser
-                            ? AppColors.champagneGold.withValues(alpha: 0.3)
-                            : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                            ? AppColors.accentOf(context).withValues(alpha: 0.3)
+                            : (isDark
+                                  ? AppColors.darkCardBorder
+                                  : AppColors.lightCardBorder),
                       ),
                     ),
                     child: Column(
@@ -249,15 +319,31 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                       children: [
                         if (msg.imageTag != null) ...[
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             margin: const EdgeInsets.only(bottom: 6),
-                            decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)),
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.image_rounded, size: 14, color: AppColors.champagneGold),
+                                Icon(
+                                  Icons.image_rounded,
+                                  size: 14,
+                                  color: AppColors.accentOf(context),
+                                ),
                                 const SizedBox(width: 4),
-                                Text(msg.imageTag!, style: const TextStyle(color: Colors.white, fontSize: 10)),
+                                Text(
+                                  msg.imageTag!,
+                                  style: TextStyle(
+                                    color: AppColors.inkOf(context),
+                                    fontSize: 10,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -266,7 +352,9 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                           msg.text,
                           style: TextStyle(
                             fontSize: 13,
-                            color: msg.isUser ? Colors.white : textColor,
+                            color: msg.isUser
+                                ? AppColors.inkOf(context)
+                                : textColor,
                             height: 1.4,
                           ),
                         ),
@@ -282,10 +370,23 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: Row(
-                children: const [
-                  SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.emerald)),
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.leafOf(context),
+                    ),
+                  ),
                   SizedBox(width: 8),
-                  Text('ClimateGPT is analyzing...', style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
+                  Text(
+                    'ClimateGPT is analyzing...',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.lightTextSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -297,7 +398,9 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
               color: cardBg,
               border: Border(
                 top: BorderSide(
-                  color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder,
+                  color: isDark
+                      ? AppColors.darkCardBorder
+                      : AppColors.lightCardBorder,
                 ),
               ),
             ),
@@ -305,12 +408,22 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.add_photo_alternate_rounded, color: AppColors.champagneGold, size: 24),
+                    icon: Icon(
+                      Icons.add_photo_alternate_rounded,
+                      color: AppColors.accentOf(context),
+                      size: 24,
+                    ),
                     tooltip: 'Upload / Capture Photo',
                     onPressed: _openUploadSheet,
                   ),
                   IconButton(
-                    icon: Icon(Icons.mic_rounded, color: _isListening ? AppColors.coral : AppColors.champagneGold, size: 24),
+                    icon: Icon(
+                      Icons.mic_rounded,
+                      color: _isListening
+                          ? AppColors.coral
+                          : AppColors.accentOf(context),
+                      size: 24,
+                    ),
                     tooltip: 'Speech-to-Text Voice Query',
                     onPressed: _startSpeechToText,
                   ),
@@ -321,8 +434,13 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                       decoration: InputDecoration(
                         hintText: 'Ask or dictate question...',
                         filled: true,
-                        fillColor: isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        fillColor: isDark
+                            ? AppColors.darkSurfaceAlt
+                            : AppColors.lightSurfaceAlt,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
@@ -337,7 +455,11 @@ class _ClimateGptScreenState extends State<ClimateGptScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.send_rounded, color: AppColors.champagneGold, size: 20),
+                      icon: const Icon(
+                        Icons.send_rounded,
+                        color: AppColors.champagneGold,
+                        size: 20,
+                      ),
                       onPressed: () => _sendMessage(_textController.text),
                     ),
                   ),

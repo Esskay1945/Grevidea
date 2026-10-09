@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -21,7 +22,8 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
       if (_selectedPeriod == 'This Week') {
         return now.difference(act.timestamp).inDays <= 7;
       } else if (_selectedPeriod == 'This Month') {
-        return act.timestamp.month == now.month && act.timestamp.year == now.year;
+        return act.timestamp.month == now.month &&
+            act.timestamp.year == now.year;
       } else {
         return act.timestamp.year == now.year;
       }
@@ -70,7 +72,7 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
         'co2': '${transportCo2.toStringAsFixed(1)} kg',
         'val': transportCo2,
         'pct': ((transportCo2 / total) * 100).round(),
-        'color': AppColors.emerald,
+        'color': AppColors.leafOf(context),
         'icon': Icons.directions_subway_rounded,
       },
       {
@@ -95,20 +97,22 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
           'co2': '${otherCo2.toStringAsFixed(1)} kg',
           'val': otherCo2,
           'pct': ((otherCo2 / total) * 100).round(),
-          'color': AppColors.champagneGold,
+          'color': AppColors.accentOf(context),
           'icon': Icons.eco_rounded,
         },
     ];
 
     // Distribute into 5 time buckets for the bar chart
     final step = total / 5;
-    final weeklyBars = [step * 0.6, step * 0.9, step * 1.1, step * 0.8, step * 1.6];
+    final weeklyBars = [
+      step * 0.6,
+      step * 0.9,
+      step * 1.1,
+      step * 0.8,
+      step * 1.6,
+    ];
 
-    return {
-      'total': total,
-      'categories': categories,
-      'weeklyBars': weeklyBars,
-    };
+    return {'total': total, 'categories': categories, 'weeklyBars': weeklyBars};
   }
 
   @override
@@ -116,11 +120,14 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     final breakdown = _computeBreakdown();
     final double totalCo2 = breakdown['total'] as double;
-    final List<Map<String, dynamic>> categories = List<Map<String, dynamic>>.from(breakdown['categories']);
+    final List<Map<String, dynamic>> categories =
+        List<Map<String, dynamic>>.from(breakdown['categories']);
     final List<double> weeklyBars = List<double>.from(breakdown['weeklyBars']);
 
     return Scaffold(
@@ -142,7 +149,14 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(p, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isSel ? AppColors.champagneGold : null)),
+                  label: Text(
+                    p,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isSel ? AppColors.accentOf(context) : null,
+                    ),
+                  ),
                   selected: isSel,
                   selectedColor: AppColors.royalForest,
                   backgroundColor: cardBg,
@@ -161,9 +175,16 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                ),
               ],
             ),
             child: totalCo2 == 0.0
@@ -171,11 +192,21 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Column(
                       children: [
-                        Icon(Icons.pie_chart_outline_rounded, size: 52, color: AppColors.lightTextSecondary.withValues(alpha: 0.4)),
+                        Icon(
+                          Icons.pie_chart_outline_rounded,
+                          size: 52,
+                          color: AppColors.lightTextSecondary.withValues(
+                            alpha: 0.4,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'No activities logged for $_selectedPeriod',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: textColor,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         const Padding(
@@ -183,7 +214,10 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                           child: Text(
                             'Log your public transit commute, home solar, or recycling actions to generate your live carbon breakdown.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 11.5, color: AppColors.lightTextSecondary),
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: AppColors.lightTextSecondary,
+                            ),
                           ),
                         ),
                       ],
@@ -200,14 +234,36 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                           children: [
                             CustomPaint(
                               size: const Size(190, 190),
-                              painter: _DonutChartPainter(categories: categories),
+                              painter: _DonutChartPainter(
+                                categories: categories,
+                              ),
                             ),
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(totalCo2.toStringAsFixed(1), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, letterSpacing: -1)),
-                                const Text('kg CO₂', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.lightTextSecondary)),
-                                Text(_selectedPeriod, style: const TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
+                                Text(
+                                  totalCo2.toStringAsFixed(1),
+                                  style: const TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -1,
+                                  ),
+                                ),
+                                const Text(
+                                  'kg CO₂',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.lightTextSecondary,
+                                  ),
+                                ),
+                                Text(
+                                  _selectedPeriod,
+                                  style: const TextStyle(
+                                    fontSize: 9.5,
+                                    color: AppColors.lightTextSecondary,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -216,26 +272,55 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                       const SizedBox(height: 20),
 
                       // Category List with percentages
-                      ...categories.map((c) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 10,
-                                  height: 10,
-                                  decoration: BoxDecoration(color: c['color'] as Color, shape: BoxShape.circle),
+                      ...categories.map(
+                        (c) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: c['color'] as Color,
+                                  shape: BoxShape.circle,
                                 ),
-                                const SizedBox(width: 8),
-                                Icon(c['icon'] as IconData, size: 16, color: c['color'] as Color),
-                                const SizedBox(width: 8),
-                                Text(c['name'] as String, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
-                                const Spacer(),
-                                Text(c['co2'] as String, style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
-                                const SizedBox(width: 12),
-                                Text('${c['pct']}%', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: c['color'] as Color)),
-                              ],
-                            ),
-                          )),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                c['icon'] as IconData,
+                                size: 16,
+                                color: c['color'] as Color,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                c['name'] as String,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: textColor,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                c['co2'] as String,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.lightTextSecondary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                '${c['pct']}%',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: c['color'] as Color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
           ),
@@ -247,7 +332,11 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,9 +344,23 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Timeline Carbon Trend', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: textColor)),
+                    Text(
+                      'Timeline Carbon Trend',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: textColor,
+                      ),
+                    ),
                     if (totalCo2 > 0)
-                      const Text('Tracked Activity', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.emerald)),
+                      Text(
+                        'Tracked Activity',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.leafOf(context),
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -267,26 +370,50 @@ class _ImpactBreakdownScreenState extends State<ImpactBreakdownScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: weeklyBars.asMap().entries.map((e) {
-                      final dayLabels = ['1-7', '8-14', '15-21', '22-28', '29+'];
+                      final dayLabels = [
+                        '1-7',
+                        '8-14',
+                        '15-21',
+                        '22-28',
+                        '29+',
+                      ];
                       final val = e.value;
                       final maxVal = weeklyBars.reduce((a, b) => a > b ? a : b);
-                      final h = maxVal > 0 ? ((val / maxVal).clamp(0.08, 1.0)) * 68.0 : 8.0;
+                      final h = maxVal > 0
+                          ? ((val / maxVal).clamp(0.08, 1.0)) * 68.0
+                          : 8.0;
 
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(val.toStringAsFixed(1), style: const TextStyle(fontSize: 9, color: AppColors.lightTextSecondary)),
+                          Text(
+                            val.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: AppColors.lightTextSecondary,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           Container(
                             width: 24,
                             height: h,
                             decoration: BoxDecoration(
-                              color: e.key == weeklyBars.length - 1 ? AppColors.emerald : AppColors.royalForest,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                              color: e.key == weeklyBars.length - 1
+                                  ? AppColors.leafOf(context)
+                                  : AppColors.royalForest,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(6),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text('Day ${dayLabels[e.key]}', style: const TextStyle(fontSize: 9.5, color: AppColors.lightTextSecondary)),
+                          Text(
+                            'Day ${dayLabels[e.key]}',
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              color: AppColors.lightTextSecondary,
+                            ),
+                          ),
                         ],
                       );
                     }).toList(),

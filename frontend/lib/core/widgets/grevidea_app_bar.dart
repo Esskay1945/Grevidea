@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
 import '../../state/app_state.dart';
 import '../../features/auth/login_screen.dart';
@@ -28,7 +29,9 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryTextColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final primaryTextColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     return AppBar(
       backgroundColor: Colors.transparent,
@@ -37,12 +40,20 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       leading: showBack
           ? IconButton(
-              icon: Icon(Icons.arrow_back_ios_new_rounded, color: primaryTextColor, size: 20),
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: primaryTextColor,
+                size: 20,
+              ),
               onPressed: onBack ?? () => Navigator.of(context).pop(),
             )
           : Builder(
               builder: (ctx) => IconButton(
-                icon: Icon(Icons.menu_rounded, color: primaryTextColor, size: 26),
+                icon: Icon(
+                  Icons.menu_rounded,
+                  color: primaryTextColor,
+                  size: 26,
+                ),
                 tooltip: 'All 58 Features & Modules',
                 onPressed: () => Scaffold.of(ctx).openDrawer(),
               ),
@@ -72,8 +83,8 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
               Container(
                 width: 6,
                 height: 6,
-                decoration: const BoxDecoration(
-                  color: AppColors.emerald,
+                decoration: BoxDecoration(
+                  color: AppColors.leafOf(context),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -87,7 +98,9 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: TextStyle(
                 fontSize: showBack ? 10 : 11,
                 fontWeight: FontWeight.w500,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
               ),
             ),
         ],
@@ -99,7 +112,7 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: Icon(
             isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-            color: AppColors.champagneGold,
+            color: AppColors.accentOf(context),
             size: 21,
           ),
           tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
@@ -108,30 +121,35 @@ class GrevideaAppBar extends StatelessWidget implements PreferredSizeWidget {
 
         // Show full chips only on main dashboard without back button
         if (!showBack) ...[
-
           // ── Green Points Badge Chip ────────────────────────────────────────
           Container(
             margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 2),
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt,
+              color: isDark
+                  ? AppColors.darkSurfaceAlt
+                  : AppColors.lightSurfaceAlt,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AppColors.champagneGold.withValues(alpha: 0.4),
+                color: AppColors.accentOf(context).withValues(alpha: 0.4),
                 width: 1,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.eco_rounded, color: AppColors.emerald, size: 13),
+                Icon(
+                  Icons.eco_rounded,
+                  color: AppColors.leafOf(context),
+                  size: 13,
+                ),
                 const SizedBox(width: 3),
                 Text(
                   '${appState.greenPoints}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.champagneGold,
+                    color: AppColors.accentOf(context),
                   ),
                 ),
               ],
@@ -154,7 +172,9 @@ class GesturefulProfileAvatar extends StatelessWidget {
   void _openProfileModal(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     showModalBottomSheet(
       context: context,
@@ -187,13 +207,22 @@ class GesturefulProfileAvatar extends StatelessWidget {
                     height: 56,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.champagneGold, width: 2),
+                      border: Border.all(
+                        color: AppColors.champagneGold,
+                        width: 2,
+                      ),
                       color: AppColors.royalForest,
                     ),
                     child: Center(
                       child: Text(
-                        appState.userName.isNotEmpty ? appState.userName[0].toUpperCase() : 'U',
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.champagneGold),
+                        appState.userName.isNotEmpty
+                            ? appState.userName[0].toUpperCase()
+                            : 'U',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.champagneGold,
+                        ),
                       ),
                     ),
                   ),
@@ -204,25 +233,42 @@ class GesturefulProfileAvatar extends StatelessWidget {
                       children: [
                         Text(
                           appState.userName,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: textColor),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: textColor,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           appState.userEmail,
-                          style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.lightTextSecondary,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: AppColors.emerald.withValues(alpha: 0.15),
+                            color: AppColors.leafOf(context)
+                                .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             appState.baseline.cityWard,
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.leafOf(context),
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -241,12 +287,18 @@ class GesturefulProfileAvatar extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(
                   isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                  color: AppColors.champagneGold,
+                  color: AppColors.accentOf(context),
                 ),
-                title: Text(isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                title: Text(
+                  isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 trailing: Switch(
                   value: isDark,
-                  activeThumbColor: AppColors.champagneGold,
+                  activeThumbColor: AppColors.accentOf(context),
                   activeTrackColor: AppColors.royalForest,
                   onChanged: (_) {
                     appState.toggleTheme();
@@ -258,16 +310,28 @@ class GesturefulProfileAvatar extends StatelessWidget {
               // Edit Baseline Setup Tile
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.tune_rounded, color: AppColors.emerald),
-                title: const Text('Edit Baseline & Commute Settings', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                subtitle: const Text('Update wards, multi-commute, and clean energy', style: TextStyle(fontSize: 11)),
+                leading: Icon(
+                  Icons.tune_rounded,
+                  color: AppColors.leafOf(context),
+                ),
+                title: const Text(
+                  'Edit Baseline & Commute Settings',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                subtitle: const Text(
+                  'Update wards, multi-commute, and clean energy',
+                  style: TextStyle(fontSize: 11),
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
                 onTap: () {
                   Navigator.pop(ctx);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => BaselineSetupScreen(appState: appState, isInitialSetup: false),
+                      builder: (_) => BaselineSetupScreen(
+                        appState: appState,
+                        isInitialSetup: false,
+                      ),
                     ),
                   );
                 },
@@ -280,21 +344,33 @@ class GesturefulProfileAvatar extends StatelessWidget {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 18),
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                   label: const Text(
                     'Log Out of Grevidea',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.coral,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
                   onPressed: () {
                     Navigator.pop(ctx);
                     appState.logout();
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => LoginScreen(appState: appState)),
+                      MaterialPageRoute(
+                        builder: (_) => LoginScreen(appState: appState),
+                      ),
                       (route) => false,
                     );
                   },
@@ -316,13 +392,15 @@ class GesturefulProfileAvatar extends StatelessWidget {
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.champagneGold, width: 1.5),
+          border: Border.all(color: AppColors.accentOf(context), width: 1.5),
         ),
         child: CircleAvatar(
           radius: 14,
           backgroundColor: AppColors.royalForest,
           child: Text(
-            appState.userName.isNotEmpty ? appState.userName[0].toUpperCase() : 'U',
+            appState.userName.isNotEmpty
+                ? appState.userName[0].toUpperCase()
+                : 'U',
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,

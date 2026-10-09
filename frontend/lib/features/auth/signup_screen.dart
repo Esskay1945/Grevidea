@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
 import '../../core/widgets/responsive_wrapper.dart';
@@ -98,8 +99,10 @@ class _SignupScreenState extends State<SignupScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: AppColors.royalForest,
-              content: Text('✓ Google Account Linked: $name ($email)',
-                  style: const TextStyle(color: AppColors.champagneGold)),
+              content: Text(
+                '✓ Google Account Linked: $name ($email)',
+                style: const TextStyle(color: AppColors.champagneGold),
+              ),
             ),
           );
           _navigateAfterAuth(context);
@@ -141,7 +144,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     width: 32,
                     height: 32,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle, color: Colors.white),
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
                     child: Center(
                       child: Text(
                         'G',
@@ -164,23 +169,31 @@ class _SignupScreenState extends State<SignupScreen> {
               const Text(
                 'Choose a Google account to continue to Grevidea',
                 style: TextStyle(
-                    fontSize: 13, color: AppColors.lightTextSecondary),
+                  fontSize: 13,
+                  color: AppColors.lightTextSecondary,
+                ),
               ),
               const SizedBox(height: 18),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const CircleAvatar(
                   backgroundColor: AppColors.royalForest,
-                  child: Text('S',
-                      style: TextStyle(
-                          color: AppColors.champagneGold,
-                          fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'S',
+                    style: TextStyle(
+                      color: AppColors.champagneGold,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                title: const Text('Siddharth Kumar',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle: const Text('esskay400d@gmail.com',
-                    style: TextStyle(fontSize: 12)),
+                title: const Text(
+                  'Siddharth Kumar',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'esskay400d@gmail.com',
+                  style: TextStyle(fontSize: 12),
+                ),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   widget.appState.signup(
@@ -192,8 +205,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SnackBar(
                       backgroundColor: AppColors.royalForest,
                       content: Text(
-                          '✓ Google Account Linked: Siddharth Kumar (esskay400d@gmail.com)',
-                          style: TextStyle(color: AppColors.champagneGold)),
+                        '✓ Google Account Linked: Siddharth Kumar (esskay400d@gmail.com)',
+                        style: TextStyle(color: AppColors.champagneGold),
+                      ),
                     ),
                   );
                   _navigateAfterAuth(context);
@@ -202,17 +216,24 @@ class _SignupScreenState extends State<SignupScreen> {
               const Divider(height: 8),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const CircleAvatar(
-                  backgroundColor: AppColors.emerald,
-                  child: Text('S',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                leading: CircleAvatar(
+                  backgroundColor: AppColors.leafOf(context),
+                  child: Text(
+                    'S',
+                    style: TextStyle(
+                      color: AppColors.inkOf(context),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                title: const Text('Siddharth (Esskay)',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle: const Text('esskay1945@gmail.com',
-                    style: TextStyle(fontSize: 12)),
+                title: const Text(
+                  'Siddharth (Esskay)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'esskay1945@gmail.com',
+                  style: TextStyle(fontSize: 12),
+                ),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   widget.appState.signup(
@@ -224,8 +245,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SnackBar(
                       backgroundColor: AppColors.royalForest,
                       content: Text(
-                          '✓ Google Account Linked: Siddharth (esskay1945@gmail.com)',
-                          style: TextStyle(color: AppColors.champagneGold)),
+                        '✓ Google Account Linked: Siddharth (esskay1945@gmail.com)',
+                        style: TextStyle(color: AppColors.champagneGold),
+                      ),
                     ),
                   );
                   _navigateAfterAuth(context);
@@ -234,17 +256,24 @@ class _SignupScreenState extends State<SignupScreen> {
               const Divider(height: 8),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const CircleAvatar(
+                leading: CircleAvatar(
                   backgroundColor: Colors.blueGrey,
-                  child: Text('J',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'J',
+                    style: TextStyle(
+                      color: AppColors.inkOf(context),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                title: const Text('John Doe (Tester)',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle:
-                    const Text('xyz@gmail.com', style: TextStyle(fontSize: 12)),
+                title: const Text(
+                  'John Doe (Tester)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: const Text(
+                  'xyz@gmail.com',
+                  style: TextStyle(fontSize: 12),
+                ),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   widget.appState.signup(
@@ -256,8 +285,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SnackBar(
                       backgroundColor: AppColors.royalForest,
                       content: Text(
-                          '✓ Google Account Linked: John Doe (xyz@gmail.com)',
-                          style: TextStyle(color: AppColors.champagneGold)),
+                        '✓ Google Account Linked: John Doe (xyz@gmail.com)',
+                        style: TextStyle(color: AppColors.champagneGold),
+                      ),
                     ),
                   );
                   _navigateAfterAuth(context);
@@ -268,12 +298,16 @@ class _SignupScreenState extends State<SignupScreen> {
                 contentPadding: EdgeInsets.zero,
                 leading: const CircleAvatar(
                   backgroundColor: Colors.black12,
-                  child: Icon(Icons.person_add_alt_1_rounded,
-                      size: 20, color: Colors.black87),
+                  child: Icon(
+                    Icons.person_add_alt_1_rounded,
+                    size: 20,
+                    color: Colors.black87,
+                  ),
                 ),
-                title: const Text('Add another Google account',
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                title: const Text(
+                  'Add another Google account',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: TextField(
@@ -281,16 +315,21 @@ class _SignupScreenState extends State<SignupScreen> {
                     decoration: const InputDecoration(
                       hintText: 'Enter your username@gmail.com',
                       isDense: true,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
                     ),
                   ),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.arrow_forward_rounded,
-                      color: AppColors.emerald),
+                  icon: Icon(
+                    Icons.arrow_forward_rounded,
+                    color: AppColors.leafOf(context),
+                  ),
                   onPressed: () {
                     final email = customEmailCtrl.text.trim();
                     if (email.contains('@')) {
@@ -307,9 +346,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         SnackBar(
                           backgroundColor: AppColors.royalForest,
                           content: Text(
-                              '✓ Google Account Linked: $displayName ($email)',
-                              style: const TextStyle(
-                                  color: AppColors.champagneGold)),
+                            '✓ Google Account Linked: $displayName ($email)',
+                            style: const TextStyle(
+                              color: AppColors.champagneGold,
+                            ),
+                          ),
                         ),
                       );
                       _navigateAfterAuth(context);
@@ -352,7 +393,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             color: AppColors.royalForest,
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: AppColors.champagneGold, width: 1.5),
+                              color: AppColors.champagneGold,
+                              width: 1.5,
+                            ),
                           ),
                           child: const Icon(
                             Icons.eco_rounded,
@@ -375,11 +418,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                     : AppColors.lightTextPrimary,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'Live green. Lead change.',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: AppColors.champagneGold,
+                                color: AppColors.accentOf(context),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -392,7 +435,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         isDark
                             ? Icons.light_mode_rounded
                             : Icons.dark_mode_rounded,
-                        color: AppColors.champagneGold,
+                        color: AppColors.accentOf(context),
                         size: 26,
                       ),
                       onPressed: () {
@@ -446,10 +489,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Name is required'
                       : null,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'e.g. John Doe',
-                    prefixIcon: Icon(Icons.person_outline_rounded,
-                        color: AppColors.champagneGold),
+                    prefixIcon: Icon(
+                      Icons.person_outline_rounded,
+                      color: AppColors.accentOf(context),
+                    ),
                   ),
                 ),
 
@@ -471,10 +516,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: Validators.validateEmail,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'e.g. xyz@gmail.com',
-                    prefixIcon: Icon(Icons.email_outlined,
-                        color: AppColors.champagneGold),
+                    prefixIcon: Icon(
+                      Icons.email_outlined,
+                      color: AppColors.accentOf(context),
+                    ),
                   ),
                 ),
 
@@ -499,14 +546,16 @@ class _SignupScreenState extends State<SignupScreen> {
                   validator: Validators.validatePassword,
                   decoration: InputDecoration(
                     hintText: 'Create a password (min 8 characters)',
-                    prefixIcon: const Icon(Icons.lock_outline_rounded,
-                        color: AppColors.champagneGold),
+                    prefixIcon: Icon(
+                      Icons.lock_outline_rounded,
+                      color: AppColors.accentOf(context),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.champagneGold,
+                        color: AppColors.accentOf(context),
                       ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
@@ -543,17 +592,21 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Re-enter your password to confirm',
-                    prefixIcon: const Icon(Icons.lock_clock_outlined,
-                        color: AppColors.champagneGold),
+                    prefixIcon: Icon(
+                      Icons.lock_clock_outlined,
+                      color: AppColors.accentOf(context),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.champagneGold,
+                        color: AppColors.accentOf(context),
                       ),
-                      onPressed: () => setState(() =>
-                          _obscureConfirmPassword = !_obscureConfirmPassword),
+                      onPressed: () => setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                      ),
                     ),
                   ),
                 ),
@@ -589,10 +642,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   children: [
                     Expanded(
-                        child: Divider(
-                            color: isDark
-                                ? AppColors.darkCardBorder
-                                : AppColors.lightCardBorder)),
+                      child: Divider(
+                        color: isDark
+                            ? AppColors.darkCardBorder
+                            : AppColors.lightCardBorder,
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14.0),
                       child: Text(
@@ -608,10 +663,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                     Expanded(
-                        child: Divider(
-                            color: isDark
-                                ? AppColors.darkCardBorder
-                                : AppColors.lightCardBorder)),
+                      child: Divider(
+                        color: isDark
+                            ? AppColors.darkCardBorder
+                            : AppColors.lightCardBorder,
+                      ),
+                    ),
                   ],
                 ),
 
@@ -640,12 +697,12 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
-                      child: const Text(
+                      child: Text(
                         'Sign In',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.champagneGold,
+                          color: AppColors.accentOf(context),
                         ),
                       ),
                     ),

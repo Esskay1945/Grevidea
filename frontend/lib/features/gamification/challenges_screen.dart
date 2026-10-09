@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -40,12 +41,16 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     final filtered = _challenges.where((c) {
-      final matchesFilter = _selectedFilter == 'All' || c['difficulty'] == _selectedFilter;
+      final matchesFilter =
+          _selectedFilter == 'All' || c['difficulty'] == _selectedFilter;
       final query = _searchController.text.toLowerCase();
-      final matchesQuery = query.isEmpty ||
+      final matchesQuery =
+          query.isEmpty ||
           (c['title'] as String).toLowerCase().contains(query) ||
           (c['description'] as String).toLowerCase().contains(query);
       return matchesFilter && matchesQuery;
@@ -70,13 +75,23 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Search challenges...',
-                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.lightTextSecondary),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.lightTextSecondary,
+                ),
                 filled: true,
                 fillColor: cardBg,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 16,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder,
+                  ),
                 ),
               ),
             ),
@@ -92,7 +107,14 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(
-                    label: Text(diff, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isSel ? AppColors.champagneGold : null)),
+                    label: Text(
+                      diff,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isSel ? AppColors.accentOf(context) : null,
+                      ),
+                    ),
                     selected: isSel,
                     selectedColor: AppColors.royalForest,
                     backgroundColor: cardBg,
@@ -109,34 +131,51 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
           // Challenges List
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.champagneGold))
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.accentOf(context),
+                    ),
+                  )
                 : filtered.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.emoji_events_outlined, size: 56, color: AppColors.lightTextSecondary.withValues(alpha: 0.5)),
-                            const SizedBox(height: 14),
-                            Text(
-                              'No challenges added yet',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
-                            ),
-                            const SizedBox(height: 6),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 40),
-                              child: Text(
-                                'Official civic and community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.emoji_events_outlined,
+                          size: 56,
+                          color: AppColors.lightTextSecondary.withValues(
+                            alpha: 0.5,
+                          ),
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: filtered.length,
-                        itemBuilder: (context, index) {
+                        const SizedBox(height: 14),
+                        Text(
+                          'No challenges added yet',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Text(
+                            'Official civic and community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.lightTextSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
                       final item = filtered[index];
                       final isCompleted = item['completed'] == true;
 
@@ -147,11 +186,18 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                           color: cardBg,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isCompleted ? AppColors.emerald : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                            color: isCompleted
+                                ? AppColors.leafOf(context)
+                                : (isDark
+                                      ? AppColors.darkCardBorder
+                                      : AppColors.lightCardBorder),
                             width: isCompleted ? 1.5 : 1,
                           ),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8),
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 8,
+                            ),
                           ],
                         ),
                         child: Row(
@@ -159,12 +205,18 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.royalForest.withValues(alpha: 0.1),
+                                color: AppColors.royalForest.withValues(
+                                  alpha: 0.1,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                isCompleted ? Icons.check_circle_rounded : Icons.task_alt_rounded,
-                                color: isCompleted ? AppColors.emerald : AppColors.champagneGold,
+                                isCompleted
+                                    ? Icons.check_circle_rounded
+                                    : Icons.task_alt_rounded,
+                                color: isCompleted
+                                    ? AppColors.leafOf(context)
+                                    : AppColors.accentOf(context),
                                 size: 24,
                               ),
                             ),
@@ -175,26 +227,47 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                 children: [
                                   Text(
                                     item['title'] as String,
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: textColor),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      color: textColor,
+                                    ),
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
                                     item['description'] as String,
-                                    style: TextStyle(fontSize: 11, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.lightTextSecondary,
+                                    ),
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      const Icon(Icons.timer_outlined, size: 12, color: AppColors.lightTextSecondary),
+                                      const Icon(
+                                        Icons.timer_outlined,
+                                        size: 12,
+                                        color: AppColors.lightTextSecondary,
+                                      ),
                                       const SizedBox(width: 4),
-                                      Text('${item['days_left']} days left', style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+                                      Text(
+                                        '${item['days_left']} days left',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.lightTextSecondary,
+                                        ),
+                                      ),
                                       const SizedBox(width: 10),
                                       Text(
                                         item['difficulty'] as String,
                                         style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
-                                          color: item['difficulty'] == 'Easy' ? AppColors.emerald : AppColors.amber,
+                                          color: item['difficulty'] == 'Easy'
+                                              ? AppColors.leafOf(context)
+                                              : AppColors.amber,
                                         ),
                                       ),
                                     ],
@@ -207,15 +280,26 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: AppColors.royalForest,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: AppColors.champagneGold.withValues(alpha: 0.4)),
+                                    border: Border.all(
+                                      color: AppColors.champagneGold.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                    ),
                                   ),
                                   child: Text(
                                     '+${item['points']} pts',
-                                    style: const TextStyle(color: AppColors.champagneGold, fontSize: 11, fontWeight: FontWeight.w800),
+                                    style: const TextStyle(
+                                      color: AppColors.champagneGold,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -223,25 +307,44 @@ class _ChallengesScreenState extends State<ChallengesScreen> {
                                   onPressed: isCompleted
                                       ? null
                                       : () {
-                                          setState(() => item['completed'] = true);
-                                          widget.appState.acceptChallenge(bonusPoints: item['points'] as int);
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          setState(
+                                            () => item['completed'] = true,
+                                          );
+                                          widget.appState.acceptChallenge(
+                                            bonusPoints: item['points'] as int,
+                                          );
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
-                                              backgroundColor: AppColors.royalForest,
-                                              content: Text('✓ Completed "${item['title']}"! +${item['points']} points claimed.', style: const TextStyle(color: AppColors.champagneGold)),
+                                              backgroundColor:
+                                                  AppColors.royalForest,
+                                              content: Text(
+                                                '✓ Completed "${item['title']}"! +${item['points']} points claimed.',
+                                                style: const TextStyle(
+                                                  color:
+                                                      AppColors.champagneGold,
+                                                ),
+                                              ),
                                             ),
                                           );
                                         },
                                   style: OutlinedButton.styleFrom(
                                     visualDensity: VisualDensity.compact,
-                                    side: BorderSide(color: isCompleted ? AppColors.lightTextSecondary : AppColors.emerald),
+                                    side: BorderSide(
+                                      color: isCompleted
+                                          ? AppColors.lightTextSecondary
+                                          : AppColors.leafOf(context),
+                                    ),
                                   ),
                                   child: Text(
                                     isCompleted ? 'Done' : 'Claim',
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: isCompleted ? AppColors.lightTextSecondary : AppColors.emerald,
+                                      color: isCompleted
+                                          ? AppColors.lightTextSecondary
+                                          : AppColors.leafOf(context),
                                     ),
                                   ),
                                 ),

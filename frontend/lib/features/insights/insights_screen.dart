@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -12,7 +13,8 @@ class InsightsScreen extends StatefulWidget {
   State<InsightsScreen> createState() => _InsightsScreenState();
 }
 
-class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProviderStateMixin {
+class _InsightsScreenState extends State<InsightsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -32,7 +34,9 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -52,7 +56,11 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
             decoration: BoxDecoration(
               color: isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
             ),
             child: TabBar(
               controller: _tabController,
@@ -61,9 +69,14 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
                 color: AppColors.royalForest,
                 borderRadius: BorderRadius.circular(20),
               ),
-              labelColor: AppColors.champagneGold,
-              unselectedLabelColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-              labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              labelColor: AppColors.accentOf(context),
+              unselectedLabelColor: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+              labelStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
               tabs: const [
                 Tab(text: 'Overview'),
                 Tab(text: 'Comparison'),
@@ -114,7 +127,11 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
                 children: [
                   const Text(
                     'Environmental Score',
-                    style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Row(
@@ -132,19 +149,30 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
                       ),
                       const Text(
                         ' /100',
-                        style: TextStyle(fontSize: 16, color: Colors.white70, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white70,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'Great!',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.leafOf(context),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "You're doing better than 78% of users.",
-                    style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8)),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
                   ),
                 ],
               ),
@@ -156,9 +184,16 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.deepForest,
-                  border: Border.all(color: AppColors.emerald, width: 3),
+                  border: Border.all(
+                    color: AppColors.leafOf(context),
+                    width: 3,
+                  ),
                 ),
-                child: const Icon(Icons.energy_savings_leaf_rounded, color: AppColors.emerald, size: 36),
+                child: Icon(
+                  Icons.energy_savings_leaf_rounded,
+                  color: AppColors.leafOf(context),
+                  size: 36,
+                ),
               ),
             ],
           ),
@@ -171,21 +206,64 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.darkCardBorder
+                  : AppColors.lightCardBorder,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Score Breakdown',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
               const SizedBox(height: 16),
-              _buildCategoryProgressBar('Transport', 70, 100, Icons.directions_car_rounded, AppColors.sapphire, textColor),
-              _buildCategoryProgressBar('Energy', 85, 100, Icons.bolt_rounded, AppColors.amber, textColor),
-              _buildCategoryProgressBar('Food', 75, 100, Icons.restaurant_rounded, AppColors.emerald, textColor),
-              _buildCategoryProgressBar('Waste', 80, 100, Icons.recycling_rounded, Colors.teal, textColor),
-              _buildCategoryProgressBar('Lifestyle', 90, 100, Icons.spa_rounded, AppColors.champagneGold, textColor),
+              _buildCategoryProgressBar(
+                'Transport',
+                70,
+                100,
+                Icons.directions_car_rounded,
+                AppColors.sapphire,
+                textColor,
+              ),
+              _buildCategoryProgressBar(
+                'Energy',
+                85,
+                100,
+                Icons.bolt_rounded,
+                AppColors.amber,
+                textColor,
+              ),
+              _buildCategoryProgressBar(
+                'Food',
+                75,
+                100,
+                Icons.restaurant_rounded,
+                AppColors.leafOf(context),
+                textColor,
+              ),
+              _buildCategoryProgressBar(
+                'Waste',
+                80,
+                100,
+                Icons.recycling_rounded,
+                Colors.teal,
+                textColor,
+              ),
+              _buildCategoryProgressBar(
+                'Lifestyle',
+                90,
+                100,
+                Icons.spa_rounded,
+                AppColors.accentOf(context),
+                textColor,
+              ),
             ],
           ),
         ),
@@ -197,22 +275,45 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.darkCardBorder
+                  : AppColors.lightCardBorder,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Achievements',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: textColor),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
               const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildAchievementBadge('Green Streak', '14 Days', Icons.local_fire_department_rounded, AppColors.amber),
-                  _buildAchievementBadge('Tree Saver', '10 Trees', Icons.forest_rounded, AppColors.emerald),
-                  _buildAchievementBadge('CO₂ Saver', '50 kg', Icons.cloud_done_rounded, AppColors.sapphire),
+                  _buildAchievementBadge(
+                    'Green Streak',
+                    '14 Days',
+                    Icons.local_fire_department_rounded,
+                    AppColors.amber,
+                  ),
+                  _buildAchievementBadge(
+                    'Tree Saver',
+                    '10 Trees',
+                    Icons.forest_rounded,
+                    AppColors.leafOf(context),
+                  ),
+                  _buildAchievementBadge(
+                    'CO₂ Saver',
+                    '50 kg',
+                    Icons.cloud_done_rounded,
+                    AppColors.sapphire,
+                  ),
                 ],
               ),
             ],
@@ -226,24 +327,37 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
           decoration: BoxDecoration(
             color: AppColors.royalForest.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.emerald.withValues(alpha: 0.4)),
+            border: Border.all(
+              color: AppColors.leafOf(context).withValues(alpha: 0.4),
+            ),
           ),
           child: Row(
             children: [
-              const Icon(Icons.auto_graph_rounded, color: AppColors.emerald, size: 28),
+              Icon(
+                Icons.auto_graph_rounded,
+                color: AppColors.leafOf(context),
+                size: 28,
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'Spillover Effect Detected',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.emerald),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.leafOf(context),
+                      ),
                     ),
                     SizedBox(height: 3),
                     Text(
                       'Adopting plant-based lunches triggered a 14% reduction in transport emissions within 14 days.',
-                      style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.lightTextSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -256,7 +370,14 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildCategoryProgressBar(String label, int value, int max, IconData icon, Color color, Color textColor) {
+  Widget _buildCategoryProgressBar(
+    String label,
+    int value,
+    int max,
+    IconData icon,
+    Color color,
+    Color textColor,
+  ) {
     final pct = value / max;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -266,9 +387,23 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 8),
-              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
               const Spacer(),
-              Text('$value/$max', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+              Text(
+                '$value/$max',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -286,7 +421,12 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildAchievementBadge(String title, String val, IconData icon, Color color) {
+  Widget _buildAchievementBadge(
+    String title,
+    String val,
+    IconData icon,
+    Color color,
+  ) {
     return Column(
       children: [
         Container(
@@ -299,8 +439,18 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
           child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(height: 6),
-        Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-        Text(val, style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+        ),
+        Text(
+          val,
+          style: TextStyle(
+            fontSize: 10,
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -309,14 +459,34 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildComparisonCard('Your Footprint', '12.4 kg CO₂/wk', AppColors.emerald, '36% lower than Thane average'),
-        _buildComparisonCard('Thane West Average', '19.8 kg CO₂/wk', AppColors.amber, 'Based on 4,820 citizen baselines'),
-        _buildComparisonCard('National Urban Benchmark', '26.4 kg CO₂/wk', AppColors.coral, 'CPCB / MoEFCC 2026 urban standard'),
+        _buildComparisonCard(
+          'Your Footprint',
+          '12.4 kg CO₂/wk',
+          AppColors.leafOf(context),
+          '36% lower than Thane average',
+        ),
+        _buildComparisonCard(
+          'Thane West Average',
+          '19.8 kg CO₂/wk',
+          AppColors.amber,
+          'Based on 4,820 citizen baselines',
+        ),
+        _buildComparisonCard(
+          'National Urban Benchmark',
+          '26.4 kg CO₂/wk',
+          AppColors.coral,
+          'CPCB / MoEFCC 2026 urban standard',
+        ),
       ],
     );
   }
 
-  Widget _buildComparisonCard(String title, String stat, Color color, String subtitle) {
+  Widget _buildComparisonCard(
+    String title,
+    String stat,
+    Color color,
+    String subtitle,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(16),
@@ -333,12 +503,31 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.lightTextSecondary,
+                  ),
+                ),
               ],
             ),
           ),
-          Text(stat, style: TextStyle(fontWeight: FontWeight.w800, color: color, fontSize: 14)),
+          Text(
+            stat,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: color,
+              fontSize: 14,
+            ),
+          ),
         ],
       ),
     );
@@ -358,15 +547,35 @@ class _InsightsScreenState extends State<InsightsScreen> with SingleTickerProvid
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Cumulative Lifetime Impact', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              const Text(
+                'Cumulative Lifetime Impact',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
               const SizedBox(height: 8),
-              const Text('148.6 kg CO₂ Avoided', style: TextStyle(color: AppColors.champagneGold, fontSize: 24, fontWeight: FontWeight.w900)),
+              const Text(
+                '148.6 kg CO₂ Avoided',
+                style: TextStyle(
+                  color: AppColors.champagneGold,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('Equivalent to 6.2 Neem Trees', style: TextStyle(color: Colors.white, fontSize: 12)),
-                  Text('₹4,820 Fuel Saved', style: TextStyle(color: AppColors.emerald, fontSize: 12, fontWeight: FontWeight.bold)),
+                children: [
+                  Text(
+                    'Equivalent to 6.2 Neem Trees',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                  Text(
+                    '₹4,820 Fuel Saved',
+                    style: TextStyle(
+                      color: AppColors.leafOf(context),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],

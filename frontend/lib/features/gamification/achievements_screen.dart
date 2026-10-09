@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -30,7 +31,8 @@ class AchievementDefinition {
   });
 }
 
-class _AchievementsScreenState extends State<AchievementsScreen> with SingleTickerProviderStateMixin {
+class _AchievementsScreenState extends State<AchievementsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   final List<AchievementDefinition> _achievementDefinitions = [
@@ -39,7 +41,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       title: 'Green Starter',
       desc: 'First 5 eco actions completed',
       icon: Icons.eco_rounded,
-      color: AppColors.emerald,
+      color: AppColors.leafOf(context),
       isUnlocked: (s) => s.recentActivities.length >= 5,
     ),
     AchievementDefinition(
@@ -63,7 +65,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       title: 'Planet Protector',
       desc: 'Saved 500 kg of lifetime CO₂',
       icon: Icons.public_rounded,
-      color: AppColors.champagneGold,
+      color: AppColors.accentOf(context),
       isUnlocked: (s) => s.totalCo2Saved >= 500.0,
     ),
     AchievementDefinition(
@@ -71,7 +73,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       title: 'Tree Ambassador',
       desc: '1.0 mature tree absorption equivalent',
       icon: Icons.park_rounded,
-      color: AppColors.emerald,
+      color: AppColors.leafOf(context),
       isUnlocked: (s) => s.treesEquivalent >= 1.0,
     ),
     AchievementDefinition(
@@ -88,7 +90,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       desc: 'Logged 5 verified recycling drops',
       icon: Icons.recycling_rounded,
       color: Colors.teal,
-      isUnlocked: (s) => s.recentActivities.where((a) => a.category == 'Waste').length >= 5,
+      isUnlocked: (s) =>
+          s.recentActivities.where((a) => a.category == 'Waste').length >= 5,
     ),
     AchievementDefinition(
       id: 'circular_master',
@@ -96,7 +99,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       desc: 'Logged 15 verified recycling drops',
       icon: Icons.change_circle_rounded,
       color: Colors.teal.shade700,
-      isUnlocked: (s) => s.recentActivities.where((a) => a.category == 'Waste').length >= 15,
+      isUnlocked: (s) =>
+          s.recentActivities.where((a) => a.category == 'Waste').length >= 15,
     ),
     AchievementDefinition(
       id: 'habit_3',
@@ -127,7 +131,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       title: 'Century Club',
       desc: 'Earned your first 100 Green Points',
       icon: Icons.stars_rounded,
-      color: AppColors.champagneGold,
+      color: AppColors.accentOf(context),
       isUnlocked: (s) => s.greenPoints >= 100,
     ),
     AchievementDefinition(
@@ -135,7 +139,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       title: 'Eco Warrior',
       desc: 'Earned more than 500 Green Points',
       icon: Icons.shield_rounded,
-      color: AppColors.champagneGold,
+      color: AppColors.accentOf(context),
       isUnlocked: (s) => s.greenPoints >= 500,
     ),
     AchievementDefinition(
@@ -143,7 +147,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       title: 'Sustainability Titan',
       desc: 'Earned 1,000 lifetime points',
       icon: Icons.military_tech_rounded,
-      color: AppColors.champagneGold,
+      color: AppColors.accentOf(context),
       isUnlocked: (s) => s.greenPoints >= 1000,
     ),
     AchievementDefinition(
@@ -152,7 +156,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       desc: 'Logged 10 public transit commutes',
       icon: Icons.directions_subway_rounded,
       color: AppColors.sapphire,
-      isUnlocked: (s) => s.recentActivities.where((a) => a.category == 'Transport').length >= 10,
+      isUnlocked: (s) =>
+          s.recentActivities.where((a) => a.category == 'Transport').length >=
+          10,
     ),
     AchievementDefinition(
       id: 'solar_sentinel',
@@ -160,7 +166,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       desc: 'Dwelling with clean energy or solar',
       icon: Icons.solar_power_rounded,
       color: Colors.amber.shade700,
-      isUnlocked: (s) => s.baseline.hasRooftopSolar && s.recentActivities.any((a) => a.category == 'Energy'),
+      isUnlocked: (s) =>
+          s.baseline.hasRooftopSolar &&
+          s.recentActivities.any((a) => a.category == 'Energy'),
     ),
   ];
 
@@ -181,16 +189,21 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
-    final unlockedCount = _achievementDefinitions.where((a) => a.isUnlocked(widget.appState)).length;
+    final unlockedCount = _achievementDefinitions
+        .where((a) => a.isUnlocked(widget.appState))
+        .length;
 
     return Scaffold(
       backgroundColor: bg,
       drawer: FeatureDirectoryDrawer(appState: widget.appState),
       appBar: GrevideaAppBar(
         title: 'My Achievements',
-        subtitle: '$unlockedCount / ${_achievementDefinitions.length} Badges Unlocked',
+        subtitle:
+            '$unlockedCount / ${_achievementDefinitions.length} Badges Unlocked',
         showBack: Navigator.of(context).canPop(),
         appState: widget.appState,
       ),
@@ -203,7 +216,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
             decoration: BoxDecoration(
               color: isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+              border: Border.all(
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
             ),
             child: TabBar(
               controller: _tabController,
@@ -212,9 +229,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                 color: AppColors.royalForest,
                 borderRadius: BorderRadius.circular(20),
               ),
-              labelColor: AppColors.champagneGold,
-              unselectedLabelColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-              labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              labelColor: AppColors.accentOf(context),
+              unselectedLabelColor: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+              labelStyle: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
               tabs: const [
                 Tab(text: 'Badges'),
                 Tab(text: 'Milestones'),
@@ -242,14 +264,19 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                     final color = badge.color;
 
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: cardBg,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isUnlocked
                               ? color.withValues(alpha: 0.5)
-                              : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                              : (isDark
+                                    ? AppColors.darkCardBorder
+                                    : AppColors.lightCardBorder),
                           width: isUnlocked ? 1.5 : 1,
                         ),
                         boxShadow: [
@@ -266,15 +293,23 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isUnlocked ? color.withValues(alpha: 0.15) : AppColors.lightTextSecondary.withValues(alpha: 0.1),
+                              color: isUnlocked
+                                  ? color.withValues(alpha: 0.15)
+                                  : AppColors.lightTextSecondary.withValues(
+                                      alpha: 0.1,
+                                    ),
                               border: Border.all(
-                                color: isUnlocked ? color : Colors.grey.shade400,
+                                color: isUnlocked
+                                    ? color
+                                    : Colors.grey.shade400,
                                 width: 1.2,
                               ),
                             ),
                             child: Icon(
                               badge.icon,
-                              color: isUnlocked ? color : AppColors.lightTextSecondary,
+                              color: isUnlocked
+                                  ? color
+                                  : AppColors.lightTextSecondary,
                               size: 22,
                             ),
                           ),
@@ -287,7 +322,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: isUnlocked ? textColor : AppColors.lightTextSecondary,
+                              color: isUnlocked
+                                  ? textColor
+                                  : AppColors.lightTextSecondary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -296,7 +333,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                             style: TextStyle(
                               fontSize: 8,
                               fontWeight: FontWeight.bold,
-                              color: isUnlocked ? AppColors.emerald : AppColors.lightTextSecondary,
+                              color: isUnlocked
+                                  ? AppColors.leafOf(context)
+                                  : AppColors.lightTextSecondary,
                             ),
                           ),
                         ],
@@ -321,7 +360,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       'Tree Absorption Equivalent',
                       '${widget.appState.treesEquivalent.toStringAsFixed(1)} / 5.0 Trees Equiv.',
                       (widget.appState.treesEquivalent / 5.0).clamp(0.0, 1.0),
-                      AppColors.emerald,
+                      AppColors.leafOf(context),
                       cardBg,
                       textColor,
                     ),
@@ -337,7 +376,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       'Green Points Century',
                       '${widget.appState.greenPoints} / 500 Points',
                       (widget.appState.greenPoints / 500.0).clamp(0.0, 1.0),
-                      AppColors.champagneGold,
+                      AppColors.accentOf(context),
                       cardBg,
                       textColor,
                     ),
@@ -351,7 +390,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
     );
   }
 
-  Widget _buildMilestoneCard(String title, String progress, double pct, Color color, Color cardBg, Color textColor) {
+  Widget _buildMilestoneCard(
+    String title,
+    String progress,
+    double pct,
+    Color color,
+    Color cardBg,
+    Color textColor,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -371,11 +417,22 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: textColor),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: textColor,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
-              Text(progress, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: color)),
+              Text(
+                progress,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: color,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),

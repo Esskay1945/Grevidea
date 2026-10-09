@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -136,7 +138,8 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           officerDesignation: 'Ward Sanitary Inspector & Field Supervisor',
           resolutionSla:
               '24 - 48 Hours (Maha. Right to Public Services Act 2015)',
-          escalationContact: '022-25331590 / 022-25331211 • mc@thanecity.gov.in',
+          escalationContact:
+              '022-25331590 / 022-25331211 • mc@thanecity.gov.in',
           icon: Icons.delete_sweep_rounded,
         );
     }
@@ -159,7 +162,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               backgroundColor: AppColors.royalForest,
-              content: Text('Helpline number: $phoneNumber (Dialer could not open automatically)'),
+              content: Text(
+                'Helpline number: $phoneNumber (Dialer could not open automatically)',
+              ),
             ),
           );
         }
@@ -203,8 +208,12 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               ),
               const SizedBox(height: 16),
               Row(
-                children: const [
-                  Icon(Icons.phone_in_talk_rounded, color: AppColors.emerald, size: 22),
+                children: [
+                  Icon(
+                    Icons.phone_in_talk_rounded,
+                    color: AppColors.leafOf(context),
+                    size: 22,
+                  ),
                   SizedBox(width: 8),
                   Text(
                     'Call Municipal Authority',
@@ -215,15 +224,19 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               const SizedBox(height: 4),
               const Text(
                 'Direct phone helpline connection to civic grievance desks & disaster control.',
-                style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.lightTextSecondary,
+                ),
               ),
               const SizedBox(height: 16),
               _buildPhoneTile(
                 title: 'General Civic Grievance #1',
                 phone: civicHelpline1,
-                subtitle: 'Thane Municipal Corporation Grievance Redressal Cell',
+                subtitle:
+                    'Thane Municipal Corporation Grievance Redressal Cell',
                 icon: Icons.support_agent_rounded,
-                color: AppColors.emerald,
+                color: AppColors.leafOf(context),
               ),
               const SizedBox(height: 8),
               _buildPhoneTile(
@@ -237,7 +250,8 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               _buildPhoneTile(
                 title: 'Regional Disaster Management Cell',
                 phone: disasterHelpline,
-                subtitle: 'TMC 24x7 Emergency & Disaster Operations (Toll-Free)',
+                subtitle:
+                    'TMC 24x7 Emergency & Disaster Operations (Toll-Free)',
                 icon: Icons.emergency_rounded,
                 color: AppColors.coral,
               ),
@@ -268,12 +282,28 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           backgroundColor: color.withValues(alpha: 0.2),
           child: Icon(icon, color: color, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(phone, style: TextStyle(fontWeight: FontWeight.w800, color: color, fontSize: 13)),
-            Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.lightTextSecondary)),
+            Text(
+              phone,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: color,
+                fontSize: 13,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.lightTextSecondary,
+              ),
+            ),
           ],
         ),
         trailing: ElevatedButton.icon(
@@ -285,10 +315,15 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             backgroundColor: color,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
           icon: const Icon(Icons.call_rounded, size: 14),
-          label: const Text('Call', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          label: const Text(
+            'Call',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
     );
@@ -296,7 +331,8 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
 
   void _showSendDirectEmailDialog({String? complaintId, String? wasteType}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final wType = wasteType ?? _selectedWasteType ?? 'Civic Environmental Issue';
+    final wType =
+        wasteType ?? _selectedWasteType ?? 'Civic Environmental Issue';
     final locationText = _locationController.text;
     final nameCtrl = TextEditingController(text: widget.appState.userName);
     final phoneCtrl = TextEditingController();
@@ -336,7 +372,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                       width: 38,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.lightTextSecondary.withValues(alpha: 0.3),
+                        color: AppColors.lightTextSecondary.withValues(
+                          alpha: 0.3,
+                        ),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -350,24 +388,31 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                           color: AppColors.royalForest,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.mark_email_read_rounded,
-                            color: AppColors.champagneGold, size: 20),
+                        child: const Icon(
+                          Icons.mark_email_read_rounded,
+                          color: AppColors.champagneGold,
+                          size: 20,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
                               'Direct Email to Municipal Commissioner',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             Text(
                               'Dispatched directly from app • Not redirected to Gmail',
                               style: TextStyle(
-                                  fontSize: 10.5,
-                                  color: AppColors.emerald,
-                                  fontWeight: FontWeight.w600),
+                                fontSize: 10.5,
+                                color: AppColors.leafOf(context),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -380,31 +425,49 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     decoration: BoxDecoration(
                       color: AppColors.royalForest.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.emerald.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppColors.leafOf(context).withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
-                      children: const [
-                        Icon(Icons.verified_user_rounded, color: AppColors.emerald, size: 16),
+                      children: [
+                        Icon(
+                          Icons.verified_user_rounded,
+                          color: AppColors.leafOf(context),
+                          size: 16,
+                        ),
                         SizedBox(width: 6),
-                        Text('Official Recipient: ',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                        Text(municipalCommissionerEmail,
-                            style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.champagneGold)),
+                        Text(
+                          'Official Recipient: ',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          municipalCommissionerEmail,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.accentOf(context),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text('Subject',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Subject',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 4),
                   TextField(
                     controller: subjectCtrl,
                     decoration: InputDecoration(
                       isDense: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     style: const TextStyle(fontSize: 12),
                   ),
@@ -415,14 +478,21 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Your Name',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'Your Name',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
                             TextField(
                               controller: nameCtrl,
                               decoration: InputDecoration(
                                 isDense: true,
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                               style: const TextStyle(fontSize: 12),
                             ),
@@ -434,8 +504,13 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Phone Number',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'Phone Number',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             const SizedBox(height: 4),
                             TextField(
                               controller: phoneCtrl,
@@ -443,7 +518,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                               decoration: InputDecoration(
                                 isDense: true,
                                 hintText: 'Optional',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
                               style: const TextStyle(fontSize: 12),
                             ),
@@ -453,15 +530,19 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     ],
                   ),
                   const SizedBox(height: 10),
-                  const Text('Grievance Message',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Grievance Message',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 4),
                   TextField(
                     controller: messageCtrl,
                     maxLines: 4,
                     decoration: InputDecoration(
                       isDense: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     style: const TextStyle(fontSize: 12),
                   ),
@@ -476,50 +557,64 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                               if (subjectCtrl.text.trim().isEmpty ||
                                   messageCtrl.text.trim().isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Subject and message are required')),
+                                  const SnackBar(
+                                    content: Text(
+                                      'Subject and message are required',
+                                    ),
+                                  ),
                                 );
                                 return;
                               }
                               setModalState(() => isSendingEmail = true);
                               try {
-                                final pos =
-                                    await widget.appState.locationService.getCurrentLocation();
+                                final pos = await widget
+                                    .appState
+                                    .locationService
+                                    .getCurrentLocation();
                                 String? photo;
                                 if (_imagePath != null) {
-                                  final bytes = await XFile(_imagePath!).readAsBytes();
+                                  final bytes = await XFile(_imagePath!)
+                                      .readAsBytes();
                                   if (bytes.length <= 1000000) {
-                                    photo = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+                                    photo =
+                                        'data:image/jpeg;base64,${base64Encode(bytes)}';
                                   }
                                 }
-                                final resp = await widget.appState.api.sendCivicEmail(
-                                  subject: subjectCtrl.text.trim(),
-                                  message: messageCtrl.text.trim(),
-                                  complaintId: complaintId,
-                                  wasteType: wType,
-                                  location: locationText,
-                                  latitude: pos?.latitude,
-                                  longitude: pos?.longitude,
-                                  imageUrl: photo,
-                                  reporterName: nameCtrl.text.trim(),
-                                  reporterPhone: phoneCtrl.text.trim(),
-                                  recipientEmail: municipalCommissionerEmail,
-                                );
+                                final resp = await widget.appState.api
+                                    .sendCivicEmail(
+                                      subject: subjectCtrl.text.trim(),
+                                      message: messageCtrl.text.trim(),
+                                      complaintId: complaintId,
+                                      wasteType: wType,
+                                      location: locationText,
+                                      latitude: pos?.latitude,
+                                      longitude: pos?.longitude,
+                                      imageUrl: photo,
+                                      reporterName: nameCtrl.text.trim(),
+                                      reporterPhone: phoneCtrl.text.trim(),
+                                      recipientEmail:
+                                          municipalCommissionerEmail,
+                                    );
                                 if (ctx.mounted) {
                                   Navigator.pop(ctx);
                                   showDialog(
                                     context: context,
                                     builder: (dCtx) => AlertDialog(
                                       title: Row(
-                                        children: const [
-                                          Icon(Icons.check_circle_rounded,
-                                              color: AppColors.emerald, size: 26),
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle_rounded,
+                                            color: AppColors.leafOf(context),
+                                            size: 26,
+                                          ),
                                           SizedBox(width: 8),
                                           Text('Email Dispatched!'),
                                         ],
                                       ),
                                       content: Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const Text(
                                             'Your grievance has been dispatched directly from the Grevidea app to:',
@@ -529,21 +624,26 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                                           Text(
                                             municipalCommissionerEmail,
                                             style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: AppColors.champagneGold,
-                                                fontSize: 13),
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.champagneGold,
+                                              fontSize: 13,
+                                            ),
                                           ),
                                           const SizedBox(height: 10),
                                           Container(
                                             padding: const EdgeInsets.all(8),
                                             decoration: BoxDecoration(
-                                              color: AppColors.emerald.withValues(alpha: 0.1),
-                                              borderRadius: BorderRadius.circular(8),
+                                              color: AppColors.leafOf(context)
+                                                  .withValues(alpha: 0.1),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                             ),
                                             child: Text(
                                               'Dispatch ID: ${resp['dispatch_id'] ?? 'TMC-ESC-OK'}\nStatus: ${resp['status'] ?? 'Delivered'} (+15 Green Points awarded)',
                                               style: const TextStyle(
-                                                  fontSize: 11, fontWeight: FontWeight.w600),
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -552,9 +652,15 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                                         ElevatedButton(
                                           onPressed: () => Navigator.pop(dCtx),
                                           style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppColors.royalForest),
-                                          child: const Text('OK',
-                                              style: TextStyle(color: AppColors.champagneGold)),
+                                            backgroundColor:
+                                                AppColors.royalForest,
+                                          ),
+                                          child: const Text(
+                                            'OK',
+                                            style: TextStyle(
+                                              color: AppColors.champagneGold,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -564,34 +670,44 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                                 setModalState(() => isSendingEmail = false);
                                 if (ctx.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Email dispatch: $e')),
+                                    SnackBar(
+                                      content: Text('Email dispatch: $e'),
+                                    ),
                                   );
                                 }
                               }
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.royalForest,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       child: isSendingEmail
                           ? const SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
-                                  color: AppColors.champagneGold, strokeWidth: 2),
+                                color: AppColors.champagneGold,
+                                strokeWidth: 2,
+                              ),
                             )
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                Icon(Icons.send_rounded,
-                                    color: AppColors.champagneGold, size: 18),
+                                Icon(
+                                  Icons.send_rounded,
+                                  color: AppColors.champagneGold,
+                                  size: 18,
+                                ),
                                 SizedBox(width: 8),
                                 Text(
                                   'Send Email Directly from App',
                                   style: TextStyle(
-                                      color: AppColors.champagneGold,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13),
+                                    color: AppColors.champagneGold,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ],
                             ),
@@ -605,7 +721,6 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
       ),
     );
   }
-
 
   @override
   void initState() {
@@ -626,21 +741,26 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           _submittedTickets.clear();
           for (final r in backendReports) {
             final wType = r['report_type']?.toString() ?? 'Garbage Dumping';
-            final dept =
-                _getDepartment(wType, widget.appState.baseline.cityWard);
+            final dept = _getDepartment(
+              wType,
+              widget.appState.baseline.cityWard,
+            );
             final id = r['id']?.toString() ?? 'TMC-SWM-2026';
-            final shortId =
-                id.length > 8 ? id.substring(0, 8).toUpperCase() : id;
+            final shortId = id.length > 8
+                ? id.substring(0, 8).toUpperCase()
+                : id;
             DateTime ts = DateTime.now();
             if (r['created_at'] != null) {
-              ts = DateTime.tryParse(r['created_at'].toString()) ??
+              ts =
+                  DateTime.tryParse(r['created_at'].toString()) ??
                   DateTime.now();
             }
             _submittedTickets.add(
               MunicipalComplaintTicket(
                 ticketNumber: 'TMC-$shortId',
                 wasteType: wType,
-                location: r['description']?.toString() ??
+                location:
+                    r['description']?.toString() ??
                     widget.appState.baseline.cityWard,
                 departmentName: dept.departmentName,
                 nodalAgency: dept.nodalAgency,
@@ -699,7 +819,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   'Select how you would like to provide photo evidence for municipal verification',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 11, color: AppColors.lightTextSecondary),
+                    fontSize: 11,
+                    color: AppColors.lightTextSecondary,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 ListTile(
@@ -709,13 +831,19 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                       color: AppColors.royalForest,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_rounded,
-                        color: AppColors.champagneGold, size: 22),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.champagneGold,
+                      size: 22,
+                    ),
                   ),
-                  title: const Text('Take Photo with Camera',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  title: const Text(
+                    'Take Photo with Camera',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   subtitle: const Text(
-                      'Open device camera in real-time to capture waste hotspot'),
+                    'Open device camera in real-time to capture waste hotspot',
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     _pickImage(ImageSource.camera);
@@ -726,16 +854,22 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.champagneGold.withValues(alpha: 0.2),
+                      color: AppColors.accentOf(context).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.photo_library_rounded,
-                        color: AppColors.champagneGold, size: 22),
+                    child: Icon(
+                      Icons.photo_library_rounded,
+                      color: AppColors.accentOf(context),
+                      size: 22,
+                    ),
                   ),
-                  title: const Text('Upload from Gallery / Files',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  title: const Text(
+                    'Upload from Gallery / Files',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   subtitle: const Text(
-                      'Select an existing photo from device storage'),
+                    'Select an existing photo from device storage',
+                  ),
                   onTap: () {
                     Navigator.pop(ctx);
                     _pickImage(ImageSource.gallery);
@@ -783,11 +917,13 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
 
     late String ticketNo;
     try {
-      final position = await widget.appState.locationService
-          .getCurrentLocation(forceRefresh: true);
+      final position = await widget.appState.locationService.getCurrentLocation(
+        forceRefresh: true,
+      );
       if (position == null)
         throw StateError(
-            'Live GPS required. Enable location in device settings.');
+          'Live GPS required. Enable location in device settings.',
+        );
       String? photo;
       if (_imagePath != null) {
         final bytes = await XFile(_imagePath!).readAsBytes();
@@ -796,13 +932,14 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
         photo = 'data:image/jpeg;base64,${base64Encode(bytes)}';
       }
       final receipt = await widget.appState.api.submitPollutionReport(
-          reportType: wasteType,
-          description: _descriptionController.text.trim().isNotEmpty
-              ? _descriptionController.text.trim()
-              : '$wasteType reported at $ward',
-          latitude: position.latitude,
-          longitude: position.longitude,
-          imageUrl: photo);
+        reportType: wasteType,
+        description: _descriptionController.text.trim().isNotEmpty
+            ? _descriptionController.text.trim()
+            : '$wasteType reported at $ward',
+        latitude: position.latitude,
+        longitude: position.longitude,
+        imageUrl: photo,
+      );
       ticketNo = receipt['id'].toString();
     } catch (error) {
       if (mounted) {
@@ -839,11 +976,16 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           backgroundColor: Theme.of(context).brightness == Brightness.dark
               ? AppColors.darkSurface
               : AppColors.lightSurface,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
-            children: const [
-              Icon(Icons.verified_rounded, color: AppColors.emerald, size: 28),
+            children: [
+              Icon(
+                Icons.verified_rounded,
+                color: AppColors.leafOf(context),
+                size: 28,
+              ),
               SizedBox(width: 8),
               Text('Report Saved'),
             ],
@@ -858,25 +1000,39 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   color: AppColors.royalForest.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                      color: AppColors.emerald.withValues(alpha: 0.3)),
+                    color: AppColors.leafOf(context).withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Registration No: $ticketNo',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: AppColors.champagneGold)),
+                    Text(
+                      'Registration No: $ticketNo',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: AppColors.accentOf(context),
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text('Target Agency: ${dept.nodalAgency}',
-                        style: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w600)),
-                    Text('Assigned Dept: ${dept.departmentName}',
-                        style: const TextStyle(fontSize: 11)),
-                    Text('Resolution SLA: ${dept.resolutionSla}',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppColors.lightTextSecondary)),
+                    Text(
+                      'Target Agency: ${dept.nodalAgency}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      'Assigned Dept: ${dept.departmentName}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    Text(
+                      'Resolution SLA: ${dept.resolutionSla}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.lightTextSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -899,12 +1055,27 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     _showCallAuthorityDialog();
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.emerald, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    side: BorderSide(
+                      color: AppColors.leafOf(context),
+                      width: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  icon: const Icon(Icons.phone_rounded, color: AppColors.emerald, size: 14),
-                  label: const Text('Call Authority',
-                      style: TextStyle(color: AppColors.emerald, fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  icon: Icon(
+                    Icons.phone_rounded,
+                    color: AppColors.leafOf(context),
+                    size: 14,
+                  ),
+                  label: Text(
+                    'Call Authority',
+                    style: TextStyle(
+                      color: AppColors.leafOf(context),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 OutlinedButton.icon(
                   onPressed: () {
@@ -915,12 +1086,27 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.champagneGold, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    side: BorderSide(
+                      color: AppColors.accentOf(context),
+                      width: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  icon: const Icon(Icons.email_rounded, color: AppColors.champagneGold, size: 14),
-                  label: const Text('Direct Email',
-                      style: TextStyle(color: AppColors.champagneGold, fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  icon: Icon(
+                    Icons.email_rounded,
+                    color: AppColors.accentOf(context),
+                    size: 14,
+                  ),
+                  label: Text(
+                    'Direct Email',
+                    style: TextStyle(
+                      color: AppColors.accentOf(context),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -929,10 +1115,18 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.royalForest,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  child: const Text('Track Status',
-                      style: TextStyle(color: AppColors.champagneGold, fontSize: 11.5, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Track Status',
+                    style: TextStyle(
+                      color: AppColors.champagneGold,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -947,8 +1141,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor =
-        isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     final currentDept = _getDepartment(
       _selectedWasteType ?? 'Garbage Dumping',
@@ -971,18 +1166,20 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             color: cardBg,
             child: TabBar(
               controller: _tabController,
-              indicatorColor: AppColors.champagneGold,
-              labelColor: AppColors.champagneGold,
+              indicatorColor: AppColors.accentOf(context),
+              labelColor: AppColors.accentOf(context),
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.lightTextSecondary,
               tabs: [
                 const Tab(
-                    icon: Icon(Icons.add_location_alt_rounded, size: 18),
-                    text: 'Report Hotspot'),
+                  icon: Icon(Icons.add_location_alt_rounded, size: 18),
+                  text: 'Report Hotspot',
+                ),
                 Tab(
-                    icon: const Icon(Icons.receipt_long_rounded, size: 18),
-                    text: 'Track Dispatches (${_submittedTickets.length})'),
+                  icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                  text: 'Track Dispatches (${_submittedTickets.length})',
+                ),
               ],
             ),
           ),
@@ -1004,24 +1201,32 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
     );
   }
 
-  Widget _buildReportForm(bool isDark, Color cardBg, Color textColor,
-      MunicipalDepartmentInfo dept) {
+  Widget _buildReportForm(
+    bool isDark,
+    Color cardBg,
+    Color textColor,
+    MunicipalDepartmentInfo dept,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
         Text(
           'Civic Environmental Grievance',
           style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.w800, color: textColor),
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: textColor,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           'Citizen reports are dispatched directly to municipal enforcement cells under the Maharashtra Right to Public Services Act 2015.',
           style: TextStyle(
-              fontSize: 11,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.lightTextSecondary),
+            fontSize: 11,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.lightTextSecondary,
+          ),
         ),
         const SizedBox(height: 18),
 
@@ -1032,7 +1237,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: AppColors.champagneGold.withValues(alpha: 0.4),
+              color: AppColors.accentOf(context).withValues(alpha: 0.4),
               width: 1.2,
             ),
             boxShadow: [
@@ -1051,26 +1256,32 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: AppColors.champagneGold.withValues(alpha: 0.2),
+                      color: AppColors.accentOf(context).withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.contact_phone_rounded,
-                        color: AppColors.champagneGold, size: 18),
+                    child: Icon(
+                      Icons.contact_phone_rounded,
+                      color: AppColors.accentOf(context),
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'DIRECT AUTHORITY ESCALATION',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w900,
-                        color: AppColors.champagneGold,
+                        color: AppColors.accentOf(context),
                         letterSpacing: 0.5,
                       ),
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.sapphire.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -1089,7 +1300,10 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               const SizedBox(height: 8),
               const Text(
                 'Choose how you want to reach out: call the official grievance helpline directly, or send an official email to the Municipal Commissioner directly from the app (no Gmail redirect).',
-                style: TextStyle(fontSize: 11, color: AppColors.lightTextSecondary),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.lightTextSecondary,
+                ),
               ),
               const SizedBox(height: 14),
               Row(
@@ -1100,16 +1314,23 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                       onPressed: _showCallAuthorityDialog,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: AppColors.emerald, width: 1.2),
+                        side: BorderSide(
+                          color: AppColors.leafOf(context),
+                          width: 1.2,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.phone_rounded, color: AppColors.emerald, size: 18),
-                      label: const Text(
+                      icon: Icon(
+                        Icons.phone_rounded,
+                        color: AppColors.leafOf(context),
+                        size: 18,
+                      ),
+                      label: Text(
                         'Call Authority',
                         style: TextStyle(
-                          color: AppColors.emerald,
+                          color: AppColors.leafOf(context),
                           fontWeight: FontWeight.w800,
                           fontSize: 12,
                         ),
@@ -1128,7 +1349,11 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.email_rounded, color: AppColors.champagneGold, size: 18),
+                      icon: const Icon(
+                        Icons.email_rounded,
+                        color: AppColors.champagneGold,
+                        size: 18,
+                      ),
                       label: const Text(
                         'Send Email',
                         style: TextStyle(
@@ -1146,12 +1371,27 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 spacing: 12,
                 runSpacing: 4,
                 children: const [
-                  Text('📞 022-25331590 / 022-25331211',
-                      style: TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
-                  Text('✉️ mc@thanecity.gov.in',
-                      style: TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
-                  Text('🚨 Regional Helpline: 1800222108',
-                      style: TextStyle(fontSize: 10.5, color: AppColors.lightTextSecondary)),
+                  Text(
+                    '📞 022-25331590 / 022-25331211',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: AppColors.lightTextSecondary,
+                    ),
+                  ),
+                  Text(
+                    '✉️ mc@thanecity.gov.in',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: AppColors.lightTextSecondary,
+                    ),
+                  ),
+                  Text(
+                    '🚨 Regional Helpline: 1800222108',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: AppColors.lightTextSecondary,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1160,8 +1400,10 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
         const SizedBox(height: 18),
 
         // Waste Type Dropdown
-        const Text('Waste Category',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+        const Text(
+          'Waste Category',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -1169,9 +1411,10 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             color: cardBg,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-                color: isDark
-                    ? AppColors.darkCardBorder
-                    : AppColors.lightCardBorder),
+              color: isDark
+                  ? AppColors.darkCardBorder
+                  : AppColors.lightCardBorder,
+            ),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -1190,41 +1433,50 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color:
-                isDark ? AppColors.darkSurfaceAlt : AppColors.lightSurfaceAlt,
+            color: isDark
+                ? AppColors.darkSurfaceAlt
+                : AppColors.lightSurfaceAlt,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-                color: AppColors.champagneGold.withValues(alpha: 0.4),
-                width: 1.2),
+              color: AppColors.accentOf(context).withValues(alpha: 0.4),
+              width: 1.2,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Icon(dept.icon, color: AppColors.champagneGold, size: 20),
+                  Icon(dept.icon, color: AppColors.accentOf(context), size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'TARGET MUNICIPAL DISPATCH AUTHORITY',
                       style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.champagneGold,
-                          letterSpacing: 0.5),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.accentOf(context),
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                        color: AppColors.emerald.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(6)),
-                    child: const Text('OFFICIAL',
-                        style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.emerald)),
+                      color: AppColors.leafOf(context).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'OFFICIAL',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.leafOf(context),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1232,34 +1484,38 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               Text(
                 dept.nodalAgency,
                 style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: textColor),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 'Dept: ${dept.departmentName}',
-                style: const TextStyle(
-                    fontSize: 11.5,
-                    color: AppColors.champagneGold,
-                    fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: AppColors.accentOf(context),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 'Ward Office: ${dept.divisionOffice}',
                 style: TextStyle(
-                    fontSize: 11,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary),
+                  fontSize: 11,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
+                ),
               ),
               Text(
                 'Assigned Officer: ${dept.officerDesignation}',
                 style: TextStyle(
-                    fontSize: 11,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary),
+                  fontSize: 11,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
+                ),
               ),
               const Divider(height: 16),
               Row(
@@ -1267,14 +1523,20 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.timer_outlined,
-                          size: 14, color: AppColors.amber),
+                      const Icon(
+                        Icons.timer_outlined,
+                        size: 14,
+                        color: AppColors.amber,
+                      ),
                       const SizedBox(width: 4),
-                      Text('SLA: ${dept.resolutionSla}',
-                          style: const TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.amber)),
+                      Text(
+                        'SLA: ${dept.resolutionSla}',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.amber,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -1285,22 +1547,27 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
         const SizedBox(height: 18),
 
         // Location Field with GPS Geotag
-        const Text('Hotspot GPS Location',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+        const Text(
+          'Hotspot GPS Location',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: _locationController,
           decoration: InputDecoration(
             filled: true,
             fillColor: cardBg,
-            prefixIcon:
-                const Icon(Icons.my_location_rounded, color: AppColors.emerald),
+            prefixIcon: Icon(
+              Icons.my_location_rounded,
+              color: AppColors.leafOf(context),
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                  color: isDark
-                      ? AppColors.darkCardBorder
-                      : AppColors.lightCardBorder),
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
             ),
           ),
         ),
@@ -1310,16 +1577,21 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Photo Evidence',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            const Text(
+              'Photo Evidence',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
             if (_imagePath != null)
               GestureDetector(
                 onTap: () => setState(() => _imagePath = null),
-                child: const Text('Remove Photo',
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.coral,
-                        fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Remove Photo',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.coral,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
           ],
         ),
@@ -1334,8 +1606,8 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _imagePath != null
-                    ? AppColors.emerald
-                    : AppColors.champagneGold.withValues(alpha: 0.5),
+                    ? AppColors.leafOf(context)
+                    : AppColors.accentOf(context).withValues(alpha: 0.5),
                 width: 1.5,
               ),
             ),
@@ -1345,10 +1617,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     child: Stack(
                       children: [
                         Positioned.fill(
-                          child: Image.memory(
-                            _imageBytes!,
-                            fit: BoxFit.cover,
-                          ),
+                          child: Image.memory(_imageBytes!, fit: BoxFit.cover),
                         ),
                         Positioned(
                           bottom: 8,
@@ -1356,23 +1625,29 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                           right: 8,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.black87,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
-                              children: const [
-                                Icon(Icons.check_circle,
-                                    color: AppColors.emerald, size: 16),
+                              children: [
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.leafOf(context),
+                                  size: 16,
+                                ),
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     'Photo Captured & Geotagged',
                                     style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold),
+                                      color: AppColors.inkOf(context),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -1385,22 +1660,28 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.add_a_photo_rounded,
-                          size: 36, color: AppColors.champagneGold),
+                      Icon(
+                        Icons.add_a_photo_rounded,
+                        size: 36,
+                        color: AppColors.accentOf(context),
+                      ),
                       const SizedBox(height: 8),
                       const Text(
                         'Tap to Take Photo or Upload from Gallery',
                         style: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 13),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Camera access enabled • GPS coordinates will be embedded',
                         style: TextStyle(
-                            fontSize: 10.5,
-                            color: isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary),
+                          fontSize: 10.5,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -1412,18 +1693,20 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Description / Landmark (Optional)',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            const Text(
+              'Description / Landmark (Optional)',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
             InkWell(
               onTap: () {
-                _descriptionController.text =
-                    'Severe overflowed waste container near Majiwada service road pillar #14, foul odor spreading.';
+                _descriptionController.text = 'Severe overflowed waste container near Majiwada service road pillar #14, foul odor spreading.';
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     backgroundColor: AppColors.royalForest,
                     content: Text(
-                        '🎙️ Speech-to-Text: Dictated landmark transcribed into description.',
-                        style: TextStyle(color: AppColors.champagneGold)),
+                      '🎙️ Speech-to-Text: Dictated landmark transcribed into description.',
+                      style: TextStyle(color: AppColors.champagneGold),
+                    ),
                   ),
                 );
               },
@@ -1433,18 +1716,25 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   color: AppColors.royalForest,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                      color: AppColors.champagneGold.withValues(alpha: 0.5)),
+                    color: AppColors.champagneGold.withValues(alpha: 0.5),
+                  ),
                 ),
                 child: Row(
                   children: const [
-                    Icon(Icons.mic_rounded,
-                        size: 14, color: AppColors.champagneGold),
+                    Icon(
+                      Icons.mic_rounded,
+                      size: 14,
+                      color: AppColors.champagneGold,
+                    ),
                     SizedBox(width: 4),
-                    Text('Dictate',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.champagneGold)),
+                    Text(
+                      'Dictate',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.champagneGold,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1456,16 +1746,16 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
           controller: _descriptionController,
           maxLines: 3,
           decoration: InputDecoration(
-            hintText:
-                'e.g. Near Majiwada flyover pillar #14, overflowed garbage bin...',
+            hintText: 'e.g. Near Majiwada flyover pillar #14, overflowed garbage bin...',
             filled: true,
             fillColor: cardBg,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                  color: isDark
-                      ? AppColors.darkCardBorder
-                      : AppColors.lightCardBorder),
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
             ),
           ),
         ),
@@ -1479,26 +1769,34 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.royalForest,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
             child: _isSubmitting
                 ? const SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
-                        color: AppColors.champagneGold, strokeWidth: 2.5))
+                      color: AppColors.champagneGold,
+                      strokeWidth: 2.5,
+                    ),
+                  )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.send_rounded,
-                          color: AppColors.champagneGold, size: 18),
+                      const Icon(
+                        Icons.send_rounded,
+                        color: AppColors.champagneGold,
+                        size: 18,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Save for ${dept.nodalAgency.contains('TMC') ? 'TMC' : 'MPCB'} ',
                         style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.champagneGold),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.champagneGold,
+                        ),
                       ),
                     ],
                   ),
@@ -1511,34 +1809,45 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
 
   Widget _buildTrackingView(bool isDark, Color cardBg, Color textColor) {
     if (_isLoadingReports) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.champagneGold),
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.accentOf(context)),
       );
     }
 
     if (_submittedTickets.isEmpty) {
       return RefreshIndicator(
         onRefresh: _fetchLiveReports,
-        color: AppColors.champagneGold,
+        color: AppColors.accentOf(context),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-            const Icon(Icons.inbox_rounded,
-                size: 60, color: AppColors.lightTextSecondary),
+            const Icon(
+              Icons.inbox_rounded,
+              size: 60,
+              color: AppColors.lightTextSecondary,
+            ),
             const SizedBox(height: 12),
             Center(
-                child: Text('No active dispatches',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: textColor))),
+              child: Text(
+                'No active dispatches',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+            ),
             const SizedBox(height: 4),
             const Center(
-                child: Text(
-                    'Pull to refresh or submit a report to track live dispatches.',
-                    style: TextStyle(
-                        fontSize: 12, color: AppColors.lightTextSecondary))),
+              child: Text(
+                'Pull to refresh or submit a report to track live dispatches.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.lightTextSecondary,
+                ),
+              ),
+            ),
           ],
         ),
       );
@@ -1546,7 +1855,7 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
 
     return RefreshIndicator(
       onRefresh: _fetchLiveReports,
-      color: AppColors.champagneGold,
+      color: AppColors.accentOf(context),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: _submittedTickets.length,
@@ -1561,9 +1870,10 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
               color: cardBg,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                  color: isDark
-                      ? AppColors.darkCardBorder
-                      : AppColors.lightCardBorder),
+                color: isDark
+                    ? AppColors.darkCardBorder
+                    : AppColors.lightCardBorder,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1573,32 +1883,37 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                   children: [
                     Text(
                       ticket.ticketNumber,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: AppColors.champagneGold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: AppColors.accentOf(context),
+                      ),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: isResolved
-                            ? AppColors.emerald.withValues(alpha: 0.15)
+                            ? AppColors.leafOf(context).withValues(alpha: 0.15)
                             : AppColors.amber.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                            color: isResolved
-                                ? AppColors.emerald
-                                : AppColors.amber,
-                            width: 0.8),
+                          color: isResolved
+                              ? AppColors.leafOf(context)
+                              : AppColors.amber,
+                          width: 0.8,
+                        ),
                       ),
                       child: Text(
                         ticket.status,
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color:
-                              isResolved ? AppColors.emerald : AppColors.amber,
+                          color: isResolved
+                              ? AppColors.leafOf(context)
+                              : AppColors.amber,
                         ),
                       ),
                     ),
@@ -1608,15 +1923,19 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 Text(
                   ticket.wasteType,
                   style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: textColor),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: textColor,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 14, color: AppColors.lightTextSecondary),
+                    const Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: AppColors.lightTextSecondary,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -1624,7 +1943,9 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontSize: 11, color: AppColors.lightTextSecondary),
+                          fontSize: 11,
+                          color: AppColors.lightTextSecondary,
+                        ),
                       ),
                     ),
                   ],
@@ -1632,18 +1953,22 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.account_balance_outlined,
-                        size: 14, color: AppColors.emerald),
+                    Icon(
+                      Icons.account_balance_outlined,
+                      size: 14,
+                      color: AppColors.leafOf(context),
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         '${ticket.nodalAgency} • ${ticket.departmentName}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.emerald,
-                            fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.leafOf(context),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -1655,14 +1980,17 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     Text(
                       'Dispatched: ${ticket.timestamp.hour}:${ticket.timestamp.minute.toString().padLeft(2, '0')}',
                       style: const TextStyle(
-                          fontSize: 10.5, color: AppColors.lightTextSecondary),
+                        fontSize: 10.5,
+                        color: AppColors.lightTextSecondary,
+                      ),
                     ),
                     const Text(
                       'SLA: In Progress',
                       style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.amber),
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.amber,
+                      ),
                     ),
                   ],
                 ),
@@ -1673,13 +2001,26 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                     TextButton.icon(
                       onPressed: _showCallAuthorityDialog,
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      icon: const Icon(Icons.phone_rounded, size: 13, color: AppColors.emerald),
-                      label: const Text('Call Authority',
-                          style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.bold)),
+                      icon: Icon(
+                        Icons.phone_rounded,
+                        size: 13,
+                        color: AppColors.leafOf(context),
+                      ),
+                      label: Text(
+                        'Call Authority',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.leafOf(context),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     TextButton.icon(
@@ -1688,13 +2029,26 @@ class _ReportWasteScreenState extends State<ReportWasteScreen>
                         wasteType: ticket.wasteType,
                       ),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      icon: const Icon(Icons.email_rounded, size: 13, color: AppColors.champagneGold),
-                      label: const Text('Direct Email',
-                          style: TextStyle(fontSize: 11, color: AppColors.champagneGold, fontWeight: FontWeight.bold)),
+                      icon: Icon(
+                        Icons.email_rounded,
+                        size: 13,
+                        color: AppColors.accentOf(context),
+                      ),
+                      label: Text(
+                        'Direct Email',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.accentOf(context),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

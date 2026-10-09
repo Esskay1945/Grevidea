@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -13,7 +14,8 @@ class CommunityScreen extends StatefulWidget {
   State<CommunityScreen> createState() => _CommunityScreenState();
 }
 
-class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProviderStateMixin {
+class _CommunityScreenState extends State<CommunityScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoadingFeed = false;
   final ImagePicker _picker = ImagePicker();
@@ -36,7 +38,10 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
   Future<void> _loadDynamicFeed() async {
     setState(() => _isLoadingFeed = true);
     try {
-      final backendPosts = await widget.appState.api.getFeed(page: 1, limit: 30);
+      final backendPosts = await widget.appState.api.getFeed(
+        page: 1,
+        limit: 30,
+      );
       if (mounted) {
         setState(() {
           _posts.clear();
@@ -45,12 +50,18 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
               final authorName = p['display_name']?.toString() ?? 'Citizen';
               _posts.add({
                 'author': authorName,
-                'avatar': authorName.isNotEmpty ? authorName[0].toUpperCase() : 'C',
+                'avatar': authorName.isNotEmpty
+                    ? authorName[0].toUpperCase()
+                    : 'C',
                 'time': p['created_at'] != null ? 'Recently' : 'Live',
                 'location': widget.appState.baseline.cityWard,
-                'text': p['description']?.toString() ?? 'Engaged in sustainable community climate action.',
+                'text':
+                    p['description']?.toString() ??
+                    'Engaged in sustainable community climate action.',
                 'tag': p['action_type']?.toString() ?? 'Eco Action',
-                'likes': p['likes'] is int ? p['likes'] : int.tryParse(p['likes']?.toString() ?? '12') ?? 12,
+                'likes': p['likes'] is int
+                    ? p['likes']
+                    : int.tryParse(p['likes']?.toString() ?? '12') ?? 12,
                 'comments': 2,
                 'isLiked': false,
                 'imageColor': AppColors.royalForest,
@@ -72,8 +83,12 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkSurface : AppColors.lightSurface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.darkSurface
+          : AppColors.lightSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) {
         return StatefulBuilder(
           builder: (dialogCtx, setDialogState) {
@@ -91,8 +106,17 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Share Eco Action', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                      IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(dialogCtx)),
+                      const Text(
+                        'Share Eco Action',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(dialogCtx),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -101,21 +125,38 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     maxLines: 3,
                     decoration: InputDecoration(
                       hintText: 'Share your sustainable deed or progress...',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
-                    children: ['Tree Planting', 'Green Commute', 'Zero Waste', 'Solar Energy'].map((t) {
-                      final isSel = selectedTag == t;
-                      return ChoiceChip(
-                        label: Text(t, style: TextStyle(fontSize: 11, color: isSel ? AppColors.champagneGold : null)),
-                        selected: isSel,
-                        selectedColor: AppColors.royalForest,
-                        onSelected: (_) => setDialogState(() => selectedTag = t),
-                      );
-                    }).toList(),
+                    children:
+                        [
+                          'Tree Planting',
+                          'Green Commute',
+                          'Zero Waste',
+                          'Solar Energy',
+                        ].map((t) {
+                          final isSel = selectedTag == t;
+                          return ChoiceChip(
+                            label: Text(
+                              t,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isSel
+                                    ? AppColors.accentOf(context)
+                                    : null,
+                              ),
+                            ),
+                            selected: isSel,
+                            selectedColor: AppColors.royalForest,
+                            onSelected: (_) =>
+                                setDialogState(() => selectedTag = t),
+                          );
+                        }).toList(),
                   ),
                   const SizedBox(height: 14),
                   if (attachedPhotoName != null)
@@ -123,10 +164,21 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Row(
                         children: [
-                          const Icon(Icons.check_circle_rounded, color: AppColors.emerald, size: 16),
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: AppColors.leafOf(context),
+                            size: 16,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
-                            child: Text('Photo attached: $attachedPhotoName', style: const TextStyle(fontSize: 12, color: AppColors.emerald), overflow: TextOverflow.ellipsis),
+                            child: Text(
+                              'Photo attached: $attachedPhotoName',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.leafOf(context),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                       ),
@@ -135,7 +187,9 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     children: [
                       ElevatedButton.icon(
                         onPressed: () async {
-                          final XFile? file = await _picker.pickImage(source: ImageSource.camera);
+                          final XFile? file = await _picker.pickImage(
+                            source: ImageSource.camera,
+                          );
                           if (file != null) {
                             setDialogState(() {
                               attachedPhotoName = file.name;
@@ -144,19 +198,26 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                         },
                         icon: const Icon(Icons.camera_alt_outlined, size: 16),
                         label: const Text('Camera'),
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.royalForest),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.royalForest,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       OutlinedButton.icon(
                         onPressed: () async {
-                          final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+                          final XFile? file = await _picker.pickImage(
+                            source: ImageSource.gallery,
+                          );
                           if (file != null) {
                             setDialogState(() {
                               attachedPhotoName = file.name;
                             });
                           }
                         },
-                        icon: const Icon(Icons.photo_library_outlined, size: 16),
+                        icon: const Icon(
+                          Icons.photo_library_outlined,
+                          size: 16,
+                        ),
                         label: const Text('Gallery'),
                       ),
                       const Spacer(),
@@ -167,7 +228,9 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                             setState(() {
                               _posts.insert(0, {
                                 'author': '${widget.appState.userName} (You)',
-                                'avatar': widget.appState.userName.isNotEmpty ? widget.appState.userName[0].toUpperCase() : 'U',
+                                'avatar': widget.appState.userName.isNotEmpty
+                                    ? widget.appState.userName[0].toUpperCase()
+                                    : 'U',
                                 'time': 'Just now',
                                 'location': widget.appState.baseline.cityWard,
                                 'text': text,
@@ -200,8 +263,16 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                             }
                           }
                         },
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.champagneGold),
-                        child: const Text('Post (+25 pts)', style: TextStyle(color: AppColors.royalForest, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.champagneGold,
+                        ),
+                        child: const Text(
+                          'Post (+25 pts)',
+                          style: TextStyle(
+                            color: AppColors.royalForest,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -219,7 +290,9 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -233,7 +306,11 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.royalForest,
         onPressed: _openCreatePostDialog,
-        child: const Icon(Icons.add_rounded, color: AppColors.champagneGold, size: 28),
+        child: const Icon(
+          Icons.add_rounded,
+          color: AppColors.champagneGold,
+          size: 28,
+        ),
       ),
       body: Column(
         children: [
@@ -251,9 +328,14 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                 color: AppColors.royalForest,
                 borderRadius: BorderRadius.circular(16),
               ),
-              labelColor: AppColors.champagneGold,
-              unselectedLabelColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-              labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              labelColor: AppColors.accentOf(context),
+              unselectedLabelColor: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+              labelStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
               tabs: const [
                 Tab(text: 'Feed'),
                 Tab(text: 'Challenges'),
@@ -271,32 +353,56 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                   backgroundColor: AppColors.royalForest,
                   onRefresh: _loadDynamicFeed,
                   child: _isLoadingFeed && _posts.isEmpty
-                      ? const Center(child: CircularProgressIndicator(color: AppColors.champagneGold))
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.champagneGold,
+                          ),
+                        )
                       : _posts.isEmpty
-                          ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                                const Icon(Icons.forum_outlined, size: 60, color: AppColors.lightTextSecondary),
-                                const SizedBox(height: 12),
-                                Center(child: Text('Community Feed is Ready', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor))),
-                                const SizedBox(height: 6),
-                                Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                                    child: Text(
-                                      'Be the first to share an eco-deed in ${widget.appState.baseline.cityWard}! Tap the + button to share.',
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
-                                    ),
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.2,
+                            ),
+                            const Icon(
+                              Icons.forum_outlined,
+                              size: 60,
+                              color: AppColors.lightTextSecondary,
+                            ),
+                            const SizedBox(height: 12),
+                            Center(
+                              child: Text(
+                                'Community Feed is Ready',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32.0,
+                                ),
+                                child: Text(
+                                  'Be the first to share an eco-deed in ${widget.appState.baseline.cityWard}! Tap the + button to share.',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.lightTextSecondary,
                                   ),
                                 ),
-                              ],
-                            )
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(20),
-                              itemCount: _posts.length,
-                              itemBuilder: (ctx, i) {
+                              ),
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(20),
+                          itemCount: _posts.length,
+                          itemBuilder: (ctx, i) {
                             final post = _posts[i];
                             return Container(
                               margin: const EdgeInsets.only(bottom: 16),
@@ -304,9 +410,16 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                               decoration: BoxDecoration(
                                 color: cardBg,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.darkCardBorder
+                                      : AppColors.lightCardBorder,
+                                ),
                                 boxShadow: [
-                                  BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10),
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.04),
+                                    blurRadius: 10,
+                                  ),
                                 ],
                               ),
                               child: Column(
@@ -319,28 +432,56 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                         backgroundColor: AppColors.royalForest,
                                         child: Text(
                                           post['avatar'],
-                                          style: const TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.bold),
+                                          style: const TextStyle(
+                                            color: AppColors.champagneGold,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text(post['author'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor)),
-                                            Text('${post['time']} • ${post['location']}', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
+                                            Text(
+                                              post['author'],
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                color: textColor,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${post['time']} • ${post['location']}',
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: AppColors
+                                                    .lightTextSecondary,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.royalForest.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: AppColors.royalForest
+                                              .withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         child: Text(
                                           post['tag'],
-                                          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.leafOf(context),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -348,7 +489,11 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                   const SizedBox(height: 12),
                                   Text(
                                     post['text'],
-                                    style: TextStyle(fontSize: 13, height: 1.4, color: textColor),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      height: 1.4,
+                                      color: textColor,
+                                    ),
                                   ),
                                   const SizedBox(height: 12),
                                   Row(
@@ -357,27 +502,56 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                                         onTap: () {
                                           setState(() {
                                             post['isLiked'] = !post['isLiked'];
-                                            post['likes'] += post['isLiked'] ? 1 : -1;
+                                            post['likes'] += post['isLiked']
+                                                ? 1
+                                                : -1;
                                           });
                                         },
                                         child: Row(
                                           children: [
                                             Icon(
-                                              post['isLiked'] ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                              post['isLiked']
+                                                  ? Icons.favorite_rounded
+                                                  : Icons
+                                                        .favorite_border_rounded,
                                               size: 18,
-                                              color: post['isLiked'] ? AppColors.coral : AppColors.lightTextSecondary,
+                                              color: post['isLiked']
+                                                  ? AppColors.coral
+                                                  : AppColors
+                                                        .lightTextSecondary,
                                             ),
                                             const SizedBox(width: 4),
-                                            Text('${post['likes']}', style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+                                            Text(
+                                              '${post['likes']}',
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: AppColors
+                                                    .lightTextSecondary,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
                                       const SizedBox(width: 20),
-                                      const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: AppColors.lightTextSecondary),
+                                      const Icon(
+                                        Icons.chat_bubble_outline_rounded,
+                                        size: 16,
+                                        color: AppColors.lightTextSecondary,
+                                      ),
                                       const SizedBox(width: 4),
-                                      Text('${post['comments']}', style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary)),
+                                      Text(
+                                        '${post['comments']}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.lightTextSecondary,
+                                        ),
+                                      ),
                                       const Spacer(),
-                                      const Icon(Icons.share_outlined, size: 16, color: AppColors.lightTextSecondary),
+                                      const Icon(
+                                        Icons.share_outlined,
+                                        size: 16,
+                                        color: AppColors.lightTextSecondary,
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -394,17 +568,30 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.emoji_events_outlined, size: 54, color: AppColors.lightTextSecondary.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.emoji_events_outlined,
+                          size: 54,
+                          color: AppColors.lightTextSecondary.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
                         const SizedBox(height: 14),
                         Text(
                           'No challenges added yet',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Community eco-challenges for ${widget.appState.baseline.cityWard} will appear here.',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.lightTextSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -418,17 +605,30 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.group_outlined, size: 54, color: AppColors.lightTextSecondary.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.group_outlined,
+                          size: 54,
+                          color: AppColors.lightTextSecondary.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
                         const SizedBox(height: 14),
                         Text(
                           'No local groups in your ward yet',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Be the first to create an Eco Squad in ${widget.appState.baseline.cityWard}!',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.lightTextSecondary,
+                          ),
                         ),
                       ],
                     ),

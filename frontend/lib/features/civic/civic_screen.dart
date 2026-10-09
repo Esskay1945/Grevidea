@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/responsive_wrapper.dart';
 import '../../state/app_state.dart';
@@ -46,7 +47,10 @@ class _CivicScreenState extends State<CivicScreen> {
           backgroundColor: AppColors.royalForest,
           content: Text(
             '✓ Incident report dispatched to Thane Municipal Corporation! (+50 Green Points)',
-            style: TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: AppColors.champagneGold,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       );
@@ -58,9 +62,7 @@ class _CivicScreenState extends State<CivicScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Civic & Climate Radar'),
-      ),
+      appBar: AppBar(title: const Text('Civic & Climate Radar')),
       body: ResponsiveWrapper(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -85,27 +87,48 @@ class _CivicScreenState extends State<CivicScreen> {
                       children: [
                         const Row(
                           children: [
-                            Icon(Icons.air_rounded, color: AppColors.champagneGold, size: 22),
+                            Icon(
+                              Icons.air_rounded,
+                              color: AppColors.champagneGold,
+                              size: 22,
+                            ),
                             SizedBox(width: 8),
                             Text(
                               'Air Quality (Thane Station)',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.emerald.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.emerald, width: 0.8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
                           ),
-                          child: const Text('LIVE CPCB', style: TextStyle(fontSize: 10, color: AppColors.emerald, fontWeight: FontWeight.w800)),
+                          decoration: BoxDecoration(
+                            color: AppColors.leafOf(context).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.leafOf(context),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            'LIVE CPCB',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.leafOf(context),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Column(
@@ -115,12 +138,32 @@ class _CivicScreenState extends State<CivicScreen> {
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               textBaseline: TextBaseline.alphabetic,
                               children: [
-                                Text('38', style: TextStyle(fontSize: 42, fontWeight: FontWeight.w800, color: AppColors.emerald)),
+                                Text(
+                                  '38',
+                                  style: TextStyle(
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.leafOf(context),
+                                  ),
+                                ),
                                 SizedBox(width: 8),
-                                Text('Good', style: TextStyle(fontSize: 16, color: AppColors.emerald, fontWeight: FontWeight.w700)),
+                                Text(
+                                  'Good',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: AppColors.leafOf(context),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ],
                             ),
-                            Text('Satisfactory air quality for outdoor workouts', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                            Text(
+                              'Satisfactory air quality for outdoor workouts',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -147,7 +190,9 @@ class _CivicScreenState extends State<CivicScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -155,47 +200,88 @@ class _CivicScreenState extends State<CivicScreen> {
                 'Help keep your neighborhood clean. Reports route directly to municipal clean-up squads.',
                 style: TextStyle(
                   fontSize: 13,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.lightTextSecondary,
                 ),
               ),
 
               const SizedBox(height: 18),
 
               // Incident Type
-              const Text('Incident / Waste Type', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Incident / Waste Type',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _selectedWasteType,
-                items: _wasteTypes.map((t) => DropdownMenuItem(value: t, child: Text(t, style: const TextStyle(fontSize: 14)))).toList(),
+                items: _wasteTypes
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t,
+                        child: Text(t, style: const TextStyle(fontSize: 14)),
+                      ),
+                    )
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedWasteType = v!),
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.delete_sweep_outlined, color: AppColors.champagneGold),
+                decoration: InputDecoration(
+                  prefixIcon: Icon(
+                    Icons.delete_sweep_outlined,
+                    color: AppColors.accentOf(context),
+                  ),
                 ),
               ),
 
               const SizedBox(height: 16),
 
               // Location Geotag
-              const Text('Geotagged Location', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Geotagged Location',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                  color: isDark
+                      ? AppColors.darkSurface
+                      : AppColors.lightSurface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkCardBorder
+                        : AppColors.lightCardBorder,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.my_location_rounded, color: AppColors.emerald, size: 20),
+                    Icon(
+                      Icons.my_location_rounded,
+                      color: AppColors.leafOf(context),
+                      size: 20,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         widget.appState.baseline.cityWard,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    const Text('GPS Lock', style: TextStyle(fontSize: 11, color: AppColors.emerald, fontWeight: FontWeight.w700)),
+                    Text(
+                      'GPS Lock',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.leafOf(context),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -203,7 +289,10 @@ class _CivicScreenState extends State<CivicScreen> {
               const SizedBox(height: 16),
 
               // Photo Attachment Stub
-              const Text('Evidence Photo', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Evidence Photo',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 6),
               GestureDetector(
                 onTap: () => setState(() => _photoAttached = !_photoAttached),
@@ -211,28 +300,54 @@ class _CivicScreenState extends State<CivicScreen> {
                   height: 100,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+                    color: isDark
+                        ? AppColors.darkSurface
+                        : AppColors.lightSurface,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: _photoAttached ? AppColors.emerald : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                      color: _photoAttached
+                          ? AppColors.leafOf(context)
+                          : (isDark
+                                ? AppColors.darkCardBorder
+                                : AppColors.lightCardBorder),
                       width: _photoAttached ? 1.5 : 1.0,
                     ),
                   ),
                   child: _photoAttached
-                      ? const Row(
+                      ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.check_circle_rounded, color: AppColors.emerald, size: 24),
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.leafOf(context),
+                              size: 24,
+                            ),
                             SizedBox(width: 8),
-                            Text('1 Photo Attached (Tap to remove)', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.w600)),
+                            Text(
+                              '1 Photo Attached (Tap to remove)',
+                              style: TextStyle(
+                                color: AppColors.leafOf(context),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         )
-                      : const Column(
+                      : Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.camera_alt_outlined, color: AppColors.champagneGold, size: 28),
+                            Icon(
+                              Icons.camera_alt_outlined,
+                              color: AppColors.accentOf(context),
+                              size: 28,
+                            ),
                             SizedBox(height: 6),
-                            Text('Attach Camera Photo of Waste Hotspot', style: TextStyle(fontSize: 13, color: AppColors.lightTextSecondary)),
+                            Text(
+                              'Attach Camera Photo of Waste Hotspot',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.lightTextSecondary,
+                              ),
+                            ),
                           ],
                         ),
                 ),
@@ -241,7 +356,10 @@ class _CivicScreenState extends State<CivicScreen> {
               const SizedBox(height: 16),
 
               // Description
-              const Text('Description (Optional)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              const Text(
+                'Description (Optional)',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 6),
               TextField(
                 controller: _descController,
@@ -263,9 +381,18 @@ class _CivicScreenState extends State<CivicScreen> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(color: AppColors.champagneGold, strokeWidth: 2.5),
+                          child: CircularProgressIndicator(
+                            color: AppColors.champagneGold,
+                            strokeWidth: 2.5,
+                          ),
                         )
-                      : const Text('Dispatch Municipal Report (+50 Points)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                      : const Text(
+                          'Dispatch Municipal Report (+50 Points)',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -293,9 +420,23 @@ class _PollutantPill extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(label, style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: AppColors.mutedOf(context),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(value, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.inkOf(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/grevidea_app_bar.dart';
 import '../../core/widgets/feature_directory_drawer.dart';
@@ -13,7 +14,8 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTickerProviderStateMixin {
+class _LeaderboardScreenState extends State<LeaderboardScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Map<String, dynamic>> _leaderboardData = [];
   bool _isLoading = true;
@@ -58,22 +60,30 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkCanvas : AppColors.lightCanvas;
     final cardBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary;
+    final textColor = isDark
+        ? AppColors.darkTextPrimary
+        : AppColors.lightTextPrimary;
 
     final userPoints = widget.appState.greenPoints;
-    final userName = widget.appState.userName.isNotEmpty ? widget.appState.userName : 'Siddharth Kumar';
+    final userName = widget.appState.userName.isNotEmpty
+        ? widget.appState.userName
+        : 'Siddharth Kumar';
     final userWard = widget.appState.baseline.cityWard;
 
     // Dynamically calculate user rank within the result set
     final userList = List<Map<String, dynamic>>.from(_leaderboardData);
-    final existingUserIdx = userList.indexWhere((u) => u['is_current_user'] == true);
+    final existingUserIdx = userList.indexWhere(
+      (u) => u['is_current_user'] == true,
+    );
 
     int calculatedUserRank = 1;
     if (existingUserIdx >= 0) {
       calculatedUserRank = existingUserIdx + 1;
     } else if (userList.isNotEmpty) {
       // Calculate rank dynamically based on score
-      int higherCount = userList.where((u) => ((u['points'] as int?) ?? 0) > userPoints).length;
+      int higherCount = userList
+          .where((u) => ((u['points'] as int?) ?? 0) > userPoints)
+          .length;
       calculatedUserRank = higherCount + 1;
     } else {
       calculatedUserRank = 1; // Sole registered user in database
@@ -89,17 +99,30 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
         appState: widget.appState,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.champagneGold))
+          ? Center(
+              child: CircularProgressIndicator(
+                color: AppColors.accentOf(context),
+              ),
+            )
           : Column(
               children: [
                 // Filter Segmented Tabs: Ward / City / State / Global
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkSurface : AppColors.lightSurfaceAlt,
+                    color: isDark
+                        ? AppColors.darkSurface
+                        : AppColors.lightSurfaceAlt,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.darkCardBorder
+                          : AppColors.lightCardBorder,
+                    ),
                   ),
                   child: TabBar(
                     controller: _tabController,
@@ -108,9 +131,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                       color: AppColors.royalForest,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    labelColor: AppColors.champagneGold,
-                    unselectedLabelColor: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-                    labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                    labelColor: AppColors.accentOf(context),
+                    unselectedLabelColor: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                    labelStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                     tabs: const [
                       Tab(text: 'Ward'),
                       Tab(text: 'City (Thane)'),
@@ -122,7 +150,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
 
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     children: [
                       // Sticky User Standing Banner (Pure Dynamic Calculation)
                       Container(
@@ -130,9 +161,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                         decoration: BoxDecoration(
                           color: AppColors.royalForest,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.champagneGold, width: 1.5),
+                          border: Border.all(
+                            color: AppColors.champagneGold,
+                            width: 1.5,
+                          ),
                           boxShadow: [
-                            BoxShadow(color: AppColors.royalForest.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                            BoxShadow(
+                              color: AppColors.royalForest.withValues(
+                                alpha: 0.3,
+                              ),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                         ),
                         child: Row(
@@ -147,7 +187,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                               ),
                               child: Text(
                                 '#$calculatedUserRank',
-                                style: const TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.w900, fontSize: 16),
+                                style: const TextStyle(
+                                  color: AppColors.champagneGold,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 14),
@@ -159,20 +203,42 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                                     children: [
                                       Text(
                                         '$userName (You)',
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
                                       const SizedBox(width: 6),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(color: AppColors.emerald, borderRadius: BorderRadius.circular(6)),
-                                        child: const Text('ACTIVE', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.leafOf(context),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'ACTIVE',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '$userWard • ${widget.appState.streakDays}d streak • ${widget.appState.treesEquivalent.toStringAsFixed(1)} trees',
-                                    style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 11,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -182,9 +248,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                               children: [
                                 Text(
                                   '$userPoints',
-                                  style: const TextStyle(color: AppColors.champagneGold, fontWeight: FontWeight.w900, fontSize: 20),
+                                  style: const TextStyle(
+                                    color: AppColors.champagneGold,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 20,
+                                  ),
                                 ),
-                                const Text('points', style: TextStyle(color: Colors.white60, fontSize: 10)),
+                                const Text(
+                                  'points',
+                                  style: TextStyle(
+                                    color: Colors.white60,
+                                    fontSize: 10,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -199,37 +275,65 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                           decoration: BoxDecoration(
                             color: cardBg,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkCardBorder
+                                  : AppColors.lightCardBorder,
+                            ),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.military_tech_rounded, size: 52, color: AppColors.champagneGold),
+                              Icon(
+                                Icons.military_tech_rounded,
+                                size: 52,
+                                color: AppColors.accentOf(context),
+                              ),
                               const SizedBox(height: 12),
                               Text(
                                 'Rank #1 in $userWard',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               Text(
                                 'You are currently the leading eco-citizen in this boundary! As neighbors join and log sustainable actions, their live rankings will appear here.',
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 12, color: AppColors.lightTextSecondary),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.lightTextSecondary,
+                                ),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.royalForest,
                                   foregroundColor: AppColors.champagneGold,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
                                 ),
                                 icon: const Icon(Icons.share_rounded, size: 16),
-                                label: const Text('Invite Neighbors to Leaderboard', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                label: const Text(
+                                  'Invite Neighbors to Leaderboard',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 onPressed: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       backgroundColor: AppColors.royalForest,
-                                      content: Text('Ward invite link copied to clipboard!', style: TextStyle(color: AppColors.champagneGold)),
+                                      content: Text(
+                                        'Ward invite link copied to clipboard!',
+                                        style: TextStyle(
+                                          color: AppColors.champagneGold,
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },
@@ -240,17 +344,41 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
                       else ...[
                         // Ranked List Header
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('RANKED CITIZENS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
-                              Text('POINTS & IMPACT', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
+                              Text(
+                                'RANKED CITIZENS',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                ),
+                              ),
+                              Text(
+                                'POINTS & IMPACT',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 4),
-                        ..._leaderboardData.map((user) => _buildRankRow(user, isDark, cardBg, textColor)),
+                        ..._leaderboardData.map(
+                          (user) =>
+                              _buildRankRow(user, isDark, cardBg, textColor),
+                        ),
                       ],
                     ],
                   ),
@@ -260,7 +388,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
     );
   }
 
-  Widget _buildRankRow(Map<String, dynamic> user, bool isDark, Color cardBg, Color textColor) {
+  Widget _buildRankRow(
+    Map<String, dynamic> user,
+    bool isDark,
+    Color cardBg,
+    Color textColor,
+  ) {
     final rank = user['rank'] ?? 1;
     final isUser = user['is_current_user'] == true;
 
@@ -270,22 +403,53 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
       decoration: BoxDecoration(
         color: isUser ? AppColors.royalForest.withValues(alpha: 0.15) : cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isUser ? AppColors.champagneGold : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder)),
+        border: Border.all(
+          color: isUser
+              ? AppColors.accentOf(context)
+              : (isDark ? AppColors.darkCardBorder : AppColors.lightCardBorder),
+        ),
       ),
       child: Row(
         children: [
-          Text('#$rank', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.champagneGold)),
+          Text(
+            '#$rank',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: AppColors.accentOf(context),
+            ),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(user['user_name'] ?? 'Citizen', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)),
-                Text('${user['city'] ?? ""} • ${user['streak_days'] ?? 0}d streak', style: const TextStyle(fontSize: 11, color: AppColors.lightTextSecondary)),
+                Text(
+                  user['user_name'] ?? 'Citizen',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: textColor,
+                  ),
+                ),
+                Text(
+                  '${user['city'] ?? ""} • ${user['streak_days'] ?? 0}d streak',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.lightTextSecondary,
+                  ),
+                ),
               ],
             ),
           ),
-          Text('${user['points'] ?? 0} pts', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.emerald)),
+          Text(
+            '${user['points'] ?? 0} pts',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: AppColors.leafOf(context),
+            ),
+          ),
         ],
       ),
     );

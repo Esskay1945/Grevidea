@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/validators.dart';
 
@@ -29,7 +30,7 @@ class PasswordStrengthBar extends StatelessWidget {
         filledBars = 2;
         break;
       case PasswordStrength.difficult:
-        color = AppColors.champagneGold;
+        color = AppColors.accentOf(context);
         label = 'Difficult / Strong (Optimal protection)';
         filledBars = 3;
         break;
@@ -53,14 +54,16 @@ class PasswordStrengthBar extends StatelessWidget {
                   height: 4.5,
                   margin: EdgeInsets.only(right: index < 2 ? 6.0 : 0.0),
                   decoration: BoxDecoration(
-                    color: isFilled ? color : AppColors.lightTextSecondary.withOpacity(0.2),
+                    color: isFilled
+                        ? color
+                        : AppColors.lightTextSecondary.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(2),
                     boxShadow: isFilled
                         ? [
                             BoxShadow(
                               color: color.withOpacity(0.3),
                               blurRadius: 4,
-                            )
+                            ),
                           ]
                         : null,
                   ),
