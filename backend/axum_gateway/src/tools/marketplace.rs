@@ -652,6 +652,7 @@ pub async fn post_carpool(
         .map_err(|_| AppError::Auth("Invalid user ID".into()))?;
 
     super::live::validate_coordinates(req.pickup_lat, req.pickup_lon)?;
+    if let Some(ref geometry)=req.route_geometry {super::live::validate_route_geometry(geometry)?;}
     if !(1..=8).contains(&req.seats_available) || req.price_points.unwrap_or(0) < 0 || req.departure_at <= chrono::Utc::now() {
         return Err(AppError::BadRequest("Enter future departure, 1–8 seats and non-negative price".into()));
     }

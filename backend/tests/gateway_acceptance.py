@@ -65,6 +65,10 @@ def run():
     listing=data(request('/api/v1/carpool',{'origin':'Test pickup','destination':'Test destination','departure_at':departure,'seats_available':1,'price_points':0,'pickup_lat':19.2183,'pickup_lon':72.9781,'route_geometry':{'type':'LineString','coordinates':[[72.9781,19.2183],[72.99,19.23]]}},driver))
     matches=data(request('/api/v1/carpool/nearby?lat=19.2183&lon=72.9781&radius_km=5',token=rider))
     assert any(r['id']==listing['id'] for r in matches)
+    passing=data(request('/api/v1/carpool',{'origin':'Far pickup','destination':'Nearby corridor','departure_at':departure,'seats_available':2,'pickup_lat':19.5,'pickup_lon':72.9781,'route_geometry':{'type':'LineString','coordinates':[[72.9781,19.5],[72.9781,19.2183]]}},driver))
+    matches=data(request('/api/v1/carpool/nearby?lat=19.2183&lon=72.9781&radius_km=2',token=rider))
+    assert any(r['id']==passing['id'] for r in matches)
+    assert request('/api/v1/carpool',{'origin':'Invalid','destination':'Invalid','departure_at':departure,'seats_available':1,'pickup_lat':19.2183,'pickup_lon':72.9781,'route_geometry':{'type':'Point','coordinates':[72.9781,19.2183]}},driver)[0]==400
     with concurrent.futures.ThreadPoolExecutor() as pool:
         statuses=list(pool.map(lambda token:request(f"/api/v1/carpool/{listing['id']}/book",{},token)[0],[rider,other]))
     assert sorted(statuses)==[200,400],statuses

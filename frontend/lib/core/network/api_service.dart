@@ -13,7 +13,9 @@ class ApiService {
   String get baseUrl => _baseUrl;
   void setBaseUrl(String url) => _baseUrl = url.replaceFirst(RegExp(r'/$'), '');
   String? _authToken;
-  void setAuthToken(String? token) => _authToken = token;
+  String? _userId;
+  String? get userId => _userId;
+  void setAuthToken(String? token) { _authToken = token; if(token==null)_userId=null; }
   bool _isBackendReachable = false;
   bool get isBackendReachable => _isBackendReachable;
   final http.Client _client = http.Client();
@@ -62,6 +64,7 @@ class ApiService {
     });
     if (res != null && res['token'] != null) {
       _authToken = res['token'];
+      _userId = res['user_id']?.toString();
       return Map<String, dynamic>.from(res);
     }
     return null;
@@ -79,6 +82,7 @@ class ApiService {
     });
     if (res != null && res['token'] != null) {
       _authToken = res['token'];
+      _userId = res['user_id']?.toString();
       return Map<String, dynamic>.from(res);
     }
     return null;
@@ -349,7 +353,7 @@ class ApiService {
     final res = await _get('/api/v1/leaderboard?scope=$scope');
     if (res is List)
       return List<Map<String, dynamic>>.from((res as List).map((u) =>
-          {...Map<String, dynamic>.from(u), 'points': u['total_points']}));
+          {...Map<String, dynamic>.from(u), 'points': u['total_points'], 'is_current_user': u['user_id']==_userId}));
     if (res != null && res['leaderboard'] != null) {
       return List<Map<String, dynamic>>.from(res['leaderboard']);
     }

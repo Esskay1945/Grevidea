@@ -9,6 +9,17 @@ pub fn validate_coordinates(lat: f64, lon: f64) -> AppResult<()> {
     if !lat.is_finite() || !lon.is_finite() || !(-90.0..=90.0).contains(&lat) || !(-180.0..=180.0).contains(&lon) { return Err(AppError::BadRequest("Invalid GPS coordinates".into())); }
     Ok(())
 }
+pub fn validate_route_geometry(value:&Value) -> AppResult<()> {
+    if value["type"]!="LineString" {return Err(AppError::BadRequest("Route must be a GeoJSON LineString".into()));}
+    let points=value["coordinates"].as_array().ok_or_else(||AppError::BadRequest("Missing route coordinates".into()))?;
+    if !(2..=20000).contains(&points.len()) {return Err(AppError::BadRequest("Route needs 2–20000 coordinates".into()));}
+    for point in points {
+        let coords=point.as_array().ok_or_else(||AppError::BadRequest("Invalid route coordinate".into()))?;
+        if coords.len()!=2 {return Err(AppError::BadRequest("Route coordinates must contain longitude and latitude".into()));}
+        validate_coordinates(coords[1].as_f64().unwrap_or(f64::NAN),coords[0].as_f64().unwrap_or(f64::NAN))?;
+    }
+    Ok(())
+}
 fn uid(auth: &AuthUser) -> AppResult<Uuid> { Uuid::parse_str(&auth.0.sub).map_err(|_| AppError::Auth("Invalid user".into())) }
 pub(super) async fn fetch(state: &AppState, url: &str, params: &[(&str, String)]) -> AppResult<Value> {
     state.brain.http.get(url).query(params).header("User-Agent", "Grevidea/1.0 (environmental travel planner)").timeout(std::time::Duration::from_secs(15)).send().await.map_err(|_| AppError::BrainUnavailable("Environmental data service unavailable".into()))?.error_for_status().map_err(|_| AppError::BrainUnavailable("Environmental data provider rejected request".into()))?.json().await.map_err(|_| AppError::BrainUnavailable("Invalid external data".into()))
@@ -98,7 +109,7 @@ pub async fn coordinate_aid(State(state):State<AppState>, auth:AuthUser, Path(id
 }
 pub async fn nearby_carpools(State(state):State<AppState>, _auth:AuthUser, Query(q):Query<Nearby>) -> AppResult<Json<ApiResponse<Value>>> {
     let r=radius(&q)?;
-    let rows:Vec<Value>=sqlx::query_scalar("SELECT to_jsonb(c) FROM carpool_listings c WHERE status='open' AND seats_available>0 AND departure_at>NOW() AND pickup_lat IS NOT NULL AND ST_DWithin(ST_SetSRID(ST_MakePoint(pickup_lon,pickup_lat),4326)::geography,ST_SetSRID(ST_MakePoint($1,$2),4326)::geography,$3) ORDER BY departure_at LIMIT 100").bind(q.lon).bind(q.lat).bind(r*1000.0).fetch_all(&state.db).await?;
+    let rows:Vec<Value>=sqlx::query_scalar("SELECT to_jsonb(c) FROM carpool_listings c WHERE status='open' AND seats_available>0 AND departure_at>NOW() AND pickup_lat IS NOT NULL AND (ST_DWithin(ST_SetSRID(ST_MakePoint(pickup_lon,pickup_lat),4326)::geography,ST_SetSRID(ST_MakePoint($1,$2),4326)::geography,$3) OR (route_geometry IS NOT NULL AND ST_DWithin(ST_SetSRID(ST_GeomFromGeoJSON(route_geometry::text),4326)::geography,ST_SetSRID(ST_MakePoint($1,$2),4326)::geography,$3))) ORDER BY departure_at LIMIT 100").bind(q.lon).bind(q.lat).bind(r*1000.0).fetch_all(&state.db).await?;
     Ok(Json(ApiResponse::ok(json!(rows))))
 }
 pub async fn book_carpool(State(state):State<AppState>, auth:AuthUser, Path(id):Path<Uuid>) -> AppResult<Json<ApiResponse<Value>>> {
@@ -117,6 +128,11 @@ pub async fn book_carpool(State(state):State<AppState>, auth:AuthUser, Path(id):
 mod tests {
  use super::*;
  #[test] fn coordinates_reject_invalid_numbers() { assert!(validate_coordinates(f64::NAN,0.).is_err()); assert!(validate_coordinates(91.,0.).is_err()); assert!(validate_coordinates(19.2,72.9).is_ok()); }
+ #[test] fn corridor_rejects_invalid_geojson() {
+    assert!(validate_route_geometry(&json!({"type":"LineString","coordinates":[[72.9,19.2],[73.0,19.3]]})).is_ok());
+    assert!(validate_route_geometry(&json!({"type":"Point","coordinates":[72.9,19.2]})).is_err());
+    assert!(validate_route_geometry(&json!({"type":"LineString","coordinates":[[72.9,19.2],[73.0,999]]})).is_err());
+ }
  #[test] fn radius_is_bounded() { assert!(radius(&Nearby{lat:0.,lon:0.,radius_km:Some(-1.)}).is_err()); }
 }
 
