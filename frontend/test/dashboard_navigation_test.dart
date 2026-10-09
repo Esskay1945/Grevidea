@@ -33,6 +33,7 @@ void main() {
       expect(find.text('Insights'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
+      state.dispose();
     });
   }
 

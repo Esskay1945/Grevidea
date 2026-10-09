@@ -15,7 +15,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets(
-      'Feature routes keep the tray and preserve form text through dialogs',
+      'Feature routes preserve form text through dialogs without a tray',
       (tester) async {
     final state = AppState();
     state.signup(
@@ -30,7 +30,7 @@ void main() {
             const Scaffold(body: TextField(key: Key('featureInput')))));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byType(PersistentFeatureTray), findsOneWidget);
+    expect(find.byType(PersistentFeatureTray), findsNothing);
     await tester.enterText(
         find.byKey(const Key('featureInput')), 'preserved destination');
     final featureContext =
@@ -48,7 +48,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('preserved destination'), findsOneWidget);
-    await tester.tap(find.text('Home').last);
+    Navigator.of(featureContext).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.byType(PersistentFeatureTray), findsNothing);
@@ -117,21 +117,23 @@ void main() {
     expect(catalog.map((f) => f['tool']).toSet().length, 58);
   });
   testWidgets(
-      'Home hides analytics; score card opens Tracker and returns to Home',
+      'Dashboard keeps score passive; hamburger opens Tracker and back returns home',
       (tester) async {
     final state = AppState();
     await tester
         .pumpWidget(MaterialApp(home: DashboardScreen(appState: state)));
-    expect(find.text('Your Eco Score'), findsOneWidget);
+    expect(find.text('Environment score'), findsOneWidget);
     expect(find.text('By Category'), findsNothing);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Your Eco Score'));
-    await tester.pump();
-    expect(find.text('Your Eco Score'), findsNothing);
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text('Tracker'));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Environment score'), findsNothing);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Home').last);
-    await tester.pump();
-    expect(find.text('Your Eco Score'), findsOneWidget);
+    Navigator.of(tester.element(find.byType(Scaffold).last)).pop();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Environment score'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     state.dispose();
   });
