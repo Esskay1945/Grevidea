@@ -1,3 +1,9 @@
+import '../../features/profile/profile_screen.dart';
+import '../../features/civic/civic_screen.dart';
+import '../../features/tracker/tracker_screen.dart';
+import '../../features/community/community_screen.dart';
+import '../../features/insights/insights_screen.dart';
+import '../../features/insights/impact_breakdown_screen.dart';
 import 'package:flutter/material.dart';
 import '../../features/integrations/delivery_center_screen.dart';
 import '../../features/profile/ecosystem_catalog_screen.dart';
@@ -76,7 +82,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Quick Actions & Community Tools',
+                            'All features & preferences',
                             style: TextStyle(
                               fontSize: 11,
                               color: Colors.white70,
@@ -98,13 +104,14 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Rank #7 • ${appState.userName}',
+                        Expanded(child: Text(
+                          appState.userName,
+                          maxLines: 1, overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.w600),
-                        ),
+                        )),
                         Row(
                           children: [
                             const Icon(Icons.eco_rounded,
@@ -132,6 +139,13 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                 children: [
+                  _buildSectionHeader('YOUR ENVIRONMENT'),
+                  _buildNavTile(context: context, icon: Icons.show_chart_rounded, title: 'Tracker', subtitle: 'Explore tracker', color: AppColors.champagneGold, onTap: () => _navigateTo(context, TrackerScreen(appState: appState))),
+                  _buildNavTile(context: context, icon: Icons.people_outline_rounded, title: 'Community', subtitle: 'Explore community', color: AppColors.champagneGold, onTap: () => _navigateTo(context, CommunityScreen(appState: appState))),
+                  _buildNavTile(context: context, icon: Icons.insights_rounded, title: 'Insights', subtitle: 'Explore insights', color: AppColors.champagneGold, onTap: () => _navigateTo(context, InsightsScreen(appState: appState))),
+                  _buildNavTile(context: context, icon: Icons.pie_chart_rounded, title: 'Impact Breakdown', subtitle: 'Explore impact breakdown', color: AppColors.champagneGold, onTap: () => _navigateTo(context, ImpactBreakdownScreen(appState: appState))),
+                  _buildNavTile(context: context, icon: Icons.account_circle_outlined, title: 'Profile & Account', subtitle: 'Personal details, baseline and sign out', color: AppColors.champagneGold, onTap: () => _navigateTo(context, ProfileScreen(appState: appState))),
+                  _buildNavTile(context: context, icon: Icons.location_city_rounded, title: 'Civic Hub', subtitle: 'Explore civic reports and actions', color: AppColors.champagneGold, onTap: () => _navigateTo(context, CivicScreen(appState: appState))),
                   _buildSectionHeader('QUICK ACTIONS'),
                   _buildNavTile(
                     context: context,
@@ -283,6 +297,8 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                         context, LeaderboardScreen(appState: appState)),
                   ),
                   _buildSectionHeader('ACCOUNT & PREFERENCES'),
+                  _buildNavTile(context: context, icon: Icons.brightness_6_rounded, title: 'Switch appearance', subtitle: isDark ? 'Use light mode' : 'Use dark mode', color: AppColors.champagneGold, onTap: appState.toggleTheme),
+
                   _buildNavTile(
                     context: context,
                     icon: Icons.settings_rounded,
@@ -325,7 +341,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'All features and quick actions are in this menu. Main tabs (Home, Tracker, Community, Ranks) stay at the bottom.',
+                      'All features and account preferences are in this menu. Return to the dashboard with the back button.',
                       style: TextStyle(
                           fontSize: 10,
                           color: AppColors.lightTextSecondary,
