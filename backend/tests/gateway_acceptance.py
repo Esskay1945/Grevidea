@@ -83,6 +83,8 @@ def run():
     receipt=data(request('/api/v1/rewards/redeem',{'reward_id':'plant_tree'},rider))
     assert receipt['status']=='pending_fulfillment'
     assert data(request('/api/v1/points',token=rider))['total_points']==receipt['balance']
+    assert request('/api/v1/auth/google', {'id_token':'not-a-token'})[0] in (401,503)
+    assert request('/api/v1/auth/google/link', {'id_token':'not-a-token'})[0] == 401
     auth_email=f'auth-security-{uuid.uuid4().hex}@example.test'
     auth_user=data(request('/api/v1/auth/register',{'email':auth_email,'password':'OriginalPassword123!','display_name':'Security test'}))
     auth_token=auth_user['token']

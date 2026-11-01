@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/services/google_identity_service.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (widget.appState.authBusy) return;
+    if (_googleBusy || widget.appState.authBusy) return;
     if (_formKey.currentState?.validate() ?? false) {
       final success = await widget.appState.login(
         _emailController.text.trim(),
@@ -76,10 +77,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  bool _googleBusy = false;
   Future<void> _handleGoogleSignIn(BuildContext context) async {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Google sign-in requires a configured server OAuth integration. Please use email and password.'),
-    ));
+    if (_googleBusy || widget.appState.authBusy) return;
+    setState(() => _googleBusy = true);
+    try {
+      final token = await GoogleIdentityService.acquireIdToken();
+      if (!mounted || token == null) return;
+      final success = await widget.appState.loginWithGoogle(token);
+      if (!mounted) return;
+      if (success) { _navigateAfterAuth(context); }
+      else { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.appState.authError ?? 'Google sign-in failed.'))); }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google sign-in could not complete. Check this build’s OAuth configuration and try again.')));
+    } finally { if (mounted) setState(() => _googleBusy = false); }
   }
 
   @override

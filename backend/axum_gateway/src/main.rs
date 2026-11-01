@@ -134,6 +134,8 @@ async fn main() -> anyhow::Result<()> {
 
         // ── EPIC 6: Auth & User (T49–T54) ────────────────────────────
         .route("/api/v1/auth/register", post(tools::platform::register))
+        .route("/api/v1/auth/google", post(tools::google_auth::google_auth))
+        .route("/api/v1/auth/google/link", post(tools::google_auth::link_google))
         .route("/api/v1/auth/password", post(tools::platform::change_password))
         .route("/api/v1/auth/login",    post(tools::platform::login))
         .route("/api/v1/user/profile",  get(tools::platform::get_profile))
