@@ -883,6 +883,24 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
       return true;
     } finally { _authBusy = false; notifyListeners(); }
   }
+  Future<bool> loginWithGoogle(String idToken) async {
+    if (_authBusy || idToken.isEmpty) return false;
+    final generation = ++_sessionGeneration;
+    _authBusy = true;
+    authError = null;
+    notifyListeners();
+    try {
+      final result = await _api.googleAuth(idToken);
+      if (generation != _sessionGeneration) return false;
+      if (result == null || result['email'] is! String || (result['email'] as String).trim().isEmpty) {
+        authError = _api.googleAuthError ?? 'Google sign-in failed. Check your server connection and retry.';
+        return false;
+      }
+      await _acceptAuthentication(result['email'], result);
+      return true;
+    } finally { _authBusy = false; notifyListeners(); }
+  }
+
   Future<void> _acceptAuthentication(String email, Map<String,dynamic> result) async {
     _loadUserFromDb(email.trim().toLowerCase());
     _userName = result['display_name']?.toString() ?? _userName;

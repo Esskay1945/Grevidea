@@ -16,3 +16,5 @@ pub mod transit;
 pub mod hazards;
 
 pub mod air_stations;
+
+pub mod google_auth;

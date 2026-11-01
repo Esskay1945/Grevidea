@@ -128,6 +128,27 @@ class ApiService {
     return null;
   }
 
+  String? googleAuthError;
+  Future<Map<String,dynamic>?> googleAuth(String idToken) async {
+    setAuthToken(null);
+    final generation = _authGeneration;
+    googleAuthError = null;
+    final response = await requestDetailed('/api/v1/auth/google', data: {'id_token': idToken});
+    if (generation != _authGeneration) return null;
+    final res = response.data;
+    if (response.statusCode == 403) {
+      googleAuthError = 'This email already has an account. Sign in with your password and link Google from Profile.';
+    } else if (response.statusCode == 503) {
+      googleAuthError = 'Google sign-in is not configured or Google verification is temporarily unavailable.';
+    }
+    if (res is! Map || res['token'] is! String || (res['token'] as String).isEmpty ||
+        res['email'] is! String || !(res['email'] as String).contains('@') || res['user_id'] == null) return null;
+    _authToken = res['token'];
+    _authenticatedEmail = (res['email'] as String).trim().toLowerCase();
+    _userId = res['user_id'].toString();
+    return Map<String,dynamic>.from(res);
+  }
+
   // ── EPIC 5: Social Feed & Community Actions (T46, T48) ──────────────────────
   Future<List<Map<String, dynamic>>> getFeed(
       {int page = 1, int limit = 20}) async {

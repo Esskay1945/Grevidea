@@ -6,6 +6,7 @@ pub struct Config {
     pub database_url: String,
     pub brain_url: String,
     pub jwt_secret: String,
+    pub google_client_id: Option<String>,
     pub port: u16,
     pub cpcb_api_key: Option<String>,
     pub openaq_api_key: Option<String>,
@@ -30,6 +31,7 @@ impl Config {
             brain_url: env::var("BRAIN_URL")
                 .unwrap_or_else(|_| "http://localhost:8000".to_string()),
             jwt_secret: { let secret = env::var("JWT_SECRET").expect("JWT_SECRET is required"); assert!(secret.len() >= 32 && !secret.contains("change-in-production"), "JWT_SECRET must be unique and at least 32 bytes"); secret },
+            google_client_id: env::var("GOOGLE_CLIENT_ID").ok().map(|v| v.trim().to_string()),
             port: env::var("GATEWAY_PORT")
                 .unwrap_or_else(|_| "3000".to_string())
                 .parse()
