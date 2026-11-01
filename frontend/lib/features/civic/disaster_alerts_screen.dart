@@ -249,7 +249,7 @@ class _DisasterAlertsScreenState extends State<DisasterAlertsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '📍 Live GPS: ${widget.appState.locationService.currentLatitude.toStringAsFixed(4)}° N, ${widget.appState.locationService.currentLongitude.toStringAsFixed(4)}° E',
+                    widget.appState.locationService.hasFreshPosition ? 'GPS: ${widget.appState.locationService.currentLatitude.toStringAsFixed(5)}, ${widget.appState.locationService.currentLongitude.toStringAsFixed(5)}' : 'GPS unavailable',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 11,

@@ -29,8 +29,7 @@ impl Config {
                 .expect("DATABASE_URL must be set (Supabase connection string)"),
             brain_url: env::var("BRAIN_URL")
                 .unwrap_or_else(|_| "http://localhost:8000".to_string()),
-            jwt_secret: env::var("JWT_SECRET")
-                .unwrap_or_else(|_| "grevidea-dev-secret-change-in-production".to_string()),
+            jwt_secret: { let secret = env::var("JWT_SECRET").expect("JWT_SECRET is required"); assert!(secret.len() >= 32 && !secret.contains("change-in-production"), "JWT_SECRET must be unique and at least 32 bytes"); secret },
             port: env::var("GATEWAY_PORT")
                 .unwrap_or_else(|_| "3000".to_string())
                 .parse()

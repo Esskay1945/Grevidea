@@ -592,7 +592,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          '📍 ${userLat.toStringAsFixed(4)}° N, ${userLng.toStringAsFixed(4)}° E',
+                          widget.appState.locationService.hasFreshPosition ? '${userLat.toStringAsFixed(5)}, ${userLng.toStringAsFixed(5)}' : 'GPS unavailable — enable precise location',
                           style: TextStyle(
                             color: AppColors.inkOf(context),
                             fontSize: 11,

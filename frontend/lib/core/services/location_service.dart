@@ -39,7 +39,9 @@ class LocationService extends ChangeNotifier {
   LocationService._internal();
   Position? _lastKnownPosition;
   Position? get lastKnownPosition => _lastKnownPosition;
-  static const double defaultLatitude = 19.2183, defaultLongitude = 72.9781;
+  static const double defaultLatitude = 0, defaultLongitude = 0;
+  String? error;
+  bool get hasFreshPosition => _lastKnownPosition != null && DateTime.now().difference(_lastKnownPosition!.timestamp).abs() < const Duration(minutes: 2);
   double get currentLatitude => _lastKnownPosition?.latitude ?? defaultLatitude;
   double get currentLongitude =>
       _lastKnownPosition?.longitude ?? defaultLongitude;
@@ -135,7 +137,7 @@ class LocationService extends ChangeNotifier {
         p = await Geolocator.requestPermission();
       final allowed =
           p == LocationPermission.whileInUse || p == LocationPermission.always;
-      if (allowed) await startSilentTracking();
+      if (allowed) { await getCurrentLocation(forceRefresh: true); await startSilentTracking(); }
       return allowed;
     } catch (_) {
       return false;
@@ -149,13 +151,14 @@ class LocationService extends ChangeNotifier {
       final p = await Geolocator.checkPermission();
       if (p != LocationPermission.whileInUse && p != LocationPermission.always)
         return;
+      await getCurrentLocation();
       _subscription = Geolocator.getPositionStream(
               locationSettings: !kIsWeb &&
                       defaultTargetPlatform == TargetPlatform.android
                   ? AndroidSettings(
-                      accuracy: LocationAccuracy.medium,
-                      distanceFilter: 50,
-                      intervalDuration: const Duration(seconds: 30),
+                      accuracy: LocationAccuracy.high,
+                      distanceFilter: 10,
+                      intervalDuration: const Duration(seconds: 5),
                       foregroundNotificationConfig:
                           const ForegroundNotificationConfig(
                               notificationTitle: 'Grevidea travel tracking',
@@ -163,8 +166,10 @@ class LocationService extends ChangeNotifier {
                                   'Measuring travel distance for your carbon ledger',
                               enableWakeLock: false))
                   : const LocationSettings(
-                      accuracy: LocationAccuracy.medium, distanceFilter: 50))
+                      accuracy: LocationAccuracy.high, distanceFilter: 10))
           .listen(ingest, onError: (_) {
+        error = 'GPS tracking stopped. Check location permission and retry.';
+        notifyListeners();
         stopTracking();
       });
       _idleTimer = Timer.periodic(
@@ -281,25 +286,43 @@ class LocationService extends ChangeNotifier {
   }
 
   Future<Position?> getCurrentLocation({bool forceRefresh = false}) async {
-    if (_lastKnownPosition != null &&
+    if (hasFreshPosition &&
         !forceRefresh &&
         DateTime.now().difference(_lastKnownPosition!.timestamp) <
             const Duration(minutes: 2)) return _lastKnownPosition;
     _isLocating = true;
+    error = null;
+    notifyListeners();
     try {
-      final p = await Geolocator.checkPermission();
-      if (p != LocationPermission.whileInUse && p != LocationPermission.always)
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        error = 'Turn on device Location/GPS, then retry.';
         return null;
-      _lastKnownPosition = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 8)));
-      notifyListeners();
-      return _lastKnownPosition;
+      }
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
+        error = permission == LocationPermission.deniedForever
+          ? 'Location permission is blocked. Enable precise location in app settings.'
+          : 'Location permission is required to obtain your GPS position.';
+        return null;
+      }
+      final position = await Geolocator.getCurrentPosition(locationSettings:
+        const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 30)));
+      if (!position.latitude.isFinite || !position.longitude.isFinite ||
+          position.latitude.abs() > 90 || position.longitude.abs() > 180 ||
+          !position.accuracy.isFinite || position.accuracy < 0 || position.accuracy > 100 ||
+          DateTime.now().difference(position.timestamp).abs() > const Duration(minutes: 2)) {
+        error = 'GPS fix is stale or imprecise. Enable precise location and retry outdoors.';
+        return null;
+      }
+      _lastKnownPosition = position;
+      return position;
     } catch (_) {
+      error = 'Could not obtain a GPS fix. Check precise location and retry outdoors.';
       return null;
     } finally {
       _isLocating = false;
+      notifyListeners();
     }
   }
 

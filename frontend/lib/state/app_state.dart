@@ -9,6 +9,7 @@ import '../core/services/location_service.dart';
 class UserBaselineProfile {
   Map<String, double> commuteDistances;
   String cityWard;
+  double? latitude, longitude;
   String primaryCommute;
   double dailyCommuteKm;
   String dietaryPreference;
@@ -19,6 +20,7 @@ class UserBaselineProfile {
 
   UserBaselineProfile({
     Map<String, double>? commuteDistances,
+    this.latitude, this.longitude,
     this.cityWard = 'Thane West, Maharashtra',
     this.primaryCommute = 'Metro',
     this.dailyCommuteKm = 18.5,
@@ -31,6 +33,7 @@ class UserBaselineProfile {
 
   Map<String, dynamic> toJson() => {
         'commuteDistances': commuteDistances,
+        'latitude': latitude, 'longitude': longitude,
         'cityWard': cityWard,
         'primaryCommute': primaryCommute,
         'dailyCommuteKm': dailyCommuteKm,
@@ -43,6 +46,7 @@ class UserBaselineProfile {
 
   factory UserBaselineProfile.fromJson(Map<String, dynamic> json) =>
       UserBaselineProfile(
+        latitude: (json['latitude'] as num?)?.toDouble(), longitude: (json['longitude'] as num?)?.toDouble(),
         commuteDistances: (json['commuteDistances'] as Map?)
             ?.map((k, v) => MapEntry(k.toString(), (v as num).toDouble())),
         cityWard: json['cityWard'] as String? ?? 'Thane West, Maharashtra',
@@ -116,7 +120,7 @@ class ActivityLogItem {
 }
 
 class AppState extends ChangeNotifier with WidgetsBindingObserver {
-  final ApiService _api = ApiService();
+  final ApiService _api;
   ApiService get api => _api;
 
   final LocationService _locationService = LocationService();
@@ -241,7 +245,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  AppState() {
+  AppState({ApiService? api}) : _api = api ?? ApiService() {
     recalculateMetrics();
     WidgetsBinding.instance.addObserver(this);
     _initBackend();
@@ -351,25 +355,14 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
       _updateAutomaticTheme();
       _themeTimer ??= Timer.periodic(
           const Duration(minutes: 1), (_) => _updateAutomaticTheme());
-      // Check current user session
-      final currentEmail = _prefs?.getString('grevidea_current_user_email');
-      if (currentEmail != null && currentEmail.isNotEmpty) {
-        _loadUserFromDb(currentEmail);
-        if (_userPassword.isNotEmpty) {
-          final owner = _userEmail;
-          unawaited(_api.login(_userEmail, _userPassword).then((_) async {
-            if (owner != _userEmail || !_isAuthenticated) return;
-            await syncPendingLedger();
-            await refreshSharedHistory();
-          }));
-        }
-      } else {
-        // Default clean state for first launch before login
-        _isAuthenticated = false;
-        _hasCompletedOnboarding = false;
-        _plants.clear();
-      }
-
+      // Legacy preferences contained plaintext credentials; remove them on upgrade.
+      final legacy = _getUsersDb();
+      for (final value in legacy.values) { if (value is Map) value.remove('password'); }
+      _saveUsersDb(legacy);
+      await _prefs?.remove('grevidea_current_user_email');
+      _isAuthenticated = false;
+      _hasCompletedOnboarding = false;
+      _plants.clear();
       _syncTimer ??= Timer.periodic(
           const Duration(minutes: 1), (_) => syncPendingLedger());
       unawaited(syncPendingLedger());
@@ -403,7 +396,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   void didChangePlatformBrightness() => _updateAutomaticTheme();
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _updateAutomaticTheme();
+    if (state == AppLifecycleState.resumed) { _updateAutomaticTheme(); if (_isAuthenticated) unawaited(_locationService.startSilentTracking()); }
   }
 
   void _updateAutomaticTheme() {
@@ -473,6 +466,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void updateBaseline({
+    double? latitude, double? longitude,
     Map<String, double>? commuteDistances,
     required String cityWard,
     required String primaryCommute,
@@ -484,6 +478,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     required String primaryGoal,
   }) {
     _baseline = UserBaselineProfile(
+      latitude: latitude, longitude: longitude,
       commuteDistances: commuteDistances,
       cityWard: cityWard,
       primaryCommute: primaryCommute,
@@ -749,8 +744,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   // ── Local Database Persistence Engine ────────────────────────────
-  String _userPassword = '';
-  String get userPassword => _userPassword;
+  String get userPassword => ''; // Credentials are never retained.
 
   final Map<String, dynamic> _inMemoryUsersDb = {};
 
@@ -783,7 +777,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     if (user != null && user is Map<String, dynamic>) {
       _userEmail = email.trim();
       _userName = user['displayName'] as String? ?? 'User';
-      _userPassword = user['password'] as String? ?? '';
+
       _hasCompletedOnboarding =
           user['hasCompletedOnboarding'] as bool? ?? false;
       _greenPoints = user['greenPoints'] as int? ?? 0;
@@ -821,7 +815,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
       // Brand new user record: completely empty zero state
       _userEmail = email.trim();
       _userName = email.split('@').first;
-      _userPassword = '';
+
       _hasCompletedOnboarding = false;
       _greenPoints = 0;
       _score = 50;
@@ -839,18 +833,9 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     final db = _getUsersDb();
     final emailKey = _userEmail.trim().toLowerCase();
 
-    // Preserve existing password if not currently set in memory
-    String passToSave = _userPassword;
-    if (passToSave.isEmpty &&
-        db[emailKey] != null &&
-        db[emailKey]['password'] != null) {
-      passToSave = db[emailKey]['password'] as String;
-    }
-
     final userRecord = {
       'email': _userEmail,
       'displayName': _userName,
-      'password': passToSave,
       'hasCompletedOnboarding': _hasCompletedOnboarding,
       'greenPoints': _greenPoints,
       'score': _score,
@@ -866,101 +851,51 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   // ── Auth Actions ─────────────────────────────────────────────────
-  bool login(String email, String password, {String? displayName}) {
-    final cleanEmail = email.trim();
-    final db = _getUsersDb();
-    final emailKey = cleanEmail.toLowerCase();
-
-    // Validate credentials if user exists and password is provided (skip for google oauth)
-    if (db.containsKey(emailKey)) {
-      final existingUser = db[emailKey];
-      if (existingUser is Map<String, dynamic> &&
-          existingUser['password'] != null &&
-          (existingUser['password'] as String).isNotEmpty &&
-          password != 'google_oauth_token') {
-        if (existingUser['password'] != password) {
-          debugPrint('Invalid password for user $cleanEmail');
-          return false;
-        }
-      }
-    }
-
-    _loadUserFromDb(cleanEmail);
-    if (password != 'google_oauth_token' && password.isNotEmpty) {
-      _userPassword = password;
-    }
-
-    if (displayName != null && displayName.trim().isNotEmpty) {
-      _userName = displayName.trim();
-    }
-    _isAuthenticated = true;
-    _saveCurrentUserToDb();
-    _locationService
-        .bindAccount(_userEmail)
-        .then((_) => _locationService.startSilentTracking());
-
-    // Async sync with Axum
-    _api.login(cleanEmail, password).then((res) {
-      if (res != null && res['display_name'] != null) {
-        _userName = res['display_name'];
-        _saveCurrentUserToDb();
-        notifyListeners();
-      }
-    });
-
+  int _sessionGeneration = 0;
+  bool _authBusy = false;
+  bool get authBusy => _authBusy;
+  String? authError;
+  Future<bool> login(String email, String password, {String? displayName}) async {
+    if (_authBusy) return false;
+    final generation = ++_sessionGeneration;
+    _authBusy = true;
+    authError = null;
     notifyListeners();
-    return true;
-  }
-
-  bool signup(
-      {required String name, required String email, required String password}) {
-    final cleanEmail = email.trim();
-    final emailKey = cleanEmail.toLowerCase();
-    final db = _getUsersDb();
-
-    // If user already exists in local database, log them in preserving their onboarding & plant status
-    if (db.containsKey(emailKey)) {
-      _loadUserFromDb(cleanEmail);
-      if (password.isNotEmpty && password != 'google_oauth_token') {
-        _userPassword = password;
-      }
-      if (name.trim().isNotEmpty) {
-        _userName = name.trim();
-      }
-      _saveCurrentUserToDb();
-      _api.login(cleanEmail, password);
-      notifyListeners();
+    try {
+      final result = await _api.login(email.trim().toLowerCase(), password);
+      if (generation != _sessionGeneration) return false;
+      if (result == null) { authError = 'Sign-in failed. Check your credentials and server connection.'; return false; }
+      await _acceptAuthentication(email, result);
       return true;
-    }
-
-    _pendingTrips.clear();
-    _selectedTransitMode = null;
-    // Brand new user: empty zero-state
-    _userEmail = cleanEmail;
-    _userName =
-        name.trim().isNotEmpty ? name.trim() : cleanEmail.split('@').first;
-    _userPassword = password;
-    _hasCompletedOnboarding = false;
-    _greenPoints = 0;
-    _plants.clear();
-    _recentActivities.clear();
-    _baseline = UserBaselineProfile();
-    _isAuthenticated = true;
-
-    _saveCurrentUserToDb();
-    _locationService
-        .bindAccount(_userEmail)
-        .then((_) => _locationService.startSilentTracking());
-
-    // Async sync with Axum
-    _api.register(
-        email: _userEmail, password: password, displayName: _userName);
-
+    } finally { _authBusy = false; notifyListeners(); }
+  }
+  Future<bool> signup({required String name, required String email, required String password}) async {
+    if (_authBusy) return false;
+    final generation = ++_sessionGeneration;
+    _authBusy = true;
+    authError = null;
     notifyListeners();
-    return true;
+    try {
+      final result = await _api.register(email: email.trim().toLowerCase(), password: password, displayName: name.trim());
+      if (generation != _sessionGeneration) return false;
+      if (result == null) { authError = 'Registration failed. Check your details and server connection, or sign in to your existing account.'; return false; }
+      await _acceptAuthentication(email, result);
+      return true;
+    } finally { _authBusy = false; notifyListeners(); }
+  }
+  Future<void> _acceptAuthentication(String email, Map<String,dynamic> result) async {
+    _loadUserFromDb(email.trim().toLowerCase());
+    _userName = result['display_name']?.toString() ?? _userName;
+    _isAuthenticated = true;
+    _saveCurrentUserToDb();
+    await _locationService.bindAccount(_userEmail);
+    await _locationService.startSilentTracking();
+    unawaited(syncPendingLedger());
+    unawaited(refreshSharedHistory());
   }
 
   void logout() {
+    _sessionGeneration++;
     _pendingTrips.clear();
     _selectedTransitMode = null;
     _isAuthenticated = false;
@@ -970,9 +905,11 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  bool changePassword(
-      {required String currentPassword, required String newPassword}) {
-    notifyListeners();
-    return true;
+  Future<bool> changePassword({required String currentPassword, required String newPassword}) async {
+    final result = await _api.request('/api/v1/auth/password', data: {
+      'current_password': currentPassword, 'new_password': newPassword,
+    });
+    if (result != null) logout();
+    return result != null;
   }
 }

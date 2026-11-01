@@ -98,12 +98,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (formKey.currentState?.validate() ?? false) {
-                          widget.appState.changePassword(
+                          final success = await widget.appState.changePassword(
                             currentPassword: oldPassController.text,
                             newPassword: newPassController.text,
                           );
+                          if (!ctx.mounted || !mounted) return;
+                          if (!success) { ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password was not changed. Check your current password and connection.'))); return; }
                           Navigator.of(ctx).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

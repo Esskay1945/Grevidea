@@ -1,4 +1,4 @@
-﻿use axum::{
+use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
@@ -33,12 +33,12 @@ pub enum AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match &self {
-            AppError::Database(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
+            AppError::Database(e) => (StatusCode::INTERNAL_SERVER_ERROR, "An internal error occurred".to_string()),
             AppError::Auth(m) => (StatusCode::UNAUTHORIZED, m.clone()),
             AppError::NotFound(m) => (StatusCode::NOT_FOUND, m.clone()),
             AppError::BadRequest(m) => (StatusCode::BAD_REQUEST, m.clone()),
             AppError::BrainUnavailable(m) => (StatusCode::SERVICE_UNAVAILABLE, m.clone()),
-            AppError::Internal(m) => (StatusCode::INTERNAL_SERVER_ERROR, m.clone()),
+            AppError::Internal(m) => (StatusCode::INTERNAL_SERVER_ERROR, "An internal error occurred".to_string()),
             AppError::Forbidden(m) => (StatusCode::FORBIDDEN, m.clone()),
         };
 

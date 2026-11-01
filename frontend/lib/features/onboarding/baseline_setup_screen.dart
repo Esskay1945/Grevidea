@@ -112,7 +112,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     _dwellingType = b.dwellingType;
     _hasSolar = b.hasRooftopSolar;
 
-    if (!_cities.contains(_selectedCity)) _selectedCity = _cities.first;
+    if (!_cities.contains(_selectedCity)) _cities.add(_selectedCity);
     if (!_dietOptions.contains(_selectedDiet))
       _selectedDiet = _dietOptions.first;
     if (!_dwellingTypes.contains(_dwellingType))
@@ -130,6 +130,20 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     if (b.primaryCommute.isNotEmpty && _selectedCommuteDistances.isEmpty) {
       _selectedCommuteDistances[b.primaryCommute] = b.dailyCommuteKm;
     }
+  }
+
+  Future<void> _useGps() async {
+    final location = widget.appState.locationService;
+    final position = await location.getCurrentLocation(forceRefresh: true);
+    if (!mounted) return;
+    if (position == null) { setState(() {}); return; }
+    final address = await widget.appState.api.request('/api/v1/location/address?lat=${position.latitude}&lon=${position.longitude}');
+    if (!mounted) return;
+    final label = address is Map ? address['display_name']?.toString() : null;
+    setState(() {
+      _selectedCity = label ?? '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}';
+      if (!_cities.contains(_selectedCity)) _cities.add(_selectedCity);
+    });
   }
 
   double get _totalDailyCommuteKm {
@@ -248,6 +262,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
 
       widget.appState.updateBaseline(
         cityWard: _selectedCity,
+        latitude: widget.appState.locationService.lastKnownPosition?.latitude,
+        longitude: widget.appState.locationService.lastKnownPosition?.longitude,
         primaryCommute: commuteSummary.isNotEmpty ? commuteSummary : 'Metro',
         dailyCommuteKm: _totalDailyCommuteKm,
         commuteDistances: Map.of(_selectedCommuteDistances),
@@ -410,6 +426,11 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
 
                 const SizedBox(height: 22),
 
+                OutlinedButton.icon(onPressed: _useGps,
+                  icon: const Icon(Icons.my_location), label: const Text('Use my precise GPS location')),
+                if (widget.appState.locationService.error != null)
+                  Text(widget.appState.locationService.error!),
+                const SizedBox(height: 12),
                 // ── 2. How Do You Travel? (Multi-Select) ────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
