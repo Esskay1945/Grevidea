@@ -13,15 +13,6 @@ class EcosystemCatalogScreen extends StatefulWidget {
 }
 
 class _EcosystemCatalogScreenState extends State<EcosystemCatalogScreen> {
-  late final Future<List<dynamic>> _catalog;
-  @override
-  void initState() {
-    super.initState();
-    _catalog = rootBundle
-        .loadString('assets/feature_catalog.json')
-        .then((text) => jsonDecode(text) as List);
-  }
-
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: GrevideaAppBar(title: 'Features', showBack: true, appState: widget.appState),

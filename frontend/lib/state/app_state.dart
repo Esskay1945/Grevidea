@@ -888,8 +888,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     _userName = result['display_name']?.toString() ?? _userName;
     _isAuthenticated = true;
     _saveCurrentUserToDb();
-    await _locationService.bindAccount(_userEmail);
-    await _locationService.startSilentTracking();
+    unawaited(_locationService.bindAccount(_userEmail).then((_) => _locationService.startSilentTracking()));
     unawaited(syncPendingLedger());
     unawaited(refreshSharedHistory());
   }
