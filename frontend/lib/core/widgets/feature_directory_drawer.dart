@@ -344,17 +344,7 @@ class FeatureDirectoryDrawer extends StatelessWidget {
                       NearbyBoardScreen(appState: appState),
                     ),
                   ),
-                  _buildNavTile(
-                    context: context,
-                    icon: Icons.apps_rounded,
-                    title: 'All 58 Ecosystem Features',
-                    subtitle: 'Climate, travel, shopping, city, community and account',
-                    color: AppColors.leafOf(context),
-                    onTap: () => _navigateTo(
-                      context,
-                      EcosystemCatalogScreen(appState: appState),
-                    ),
-                  ),
+                  EcosystemFeatureGroups(appState: appState),
                   _buildSectionHeader(context, 'LEARNING & ACHIEVEMENTS'),
                   _buildNavTile(
                     context: context,

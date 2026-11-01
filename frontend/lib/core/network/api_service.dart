@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,8 @@ class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
   ApiService._internal();
+  @visibleForTesting
+  ApiService.forTesting();
 
   String _baseUrl = const String.fromEnvironment('API_BASE_URL',
       defaultValue: 'http://localhost:3000');

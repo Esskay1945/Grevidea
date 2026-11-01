@@ -23,7 +23,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
 
   void _handleReset() {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isSubmitted = true);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email recovery is not configured on this server. Contact the app administrator.')));
     }
   }
 

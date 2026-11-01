@@ -1,3 +1,4 @@
+import 'auth_fixture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,14 +14,14 @@ import 'dart:convert';
 import 'package:grevidea/main.dart';
 import 'package:grevidea/core/widgets/persistent_feature_tray.dart';
 
-void main() {
+void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
   testWidgets(
     'Feature routes keep the tray and preserve form text through dialogs',
     (tester) async {
-      final state = AppState();
-      state.signup(
+      final state = AppState(api: AuthFixture());
+      await state.signup(
         name: 'Audit',
         email: 'navigation@example.test',
         password: 'testpassword',
@@ -70,7 +71,7 @@ void main() {
       state.dispose();
     },
   );
-  test('Baseline decimals and multi-modal breakdown survive serialization', () {
+  test('Baseline decimals and multi-modal breakdown survive serialization', () async {
     final baseline = UserBaselineProfile(
       commuteDistances: {'Metro': 12.75, 'Walking': .35},
       dailyCommuteKm: 13.1,
@@ -79,16 +80,16 @@ void main() {
     expect(restored.commuteDistances, {'Metro': 12.75, 'Walking': .35});
     expect(restored.dailyCommuteKm, 13.1);
   });
-  test('Speed thresholds never infer a car or train without confirmation', () {
+  test('Speed thresholds never infer a car or train without confirmation', () async {
     expect(LocationService.inferMode(6.99), 'walk');
     expect(LocationService.inferMode(7), 'bicycle');
     expect(LocationService.inferMode(25), 'bicycle');
     expect(LocationService.inferMode(25.01), 'unknown_transit');
   });
   test('Onboarding and habit claim survive a fresh AppState', () async {
-    final state = AppState();
+    final state = AppState(api: AuthFixture());
     await state.initPersistence();
-    state.signup(
+    await state.signup(
       name: 'Audit',
       email: 'audit@example.test',
       password: 'testpassword',
@@ -96,22 +97,23 @@ void main() {
     state.completeOnboarding();
     expect(state.claimTask('green_plate'), isTrue);
     expect(state.claimTask('green_plate'), isFalse);
-    final restored = AppState();
+    final restored = AppState(api: state.api);
     await restored.initPersistence();
+    await restored.login('audit@example.test', 'testpassword');
     expect(restored.hasCompletedOnboarding, isTrue);
     expect(restored.isTaskClaimed('green_plate'), isTrue);
     state.dispose();
     restored.dispose();
   });
-  test('Negative reward cost cannot mint points', () {
-    final state = AppState();
+  test('Negative reward cost cannot mint points', () async {
+    final state = AppState(api: AuthFixture());
     expect(state.redeemReward(cost: -1, rewardName: 'Invalid'), isFalse);
     expect(state.greenPoints, 0);
     state.dispose();
   });
   test(
     'Core text contrast exceeds WCAG AA against light and dark card surfaces',
-    () {
+    () async {
       double contrast(Color text, Color background) {
         final a = text.computeLuminance();
         final b = background.computeLuminance();
@@ -138,7 +140,7 @@ void main() {
   testWidgets(
     'Home hides analytics; score card opens Tracker and returns to Home',
     (tester) async {
-      final state = AppState();
+      final state = AppState(api: AuthFixture());
       await tester.pumpWidget(
         MaterialApp(home: DashboardScreen(appState: state)),
       );
@@ -162,7 +164,7 @@ void main() {
     await tester.runAsync(
       () => rootBundle.loadString('assets/feature_catalog.json'),
     );
-    final state = AppState();
+    final state = AppState(api: AuthFixture());
     await tester.pumpWidget(
       MaterialApp(home: EcosystemCatalogScreen(appState: state)),
     );
@@ -170,7 +172,7 @@ void main() {
       () => Future<void>.delayed(const Duration(milliseconds: 100)),
     );
     await tester.pump();
-    expect(find.text('All 58 Features'), findsOneWidget);
+    expect(find.text('Features'), findsOneWidget);
     await tester.tap(find.text('Climate assistance'));
     await tester.pumpAndSettle();
     expect(find.text('Ask Climate Assistant'), findsOneWidget);

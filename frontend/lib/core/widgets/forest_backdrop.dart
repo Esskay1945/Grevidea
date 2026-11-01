@@ -28,7 +28,7 @@ class _ForestBackdropState extends State<ForestBackdrop>
   );
   late final AnimationController _leaves = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2800),
+    duration: const Duration(milliseconds: 4200),
   );
   Offset _origin = Offset.zero;
   bool _active = true;
@@ -146,6 +146,7 @@ class _ForestBackdropState extends State<ForestBackdrop>
                         origin: _origin,
                         dark: dark,
                         still: _reduced,
+                        drawBurst: false,
                       ),
                     ),
                   ],
@@ -155,6 +156,24 @@ class _ForestBackdropState extends State<ForestBackdrop>
           ),
         ),
         widget.child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: ExcludeSemantics(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: _AutumnAtmosphere(
+                    motion: _motion,
+                    leaves: _leaves,
+                    origin: _origin,
+                    dark: dark,
+                    still: _reduced,
+                    drawAmbient: false,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -168,19 +187,23 @@ class _AutumnAtmosphere extends CustomPainter {
   final Offset origin;
   final bool dark;
   final bool still;
+  final bool drawAmbient;
+  final bool drawBurst;
   _AutumnAtmosphere({
     required this.motion,
     required this.leaves,
     required this.origin,
     required this.dark,
     required this.still,
+    this.drawAmbient = true,
+    this.drawBurst = true,
   }) : super(repaint: Listenable.merge([motion, leaves]));
 
   @override
   void paint(Canvas canvas, Size size) {
     if (still) return;
     final phase = motion.value * math.pi * 2;
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; drawAmbient && i < 6; i++) {
       final x = size.width * (0.96 + math.sin(phase + i) * 0.02);
       final y = size.height * ((motion.value + i / 6) % 1);
       _leaf(
@@ -190,16 +213,24 @@ class _AutumnAtmosphere extends CustomPainter {
         const Color(0xFFB96932).withValues(alpha: dark ? 0.30 : 0.22),
       );
     }
-    if (leaves.value <= 0 || leaves.value >= 1) return;
+    if (!drawBurst || leaves.value <= 0 || leaves.value >= 1) return;
     final t = leaves.value;
     for (var i = 0; i < 12; i++) {
-      final x = origin.dx + (i - 6) * 5 + math.sin(t * 8 + i) * 22;
-      final y = origin.dy - (i % 3) * 12 + t * size.height * 0.55;
+      final progress = ((t - i * 0.012) / (1 - i * 0.012)).clamp(0.0, 1.0);
+      if (progress <= 0) continue;
+      final spread = Curves.easeOut.transform((progress * 3).clamp(0.0, 1.0));
+      final lane = size.width * ((i + 0.5) / 12);
+      final x = origin.dx + (lane - origin.dx) * spread +
+          math.sin(progress * 8 + i) * 12 * spread;
+      final startY = origin.dy - (i % 3) * 18;
+      final y = startY + (size.height + 24 - startY) * progress;
       final color = [
         const Color(0xFFC56432),
         const Color(0xFFE2A34F),
         const Color(0xFFB54C2C),
-      ][i % 3].withValues(alpha: (1 - t) * 0.8);
+      ][i % 3].withValues(
+        alpha: 0.8 * ((1 - progress) / 0.08).clamp(0.0, 1.0),
+      );
       _leaf(canvas, Offset(x, y), t * 6 + i, color);
     }
   }
@@ -239,6 +270,8 @@ class _AutumnAtmosphere extends CustomPainter {
   bool shouldRepaint(covariant _AutumnAtmosphere old) =>
       old.dark != dark ||
       old.still != still ||
+      old.drawAmbient != drawAmbient ||
+      old.drawBurst != drawBurst ||
       old.origin != origin ||
       old.motion != motion ||
       old.leaves != leaves;

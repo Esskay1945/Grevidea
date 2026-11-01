@@ -10,15 +10,17 @@ use uuid::Uuid;
 
 pub async fn register(
     State(state): State<AppState>,
-    Json(req): Json<RegisterRequest>,
+    Json(mut req): Json<RegisterRequest>,
 ) -> AppResult<Json<ApiResponse<AuthResponse>>> {
-    if req.email.is_empty() || req.password.len() < 8 {
+    req.email = normalize_email(&req.email)?;
+    validate_password(&req.password)?;
+    if req.display_name.trim().is_empty() || req.display_name.len() > 100 {
         return Err(AppError::BadRequest("Email required and password must be 8+ chars".into()));
     }
 
     // Check email not taken
     let exists: i64 = sqlx::query_scalar::<_, Option<i64>>(
-        "SELECT COUNT(*) FROM users WHERE email = $1"
+        "SELECT COUNT(*) FROM users WHERE LOWER(email) = $1"
     )
     .bind(&req.email)
     .fetch_one(&state.db)
@@ -29,7 +31,8 @@ pub async fn register(
         return Err(AppError::BadRequest("Email already registered".into()));
     }
 
-    let hash = auth::hash_password(&req.password)?;
+    let password = req.password.clone();
+    let hash = tokio::task::spawn_blocking(move || auth::hash_password(&password)).await.map_err(|_| AppError::Internal("Password hashing unavailable".into()))??;
     let user_id: Uuid = sqlx::query_scalar(
         "INSERT INTO users (email, password_hash, display_name) VALUES ($1, $2, $3) RETURNING id"
     )
@@ -74,20 +77,29 @@ struct UserAuthRow {
 
 pub async fn login(
     State(state): State<AppState>,
-    Json(req): Json<LoginRequest>,
+    Json(mut req): Json<LoginRequest>,
 ) -> AppResult<Json<ApiResponse<AuthResponse>>> {
+    req.email = normalize_email(&req.email)?;
+    if req.password.len() > 72 { return Err(AppError::Auth("Invalid email or password".into())); }
+    let attempts: i32 = sqlx::query_scalar("INSERT INTO auth_attempts(email, attempts) VALUES ($1, 1) ON CONFLICT(email) DO UPDATE SET attempts = CASE WHEN auth_attempts.window_start < NOW() - INTERVAL '15 minutes' THEN 1 ELSE auth_attempts.attempts + 1 END, window_start = CASE WHEN auth_attempts.window_start < NOW() - INTERVAL '15 minutes' THEN NOW() ELSE auth_attempts.window_start END RETURNING attempts")
+        .bind(&req.email).fetch_one(&state.db).await?;
+    if attempts > 10 { return Err(AppError::Forbidden("Too many sign-in attempts. Retry in 15 minutes.".into())); }
     let user = sqlx::query_as::<_, UserAuthRow>(
-        "SELECT id, email, password_hash, display_name, role FROM users WHERE email = $1"
+        "SELECT id, email, password_hash, display_name, role FROM users WHERE LOWER(email) = $1"
     )
     .bind(&req.email)
     .fetch_optional(&state.db)
     .await?
     .ok_or_else(|| AppError::Auth("Invalid email or password".into()))?;
 
-    if !auth::verify_password(&req.password, &user.password_hash)? {
+    let password = req.password.clone();
+    let hash = user.password_hash.clone();
+    let matches = tokio::task::spawn_blocking(move || auth::verify_password(&password, &hash)).await.map_err(|_| AppError::Internal("Password verification unavailable".into()))??;
+    if !matches {
         return Err(AppError::Auth("Invalid email or password".into()));
     }
 
+    sqlx::query("DELETE FROM auth_attempts WHERE email = $1").bind(&req.email).execute(&state.db).await?;
     let token = Claims::new(user.id, &user.email, &user.role, &state.config.jwt_secret)?;
 
     state.brain.log_event("user_login", Some(&user.id.to_string()), json!({
@@ -617,4 +629,34 @@ pub async fn admin_override(
         details,
         audit_id: audit_id.to_string(),
     })))
+}
+
+fn normalize_email(email: &str) -> AppResult<String> {
+    let email = email.trim().to_lowercase();
+    if email.len() > 254 || email.contains(char::is_whitespace) || !email.split_once('@').is_some_and(|(a,b)| !a.is_empty() && b.contains('.') && !b.contains('@')) {
+        return Err(AppError::BadRequest("Enter a valid email address".into()));
+    }
+    Ok(email)
+}
+fn validate_password(password: &str) -> AppResult<()> {
+    if !(8..=72).contains(&password.len()) { return Err(AppError::BadRequest("Password must be 8 to 72 bytes".into())); }
+    Ok(())
+}
+#[derive(Deserialize)]
+pub struct ChangePassword { current_password: String, new_password: String }
+pub async fn change_password(State(state): State<AppState>, auth: AuthUser, Json(req): Json<ChangePassword>) -> AppResult<Json<ApiResponse<serde_json::Value>>> {
+    validate_password(&req.new_password)?;
+    let hash: String = sqlx::query_scalar("SELECT password_hash FROM users WHERE id::text = $1").bind(&auth.0.sub).fetch_one(&state.db).await?;
+    let password = req.current_password;
+    let valid = tokio::task::spawn_blocking(move || auth::verify_password(&password, &hash)).await.map_err(|_| AppError::Internal("Password verification unavailable".into()))??;
+    if !valid { return Err(AppError::Auth("Current password is incorrect".into())); }
+    let hash = tokio::task::spawn_blocking(move || auth::hash_password(&req.new_password)).await.map_err(|_| AppError::Internal("Password hashing unavailable".into()))??;
+    sqlx::query("UPDATE users SET password_hash = $1, password_changed_at = NOW() WHERE id::text = $2").bind(hash).bind(&auth.0.sub).execute(&state.db).await?;
+    Ok(Json(ApiResponse::ok(json!({"updated": true}))))
+}
+#[cfg(test)]
+mod auth_validation_tests {
+    use super::*;
+    #[test] fn email_normalization() { assert_eq!(normalize_email(" Alice@Example.com ").unwrap(), "alice@example.com"); assert!(normalize_email("not-an-email").is_err()); }
+    #[test] fn password_bounds() { assert!(validate_password("short").is_err()); assert!(validate_password(&"a".repeat(73)).is_err()); assert!(validate_password("a-long-password").is_ok()); }
 }

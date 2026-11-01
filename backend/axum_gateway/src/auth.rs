@@ -21,7 +21,7 @@ pub struct Claims {
 impl Claims {
     pub fn new(user_id: Uuid, email: &str, role: &str, secret: &str) -> Result<String, AppError> {
         let now = Utc::now();
-        let exp = now + Duration::days(30);
+        let exp = now + Duration::hours(24);
         let claims = Claims {
             sub: user_id.to_string(),
             email: email.to_string(),
@@ -53,15 +53,12 @@ impl Claims {
 pub struct AuthUser(pub Claims);
 
 #[axum::async_trait]
-impl<S> FromRequestParts<S> for AuthUser
-where
-    S: Send + Sync,
-    Arc<Config>: axum::extract::FromRef<S>,
+impl FromRequestParts<crate::AppState> for AuthUser
 {
     type Rejection = AppError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let config = Arc::<Config>::from_ref(state);
+    async fn from_request_parts(parts: &mut Parts, state: &crate::AppState) -> Result<Self, Self::Rejection> {
+        let config = &state.config;
         let auth_header = parts
             .headers
             .get("Authorization")
@@ -73,6 +70,9 @@ where
             .ok_or_else(|| AppError::Auth("Authorization header must start with 'Bearer '".into()))?;
 
         let claims = Claims::verify(token, &config.jwt_secret)?;
+        let valid: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM users WHERE id::text = $1 AND (password_changed_at IS NULL OR EXTRACT(EPOCH FROM password_changed_at)::bigint < $2))")
+            .bind(&claims.sub).bind(claims.iat).fetch_one(&state.db).await?;
+        if !valid { return Err(AppError::Auth("Session expired. Sign in again.".into())); }
         Ok(AuthUser(claims))
     }
 }
