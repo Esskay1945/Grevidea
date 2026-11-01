@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grevidea/core/network/api_service.dart';
 import 'package:grevidea/state/app_state.dart';
@@ -21,6 +22,7 @@ class GoogleStateFixture extends AuthFixture {
 }
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   test('Only a complete verified server response establishes Google identity', () async {
     final api = GoogleExchange();
     expect(await api.googleAuth('sdk-token'), isNull);
