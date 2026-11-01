@@ -22,6 +22,7 @@ class BaselineSetupScreen extends StatefulWidget {
 class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  bool _usingGps = false;
   late String _selectedCity;
   late String _selectedDiet;
   late double _monthlyKwh;
@@ -141,6 +142,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
     if (!mounted) return;
     final label = address is Map ? address['display_name']?.toString() : null;
     setState(() {
+      _usingGps = true;
       _selectedCity = label ?? '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}';
       if (!_cities.contains(_selectedCity)) _cities.add(_selectedCity);
     });
@@ -262,8 +264,8 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
 
       widget.appState.updateBaseline(
         cityWard: _selectedCity,
-        latitude: widget.appState.locationService.lastKnownPosition?.latitude,
-        longitude: widget.appState.locationService.lastKnownPosition?.longitude,
+        latitude: _usingGps ? widget.appState.locationService.lastKnownPosition?.latitude : null,
+        longitude: _usingGps ? widget.appState.locationService.lastKnownPosition?.longitude : null,
         primaryCommute: commuteSummary.isNotEmpty ? commuteSummary : 'Metro',
         dailyCommuteKm: _totalDailyCommuteKm,
         commuteDistances: Map.of(_selectedCommuteDistances),
@@ -415,7 +417,7 @@ class _BaselineSetupScreenState extends State<BaselineSetupScreen> {
                         ),
                       )
                       .toList(),
-                  onChanged: (v) => setState(() => _selectedCity = v!),
+                  onChanged: (v) => setState(() { _selectedCity = v!; _usingGps = false; }),
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.location_on_outlined,

@@ -321,6 +321,7 @@ class LocationService extends ChangeNotifier {
       error = 'Could not obtain a GPS fix. Check precise location and retry outdoors.';
       return null;
     } finally {
+      if (error != null) _lastKnownPosition = null;
       _isLocating = false;
       notifyListeners();
     }
