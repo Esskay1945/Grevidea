@@ -11,7 +11,8 @@ class GoogleExchange extends ApiService {
   String? sentToken;
   @override Future<ApiResult> requestDetailed(String path, {Map<String,dynamic>? data, String method = 'POST'}) async {
     sentToken = data?['id_token'];
-    return pending != null ? pending!.future : result;
+    if (pending != null) return await pending!.future;
+    return result;
   }
 }
 class GoogleStateFixture extends AuthFixture {
