@@ -75,6 +75,15 @@ async fn respond(state: &AppState, account: Account) -> AppResult<Json<ApiRespon
     Ok(Json(ApiResponse::ok(json!({ "token": token, "user_id": account.id, "email": account.email,
         "display_name": account.display_name, "role": account.role }))))
 }
+/// Public client ID is configuration, never a client secret. Lets installed APKs
+/// use the gateway's audience without baking project values into CI artifacts.
+pub async fn configuration(State(state): State<AppState>) -> AppResult<Json<ApiResponse<serde_json::Value>>> {
+    let schema_ready: bool = sqlx::query_scalar("SELECT COUNT(*) = 2 FROM information_schema.columns WHERE table_schema='public' AND table_name='users' AND column_name IN ('google_sub','password_changed_at')")
+        .fetch_one(&state.db).await?;
+    let client_id = state.config.google_client_id.as_deref().filter(|v| !v.is_empty());
+    Ok(Json(ApiResponse::ok(json!({"google_client_id":client_id, "google_configured":client_id.is_some(), "google_database_ready":schema_ready}))))
+}
+
 pub async fn google_auth(State(state): State<AppState>, Json(req): Json<GoogleRequest>) -> AppResult<Json<ApiResponse<serde_json::Value>>> {
     let c = verify(&state, &req.id_token).await?;
     let email = c.email.trim().to_lowercase();

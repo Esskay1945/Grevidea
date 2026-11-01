@@ -343,6 +343,8 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     try {
       _prefs = await SharedPreferences.getInstance();
 
+      final server = _prefs?.getString('grevidea_gateway_url');
+      if (server != null && ApiService.validateBaseUrl(server) == null) _api.setBaseUrl(server);
       // Restore Theme
       final savedTheme = _prefs?.getString('grevidea_theme_mode');
       if (savedTheme == 'dark') {
@@ -850,6 +852,14 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     _prefs?.setString('grevidea_current_user_email', _userEmail);
   }
 
+  Future<void> saveGatewayUrl(String url) async {
+    if (url.trim().replaceFirst(RegExp(r'/+$'), '') != _api.baseUrl) logout();
+    _api.setBaseUrl(url);
+    _prefs ??= await SharedPreferences.getInstance();
+    await _prefs!.setString('grevidea_gateway_url', _api.baseUrl);
+    notifyListeners();
+  }
+
   // ── Auth Actions ─────────────────────────────────────────────────
   int _sessionGeneration = 0;
   bool _authBusy = false;
@@ -864,7 +874,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final result = await _api.login(email.trim().toLowerCase(), password);
       if (generation != _sessionGeneration) return false;
-      if (result == null) { authError = 'Sign-in failed. Check your credentials and server connection.'; return false; }
+      if (result == null) { authError = _api.authFailure ?? 'Sign-in failed. Check your credentials and server connection.'; return false; }
       await _acceptAuthentication(email, result);
       return true;
     } finally { _authBusy = false; notifyListeners(); }
@@ -878,7 +888,7 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final result = await _api.register(email: email.trim().toLowerCase(), password: password, displayName: name.trim());
       if (generation != _sessionGeneration) return false;
-      if (result == null) { authError = 'Registration failed. Check your details and server connection, or sign in to your existing account.'; return false; }
+      if (result == null) { authError = _api.authFailure ?? 'Registration failed. Check your details and server connection, or sign in to your existing account.'; return false; }
       await _acceptAuthentication(email, result);
       return true;
     } finally { _authBusy = false; notifyListeners(); }

@@ -23,7 +23,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_linkBusy) return;
     setState(() => _linkBusy = true);
     try {
-      final token = await GoogleIdentityService.acquireIdToken();
+      final clientId = await widget.appState.api.fetchGoogleClientId();
+      if (!mounted) return;
+      if (clientId == null) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.appState.api.authFailure ?? 'Google configuration unavailable.'))); return; }
+      final token = await GoogleIdentityService.acquireIdToken(serverClientId: clientId);
       if (!mounted || token == null) return;
       final result = await widget.appState.api.request('/api/v1/auth/google/link', data: {'id_token': token});
       if (!mounted) return;

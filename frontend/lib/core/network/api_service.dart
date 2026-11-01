@@ -8,14 +8,62 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
-  ApiService._internal();
+  ApiService._internal() : _client = http.Client();
+  ApiService.forEndpoint(String url) : _client = http.Client() { setBaseUrl(url); }
+  void close() => _client.close();
   @visibleForTesting
-  ApiService.forTesting();
+  ApiService.forTesting({http.Client? client}) : _client = client ?? http.Client();
 
   String _baseUrl = const String.fromEnvironment('API_BASE_URL',
       defaultValue: 'http://localhost:3000');
   String get baseUrl => _baseUrl;
-  void setBaseUrl(String url) => _baseUrl = url.replaceFirst(RegExp(r'/$'), '');
+  static String? validateBaseUrl(String value) {
+    final uri = Uri.tryParse(value.trim());
+    if (uri == null || !['http','https'].contains(uri.scheme) || uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty || uri.hasQuery || uri.hasFragment) return 'Enter the Axum server URL, such as http://192.168.1.10:3000';
+    if (uri.host.endsWith('.supabase.co')) return 'This is the Supabase database project URL. Enter your laptop Axum server URL instead.';
+    return null;
+  }
+  void setBaseUrl(String url) {
+    final error = validateBaseUrl(url);
+    if (error != null) throw ArgumentError(error);
+    final next = url.trim().replaceFirst(RegExp(r'/+$'), '');
+    if (next != _baseUrl) { setAuthToken(null); _baseUrl = next; }
+  }
+  String? authFailure;
+  String failureMessage(ApiResult result) {
+    if (result.status == 0) return 'Cannot reach the app server at $baseUrl. Open Connection settings. For a USB-connected phone, run adb reverse tcp:3000 tcp:3000 on the laptop and keep Axum running.';
+    if (result.status == 401) return 'Invalid email or password.';
+    if (result.status == 429 || result.status == 403) return result.error ?? 'Too many attempts or access denied. Retry later.';
+    if (result.status >= 500) return 'The app server failed (${result.status}). Check its database connection, migrations and laptop terminal logs.';
+    return result.error ?? 'The server rejected this request (${result.status}).';
+  }
+
+  Future<Map<String,dynamic>> inspectConnection() async {
+    try {
+      final response = await _client.get(Uri.parse('$baseUrl/health')).timeout(const Duration(seconds: 5));
+      final health = jsonDecode(response.body);
+      if (response.statusCode != 200 || health is! Map || health['service'] != 'grevidea-gateway') return {'ready':false,'message':'This URL does not point to the Grevidea Axum server.'};
+      if (health['database_connected'] != true) return {'ready':false,'message':'Axum is reachable, but its database connection is failing. Check DATABASE_URL on the laptop.'};
+      final config = await requestDetailed('/api/v1/auth/config');
+      final data = config.data;
+      return {'ready':true,'message': data is Map && data['google_configured'] == true && data['google_database_ready'] == true
+        ? 'Server and database connected. Google sign-in is configured.'
+        : 'Server and database connected. Email registration is available. Google needs GOOGLE_CLIENT_ID and migration 007 on the laptop.'};
+    } catch (_) { return {'ready':false,'message':failureMessage(const ApiResult(0,null))}; }
+  }
+  Future<String?> fetchGoogleClientId() async {
+    final response = await requestDetailed('/api/v1/auth/config');
+    if (response.status == 0 || response.status >= 500) { authFailure = failureMessage(response); return null; }
+    if (response.status == 404) { authFailure = 'Update and restart the laptop Axum gateway to enable Google sign-in configuration.'; return null; }
+    final data = response.data;
+    if (data is! Map || data['google_client_id'] is! String || (data['google_client_id'] as String).isEmpty) {
+      authFailure = 'Google sign-in is not configured on this server. Set GOOGLE_CLIENT_ID on the laptop and restart Axum.'; return null;
+    }
+    if (data['google_database_ready'] != true) { authFailure = 'Apply database migration 007_google_oauth.sql before using Google sign-in.'; return null; }
+    return data['google_client_id'] as String;
+  }
+
   String? _authToken;
   String? _authenticatedEmail;
   String? get authenticatedEmail => _authenticatedEmail;
@@ -33,7 +81,7 @@ class ApiService {
 
   bool _isBackendReachable = false;
   bool get isBackendReachable => _isBackendReachable;
-  final http.Client _client = http.Client();
+  final http.Client _client;
   Future<bool> checkHealth() async {
     try {
       final response = await _client
@@ -72,9 +120,12 @@ class ApiService {
                   ? _client.delete(url,
                       headers: headers, body: jsonEncode(data))
                   : _client.post(url, headers: headers, body: jsonEncode(data)))
-          .timeout(const Duration(seconds: 90));
-      if (response.statusCode < 200 || response.statusCode >= 300)
-        return ApiResult(response.statusCode, null);
+          .timeout(Duration(seconds: path.startsWith('/api/v1/auth/') ? 12 : 90));
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        String? error;
+        try { final body = jsonDecode(response.body); if (body is Map && body['error'] is String) error = body['error']; } catch (_) {}
+        return ApiResult(response.statusCode, null, error: error);
+      }
       final decoded = jsonDecode(response.body);
       return ApiResult(
           response.statusCode,
@@ -94,11 +145,13 @@ class ApiService {
   Future<Map<String, dynamic>?> login(String email, String password) async {
     setAuthToken(null);
     final generation = _authGeneration;
-    final res = await _post('/api/v1/auth/login', {
+    final response = await requestDetailed('/api/v1/auth/login', data: {
       'email': email,
       'password': password,
     });
-    if (generation == _authGeneration && res != null && res['token'] != null) {
+    final res = response.data;
+    authFailure = res == null ? failureMessage(response) : null;
+    if (generation == _authGeneration && res is Map && res['token'] is String) {
       _authToken = res['token'];
       _authenticatedEmail = email.trim().toLowerCase();
       _userId = res['user_id']?.toString();
@@ -114,12 +167,14 @@ class ApiService {
   }) async {
     setAuthToken(null);
     final generation = _authGeneration;
-    final res = await _post('/api/v1/auth/register', {
+    final response = await requestDetailed('/api/v1/auth/register', data: {
       'email': email,
       'password': password,
       'display_name': displayName,
     });
-    if (generation == _authGeneration && res != null && res['token'] != null) {
+    final res = response.data;
+    authFailure = res == null ? failureMessage(response) : null;
+    if (generation == _authGeneration && res is Map && res['token'] is String) {
       _authToken = res['token'];
       _authenticatedEmail = email.trim().toLowerCase();
       _userId = res['user_id']?.toString();
@@ -136,6 +191,7 @@ class ApiService {
     final response = await requestDetailed('/api/v1/auth/google', data: {'id_token': idToken});
     if (generation != _authGeneration) return null;
     final res = response.data;
+    googleAuthError = res == null ? failureMessage(response) : null;
     if (response.status == 403) {
       googleAuthError = 'This email already has an account. Sign in with your password and link Google from Profile.';
     } else if (response.status == 503) {
@@ -489,6 +545,7 @@ class ApiService {
 class ApiResult {
   final int status;
   final dynamic data;
-  const ApiResult(this.status, this.data);
+  final String? error;
+  const ApiResult(this.status, this.data, {this.error});
   bool get permanentFailure => [400, 403, 404, 409, 422].contains(status);
 }

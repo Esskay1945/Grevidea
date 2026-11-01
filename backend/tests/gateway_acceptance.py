@@ -83,6 +83,9 @@ def run():
     receipt=data(request('/api/v1/rewards/redeem',{'reward_id':'plant_tree'},rider))
     assert receipt['status']=='pending_fulfillment'
     assert data(request('/api/v1/points',token=rider))['total_points']==receipt['balance']
+    config=data(request('/api/v1/auth/config'))
+    assert config['google_database_ready'] is True
+    assert 'jwt_secret' not in config and 'database_url' not in config
     assert request('/api/v1/auth/google', {'id_token':'not-a-token'})[0] in (401,503)
     assert request('/api/v1/auth/google/link', {'id_token':'not-a-token'})[0] == 401
     auth_email=f'auth-security-{uuid.uuid4().hex}@example.test'

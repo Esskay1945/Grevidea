@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/services/google_identity_service.dart';
+import '../../core/widgets/connection_settings_dialog.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
@@ -87,7 +88,10 @@ class _SignupScreenState extends State<SignupScreen> {
     if (_googleBusy || widget.appState.authBusy) return;
     setState(() => _googleBusy = true);
     try {
-      final token = await GoogleIdentityService.acquireIdToken();
+      final clientId = await widget.appState.api.fetchGoogleClientId();
+      if (!mounted) return;
+      if (clientId == null) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.appState.api.authFailure ?? 'Google configuration unavailable.'))); return; }
+      final token = await GoogleIdentityService.acquireIdToken(serverClientId: clientId);
       if (!mounted || token == null) return;
       final success = await widget.appState.loginWithGoogle(token);
       if (!mounted) return;
@@ -113,6 +117,9 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Align(alignment: Alignment.centerRight, child: TextButton.icon(
+                  onPressed: () => showDialog(context: context, builder: (_) => ConnectionSettingsDialog(appState: widget.appState)),
+                  icon: const Icon(Icons.settings_ethernet, size: 18), label: const Text('Connection settings'))),
                 const SizedBox(height: 12),
                 // ── Top Bar: Logo & Theme Switcher ───────────────────────────
                 Row(

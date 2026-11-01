@@ -13,3 +13,13 @@ The SDK obtains a Google ID token and posts it to `/api/v1/auth/google`. Axum va
 An existing email/password account is never silently linked based only on a matching email. Sign in with the password, open Profile, and select **Link Google account**. The linking endpoint requires both an authenticated app session and a verified Google token with the same email. Subsequent Google sign-ins use the stable subject ID. Random unknown placeholder hashes prevent Google-only accounts from accepting a made-up password.
 
 Google verification fails closed on invalid credentials or unavailable keys. Raw tokens are not logged or placed in URL queries. Email/password sign-in, password changes, theme, dashboard and tree animation are unchanged. Google account selection and real-device configuration still require manual verification with Google Play services and your Cloud configuration; CI uses synthetic cryptographic fixtures, not personal credentials.
+
+## Installed APK cannot register or sign in
+
+The default CI APK points at `http://localhost:3000`. On a phone that means the phone, not the laptop, unless USB reverse forwarding is active. Supabase does not run the Axum process.
+
+Open **Connection settings** on Login or Sign Up. Enter the reachable laptop Axum URL and choose **Test and save**. The app checks that the URL is a Grevidea gateway and that its database is connected, then saves the URL locally. For USB use the forwarding command above; for Wi-Fi use the laptop IPv4 address on the same network and allow the gateway through the laptop firewall. The gateway must stay running while you test.
+
+Installed APKs now obtain the public Google Web client ID from `/api/v1/auth/config`; rebuilding with a project-specific client ID is no longer required. Set `GOOGLE_CLIENT_ID` in the gateway's local environment and restart it, and apply migrations 006 and 007. The endpoint returns only the public client ID and readiness flags, never JWT or database secrets. Android OAuth still must match the actual installed APK signing certificate. A CI-signed APK uses that build machine's debug key until you configure a stable release signing key; the fingerprint from a different laptop build will not match it.
+
+Authentication errors now distinguish an unreachable gateway, invalid credentials, duplicate registration, throttling, and server/database failures. Connection checks do not sign in or bypass authentication.
