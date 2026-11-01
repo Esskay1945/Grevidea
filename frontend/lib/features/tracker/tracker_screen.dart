@@ -18,6 +18,8 @@ class TrackerScreen extends StatefulWidget {
 }
 
 class _TrackerScreenState extends State<TrackerScreen> {
+  final _locationMap = MapController();
+  ll.LatLng? _lastMapPosition;
   @override
   void initState() {
     super.initState();
@@ -26,11 +28,22 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   void _updated() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+      final fix = widget.appState.locationService.lastKnownPosition;
+      if (fix != null && widget.appState.locationService.hasFreshPosition) {
+        final point = ll.LatLng(fix.latitude, fix.longitude);
+        if (point != _lastMapPosition) {
+          _lastMapPosition = point;
+          WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) _locationMap.move(point, 14); });
+        }
+      }
+    }
   }
 
   @override
   void dispose() {
+    _locationMap.dispose();
     widget.appState.removeListener(_updated);
     super.dispose();
   }
@@ -505,6 +518,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 ),
               ],
             ),
+            TextButton.icon(onPressed: () async {
+              await widget.appState.locationService.getCurrentLocation(forceRefresh: true);
+              await widget.appState.locationService.startSilentTracking();
+            }, icon: const Icon(Icons.my_location), label: const Text('Refresh GPS location')),
+            if (widget.appState.locationService.error != null) Text(widget.appState.locationService.error!),
             const SizedBox(height: 8),
 
             Container(
@@ -527,6 +545,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 child: Stack(
                   children: [
                     FlutterMap(
+                      mapController: _locationMap,
                       options: MapOptions(
                         initialCenter: userCoord,
                         initialZoom: 13.5,

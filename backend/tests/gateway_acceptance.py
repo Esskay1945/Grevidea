@@ -83,5 +83,17 @@ def run():
     receipt=data(request('/api/v1/rewards/redeem',{'reward_id':'plant_tree'},rider))
     assert receipt['status']=='pending_fulfillment'
     assert data(request('/api/v1/points',token=rider))['total_points']==receipt['balance']
+    auth_email=f'auth-security-{uuid.uuid4().hex}@example.test'
+    auth_user=data(request('/api/v1/auth/register',{'email':auth_email,'password':'OriginalPassword123!','display_name':'Security test'}))
+    auth_token=auth_user['token']
+    assert request('/api/v1/auth/login',{'email':auth_email,'password':'wrong-password'})[0]==401
+    assert request('/api/v1/auth/password',{'current_password':'wrong-password','new_password':'NewPassword123!'},auth_token)[0]==401
+    assert request('/api/v1/auth/password',{'current_password':'OriginalPassword123!','new_password':'NewPassword123!'},auth_token)[0]==200
+    assert request('/api/v1/user/profile',token=auth_token)[0]==401
+    assert request('/api/v1/auth/login',{'email':auth_email,'password':'OriginalPassword123!'})[0]==401
+    # The rotation second is deliberately invalidated, including same-second tokens.
+    time.sleep(2)
+    renewed=data(request('/api/v1/auth/login',{'email':auth_email.upper(),'password':'NewPassword123!'}))
+    assert request('/api/v1/user/profile',token=renewed['token'])[0]==200
     print('PASS: auth, carbon decimals, ledger/ranks, civic attachments, aid coordination, carpool concurrency, idempotent learning claims')
 if __name__=='__main__':run()
