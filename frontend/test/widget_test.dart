@@ -9,7 +9,7 @@ import 'package:grevidea/core/models/plant_record.dart';
 void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
-  group('1. Smoke & UI Initialization', () async {
+  group('1. Smoke & UI Initialization', () {
     testWidgets(
         'Grevidea app launches with title Grevidea and initializes correctly',
         (WidgetTester tester) async {
@@ -19,7 +19,7 @@ void main() async {
     });
   });
 
-  group('2. Pure Dynamic AppState Zero-State & Defaults', () async {
+  group('2. Pure Dynamic AppState Zero-State & Defaults', () {
     test(
         'Brand new user initializes with pure zero metrics and unachieved stats',
         () async {
@@ -44,7 +44,7 @@ void main() async {
     });
   });
 
-  group('3. Dynamic Activity Logging & Impact Ledger', () async {
+  group('3. Dynamic Activity Logging & Impact Ledger', () {
     test(
         'Logging an eco activity increments green points and accumulates CO2 savings',
         () async {
@@ -96,7 +96,7 @@ void main() async {
     });
   });
 
-  group('4. Strict Plant-a-Tree Check-in & Point Revocation', () async {
+  group('4. Strict Plant-a-Tree Check-in & Point Revocation', () {
     test(
         'Missed tree check-in deduction penalty deducts previously earned points completely',
         () async {
@@ -138,7 +138,7 @@ void main() async {
     });
   });
 
-  group('5. Mathematical Leaderboard Rank Determination', () async {
+  group('5. Mathematical Leaderboard Rank Determination', () {
     test(
         'Rank is dynamically computed: User with highest score is mathematically #1',
         () async {
@@ -186,7 +186,7 @@ void main() async {
     });
   });
 
-  group('6. High-Speed Transit Speed Threshold Detection (>25 km/h)', () async {
+  group('6. High-Speed Transit Speed Threshold Detection (>25 km/h)', () {
     test('Speed at 15 km/h (walking/jogging) does not trigger transit prompt',
         () async {
       const currentSpeedKmh = 15.0;
@@ -201,7 +201,7 @@ void main() async {
     });
   });
 
-  group('7. One-Time Onboarding Gating & User Database Persistence', () async {
+  group('7. One-Time Onboarding Gating & User Database Persistence', () {
     test(
         'New user starts with hasCompletedOnboarding = false and empty plant tracker',
         () async {
@@ -250,7 +250,7 @@ void main() async {
     });
   });
 
-  group('8. Plant Tracker Zero-State & Adoption Lifecycle', () async {
+  group('8. Plant Tracker Zero-State & Adoption Lifecycle', () {
     test('Brand new user has 0 plants initially, adoption increments count',
         () async {
       final state = AppState(api: AuthFixture());
