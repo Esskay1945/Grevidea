@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/services/google_identity_service.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
@@ -82,15 +81,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_googleBusy || widget.appState.authBusy) return;
     setState(() => _googleBusy = true);
     try {
-      final token = await GoogleIdentityService.acquireIdToken();
-      if (!mounted || token == null) return;
-      final success = await widget.appState.loginWithGoogle(token);
+      final success = await widget.appState.loginLocallyWithGoogle(email: _emailController.text.trim());
       if (!mounted) return;
-      if (success) { _navigateAfterAuth(context); }
-      else { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.appState.authError ?? 'Google sign-in failed.'))); }
+      if (success) _navigateAfterAuth(context);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google sign-in could not complete. Check this build’s OAuth configuration and try again.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open the local profile. Please try again.')));
     } finally { if (mounted) setState(() => _googleBusy = false); }
   }
 

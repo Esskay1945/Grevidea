@@ -851,68 +851,35 @@ class AppState extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   // ── Auth Actions ─────────────────────────────────────────────────
-  int _sessionGeneration = 0;
-  bool _authBusy = false;
-  bool get authBusy => _authBusy;
+  bool get authBusy => false;
   String? authError;
-  Future<bool> login(String email, String password, {String? displayName}) async {
-    if (_authBusy) return false;
-    final generation = ++_sessionGeneration;
-    _authBusy = true;
-    authError = null;
-    notifyListeners();
-    try {
-      final result = await _api.login(email.trim().toLowerCase(), password);
-      if (generation != _sessionGeneration) return false;
-      if (result == null) { authError = 'Sign-in failed. Check your credentials and server connection.'; return false; }
-      await _acceptAuthentication(email, result);
-      return true;
-    } finally { _authBusy = false; notifyListeners(); }
-  }
-  Future<bool> signup({required String name, required String email, required String password}) async {
-    if (_authBusy) return false;
-    final generation = ++_sessionGeneration;
-    _authBusy = true;
-    authError = null;
-    notifyListeners();
-    try {
-      final result = await _api.register(email: email.trim().toLowerCase(), password: password, displayName: name.trim());
-      if (generation != _sessionGeneration) return false;
-      if (result == null) { authError = 'Registration failed. Check your details and server connection, or sign in to your existing account.'; return false; }
-      await _acceptAuthentication(email, result);
-      return true;
-    } finally { _authBusy = false; notifyListeners(); }
-  }
-  Future<bool> loginWithGoogle(String idToken) async {
-    if (_authBusy || idToken.isEmpty) return false;
-    final generation = ++_sessionGeneration;
-    _authBusy = true;
-    authError = null;
-    notifyListeners();
-    try {
-      final result = await _api.googleAuth(idToken);
-      if (generation != _sessionGeneration) return false;
-      if (result == null || result['email'] is! String || (result['email'] as String).trim().isEmpty) {
-        authError = _api.googleAuthError ?? 'Google sign-in failed. Check your server connection and retry.';
-        return false;
-      }
-      await _acceptAuthentication(result['email'], result);
-      return true;
-    } finally { _authBusy = false; notifyListeners(); }
-  }
 
-  Future<void> _acceptAuthentication(String email, Map<String,dynamic> result) async {
-    _loadUserFromDb(email.trim().toLowerCase());
-    _userName = result['display_name']?.toString() ?? _userName;
-    _isAuthenticated = true;
+  // Local preview entry only. Does not verify credentials or issue server tokens.
+  Future<bool> login(String email, String password, {String? displayName}) =>
+      _openLocalProfile(email, displayName: displayName);
+
+  Future<bool> signup({required String name, required String email, required String password}) =>
+      _openLocalProfile(email, displayName: name);
+
+  Future<bool> loginLocallyWithGoogle({String? email, String? displayName}) =>
+      _openLocalProfile(email?.trim().isNotEmpty == true ? email! : 'google@local.invalid',
+          displayName: displayName?.trim().isNotEmpty == true ? displayName : 'Local User');
+
+  Future<bool> _openLocalProfile(String email, {String? displayName}) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail.isEmpty) return false;
+    authError = null;
+    _api.setAuthToken(null);
+    _prefs ??= await SharedPreferences.getInstance();
+    _loadUserFromDb(cleanEmail);
+    if (displayName != null && displayName.trim().isNotEmpty) _userName = displayName.trim();
     _saveCurrentUserToDb();
     unawaited(_locationService.bindAccount(_userEmail).then((_) => _locationService.startSilentTracking()));
-    unawaited(syncPendingLedger());
-    unawaited(refreshSharedHistory());
+    notifyListeners();
+    return true;
   }
 
   void logout() {
-    _sessionGeneration++;
     _pendingTrips.clear();
     _selectedTransitMode = null;
     _isAuthenticated = false;

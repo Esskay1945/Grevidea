@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/services/google_identity_service.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/validators.dart';
@@ -18,21 +17,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _linkBusy = false;
-  Future<void> _linkGoogle() async {
-    if (_linkBusy) return;
-    setState(() => _linkBusy = true);
-    try {
-      final token = await GoogleIdentityService.acquireIdToken();
-      if (!mounted || token == null) return;
-      final result = await widget.appState.api.request('/api/v1/auth/google/link', data: {'id_token': token});
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result != null ? 'Google account linked. You can now sign in with Google.' : 'Could not link Google. Select the Google account matching your profile email.')));
-    } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not link Google. Check OAuth configuration and retry.')));
-    } finally { if (mounted) setState(() => _linkBusy = false); }
-  }
-
   void _showChangePasswordDialog() {
     final oldPassController = TextEditingController();
     final newPassController = TextEditingController();
@@ -417,9 +401,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               const SizedBox(height: 36),
 
-              OutlinedButton.icon(onPressed: _linkBusy ? null : _linkGoogle,
-                icon: const Icon(Icons.link), label: Text(_linkBusy ? 'Linking…' : 'Link Google account')),
-              const SizedBox(height: 12),
               // Logout Button
               SizedBox(
                 width: double.infinity,
