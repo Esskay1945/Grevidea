@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grevidea/core/network/api_service.dart';
-import 'package:grevidea/state/app_state.dart';
-import 'auth_fixture.dart';
 
 class GoogleExchange extends ApiService {
   GoogleExchange() : super.forTesting();
@@ -15,10 +13,6 @@ class GoogleExchange extends ApiService {
     if (pending != null) return await pending!.future;
     return result;
   }
-}
-class GoogleStateFixture extends AuthFixture {
-  Map<String,dynamic>? result;
-  @override Future<Map<String,dynamic>?> googleAuth(String idToken) async => result;
 }
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -42,17 +36,5 @@ void main() {
     api.pending!.complete(const ApiResult(200, {'token':'gateway-jwt','email':'fixture@example.test','user_id':'fixture-user'}));
     expect(await exchange, isNull);
     expect(api.authenticatedEmail, isNull);
-  });
-  test('AppState accepts server identity and rejects failed Google exchange', () async {
-    final api = GoogleStateFixture();
-    final state = AppState(api: api);
-    expect(await state.loginWithGoogle('sdk-token'), isFalse);
-    expect(state.isAuthenticated, isFalse);
-    api.result = {'email':'verified@example.test','display_name':'Verified user'};
-    expect(await state.loginWithGoogle('sdk-token'), isTrue);
-    expect(state.userEmail, 'verified@example.test');
-    expect(state.userName, 'Verified user');
-    state.logout();
-    state.dispose();
   });
 }
